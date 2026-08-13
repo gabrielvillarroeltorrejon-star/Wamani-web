@@ -110,9 +110,6 @@ onMounted(() => {
     <!-- 1. Hero Principal con cumbres sobrepuestas en el borde inferior del video -->
     <HomeHero />
 
-    <!-- LÍNEA SEPARADORA SUPERIOR -->
-    <SectionDivider />
-
     <!-- 2. TOURS DESTACADOS (SLIDER 3D COVERFLOW ARRIBA DE NUESTROS SERVICIOS) -->
     <section class="featured-3d-section py-4 px-2 px-md-4">
       <div class="container-fluid px-lg-4">
