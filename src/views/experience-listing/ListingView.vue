@@ -19,14 +19,14 @@ const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[
 // State Buscador
 const searchQuery = ref('');
 const searchDate = ref('');
-const searchPax = ref(2);
+const searchPax = ref(1);
 const selectedDifficulty = ref('');
 const selectedCity = ref('');
 
 // Modal Detalle y Reserva
 const selectedExperience = ref<Experience | null>(null);
 const modalDate = ref(defaultNextDay);
-const modalPax = ref(2);
+const modalPax = ref(1);
 
 // Ciudades únicas
 const cities = computed(() => {
@@ -55,7 +55,7 @@ const filteredExperiences = computed(() => {
 const openModal = (exp: Experience) => {
   selectedExperience.value = exp;
   modalDate.value = searchDate.value || defaultNextDay;
-  modalPax.value = searchPax.value || 2;
+  modalPax.value = searchPax.value || 1;
   document.body.style.overflow = 'hidden';
 };
 
@@ -83,7 +83,7 @@ const totalModalPriceBRL = computed(() => totalModalPriceCLP.value * 0.0055);
 const resetFilters = () => {
   searchQuery.value = '';
   searchDate.value = '';
-  searchPax.value = 2;
+  searchPax.value = 1;
   selectedCity.value = '';
   selectedDifficulty.value = '';
 };
@@ -134,7 +134,7 @@ const goToWebpay = () => {
 onMounted(() => {
   if (route.query.q) searchQuery.value = route.query.q as string;
   if (route.query.date) searchDate.value = route.query.date as string;
-  if (route.query.pax) searchPax.value = Number(route.query.pax) || 2;
+  if (route.query.pax) searchPax.value = Number(route.query.pax) || 1;
   if (route.query.diff) selectedDifficulty.value = route.query.diff as string;
   if (route.query.city) selectedCity.value = route.query.city as string;
 });

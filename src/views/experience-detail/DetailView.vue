@@ -11,7 +11,7 @@ const todayDate = new Date().toISOString().split('T')[0];
 const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
 const selectedDate = ref(defaultNextDay);
-const paxCount = ref(2);
+const paxCount = ref(1);
 
 const experience = computed(() => {
   const slug = route.params.slug as string;

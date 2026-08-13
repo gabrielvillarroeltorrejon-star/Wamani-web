@@ -16,7 +16,7 @@ const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[
 // Buscador
 const searchQuery = ref('');
 const searchDate = ref('');
-const searchPax = ref(2);
+const searchPax = ref(1);
 const searchDifficulty = ref('');
 const searchCity = ref('');
 
@@ -35,7 +35,7 @@ const getCityName = (id: string) => {
 const resetFilters = () => {
   searchQuery.value = '';
   searchDate.value = '';
-  searchPax.value = 2;
+  searchPax.value = 1;
   searchDifficulty.value = '';
   searchCity.value = '';
 };
@@ -63,12 +63,12 @@ const displayedDestinations = computed(() => {
 // Modal Detalle y Reserva
 const selectedExperience = ref<Experience | null>(null);
 const modalDate = ref(defaultNextDay);
-const modalPax = ref(2);
+const modalPax = ref(1);
 
 const openModal = (exp: Experience) => {
   selectedExperience.value = exp;
   modalDate.value = searchDate.value || defaultNextDay;
-  modalPax.value = searchPax.value || 2;
+  modalPax.value = searchPax.value || 1;
   document.body.style.overflow = 'hidden';
 };
 

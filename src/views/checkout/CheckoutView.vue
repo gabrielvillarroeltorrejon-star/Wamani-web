@@ -8,7 +8,7 @@ const contentStore = useContentStore();
 
 // Parámetros de Reserva desde la URL
 const expSlug = computed(() => (route.query.slug as string) || '');
-const paxCount = computed(() => Math.max(1, Number(route.query.pax) || 2));
+const paxCount = computed(() => Math.max(1, Number(route.query.pax) || 1));
 const travelDate = computed(() => (route.query.date as string) || new Date(Date.now() + 86400000).toISOString().split('T')[0]);
 const initialMethod = computed(() => (route.query.method as string) || 'webpay');
 

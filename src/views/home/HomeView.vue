@@ -21,12 +21,12 @@ const featuredExperiences = computed(() => contentStore.experiences.slice(0, 9))
 // Modal Detalle y Reserva
 const selectedExperience = ref<Experience | null>(null);
 const modalDate = ref(defaultNextDay);
-const modalPax = ref(2);
+const modalPax = ref(1);
 
 const openModal = (exp: Experience) => {
   selectedExperience.value = exp;
   modalDate.value = defaultNextDay;
-  modalPax.value = 2;
+  modalPax.value = 1;
   document.body.style.overflow = 'hidden';
 };
 
