@@ -82,9 +82,8 @@ onMounted(() => {
         </nav>
 
         <!-- Logo Central (Desktop) -->
-        <router-link to="/" class="navbar-brand text-white logo-center d-none d-lg-flex align-items-center gap-2">
-          <img src="/Logo Wamani.png" alt="Wamani" height="42" class="d-inline-block" />
-          <span class="font-serif fw-bold brand-title-nav text-white">WAMANI</span>
+        <router-link to="/" class="navbar-brand text-white logo-center d-none d-lg-flex align-items-center">
+          <img src="/Logo Wamani.png" alt="Wamani" height="46" class="d-inline-block" />
         </router-link>
 
         <!-- Enlaces Derecha + Idiomas (Desktop) -->
@@ -113,9 +112,8 @@ onMounted(() => {
 
         <!-- Controles Mobile / Tablet (d-flex d-lg-none) -->
         <div class="d-flex d-lg-none w-100 justify-content-between align-items-center">
-          <router-link to="/" class="text-white text-decoration-none d-flex align-items-center gap-2">
-            <img src="/Logo Wamani.png" alt="Wamani" height="36" class="d-inline-block" />
-            <span class="font-serif fw-bold text-white" style="letter-spacing: 0.12em; font-size: 0.95rem;">WAMANI</span>
+          <router-link to="/" class="text-white text-decoration-none d-flex align-items-center">
+            <img src="/Logo Wamani.png" alt="Wamani" height="38" class="d-inline-block" />
           </router-link>
 
           <div class="d-flex align-items-center gap-3">
