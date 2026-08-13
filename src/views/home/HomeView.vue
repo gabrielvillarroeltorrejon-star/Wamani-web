@@ -165,9 +165,9 @@ onMounted(() => {
               <i class="bi bi-x-lg"></i>
             </button>
 
-            <div class="row g-0 h-100">
+            <div class="row g-0 modal-main-row">
               <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-              <div class="col-lg-7 custom-modal-info p-4 p-md-5 overflow-auto custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
                 
                 <!-- Galería -->
                 <div class="modal-gallery mb-4">
@@ -190,7 +190,18 @@ onMounted(() => {
                 </div>
                 
                 <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #045D56 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-                <p class="lead mb-4 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+                <p class="lead mb-3 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+
+                <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
+                <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #045D56;">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white small">Desde</span>
+                    <strong class="text-accent fs-5">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
+                  </div>
+                  <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #2DD4BF !important; color: #022927 !important; border-radius: 12px;">
+                    <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
+                  </a>
+                </div>
 
                 <div class="mb-4">
                   <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Descripción</h4>
@@ -237,7 +248,7 @@ onMounted(() => {
               </div>
 
               <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-              <div class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+              <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
                 
                 <div>
                   <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">

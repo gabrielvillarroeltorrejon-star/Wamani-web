@@ -286,9 +286,9 @@ const goToWebpay = () => {
             <i class="bi bi-x-lg"></i>
           </button>
 
-          <div class="row g-0 h-100">
+          <div class="row g-0 modal-main-row">
             <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-            <div class="col-lg-7 custom-modal-info p-4 p-md-5 overflow-auto custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+            <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
               
               <!-- Galería -->
               <div class="modal-gallery mb-4">
@@ -311,7 +311,18 @@ const goToWebpay = () => {
               </div>
               
               <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #045D56 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-              <p class="lead mb-4 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+              <p class="lead mb-3 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+
+              <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
+              <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #045D56;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-white small">Desde</span>
+                  <strong class="text-accent fs-5">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
+                </div>
+                <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #2DD4BF !important; color: #022927 !important; border-radius: 12px;">
+                  <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
+                </a>
+              </div>
 
               <div class="mb-4">
                 <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Descripción</h4>
@@ -358,7 +369,7 @@ const goToWebpay = () => {
             </div>
 
             <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-            <div class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+            <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
               
               <div>
                 <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
@@ -532,78 +543,8 @@ const goToWebpay = () => {
 }
 
 // Modal Flotante
-.custom-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: 1050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  
-  @media (min-width: 768px) {
-    padding: 2rem;
-  }
-}
-
 .custom-modal-content {
-  background: #F4FAF8;
-  width: 100%;
-  max-width: 1200px;
-  height: 100%;
-  max-height: 90vh;
-  border-radius: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid $primary;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: $primary;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: $primary;
-    color: #ffffff;
-    transform: scale(1.05);
-  }
-}
-
-.custom-modal-info {
-  height: 100%;
-}
-
-.custom-modal-sidebar {
-  height: 100%;
-  overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba($primary, 0.3);
-    border-radius: 10px;
-  }
 }
 
 .custom-scrollbar {
