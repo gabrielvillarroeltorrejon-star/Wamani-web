@@ -1,0 +1,523 @@
+// 1. Importar variables y configuraciones de Wamani
+@import 'variables';
+
+// 2. Importar Bootstrap
+@import 'bootstrap/scss/bootstrap';
+
+// 3. Clases de utilidad y personalizaciones globales
+body {
+  background-color: $light-cream;
+  color: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: $font-family-sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+
+
+p, .lead, .text-muted {
+  color: #FFFFFF;
+}
+
+.text-muted {
+  opacity: 0.85 !important;
+}
+
+// Tarjetas globales con fondo Verde Bosque #045D56 y texto blanco puro
+.card, .review-card, .catalog-card, .featured-card, .w-card {
+  background-color: #045D56 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(45, 212, 191, 0.15) !important;
+  
+  p, span:not(.badge), li, div {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .text-muted, .text-secondary {
+    color: rgba(255, 255, 255, 0.8) !important;
+    opacity: 1 !important;
+  }
+
+  h3, h4, h5, h6, .h5, .h6 {
+    font-family: $font-family-brush !important;
+    color: #FFFFFF !important;
+  }
+
+  .text-accent, .text-primary, .category-tag {
+    color: #2DD4BF !important;
+  }
+}
+
+input.form-control, select.form-select, textarea.form-control {
+  color: #033E3B !important;
+}
+
+/* Ocultar flechas / spinners nativos de inputs numéricos (Chrome, Safari, Edge, Opera, Firefox) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type=number] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+.btn-cyan-gradient {
+  background: linear-gradient(135deg, #0FA095 0%, #077A73 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(45, 212, 191, 0.4) !important;
+  font-weight: 600;
+  border-radius: 20px !important;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #2DD4BF 0%, #0FA095 100%) !important;
+    color: #033E3B !important;
+    box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-whatsapp-custom {
+  background-color: #25D366 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #1EBE5D !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    transform: translateY(-2px);
+  }
+}
+
+// -----------------------------------------
+// REDISEÑO TOTAL DEL MODAL DE EXPERIENCIAS
+// -----------------------------------------
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}
+
+.custom-modal-content {
+  background: #FFFFFF !important;
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  max-height: 90vh;
+  border-radius: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 2px solid #045D56;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #045D56;
+  z-index: 20;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #045D56;
+    color: #FFFFFF;
+    transform: scale(1.1);
+  }
+}
+
+.custom-modal-info {
+  background-color: #FFFFFF !important;
+  color: #045D56 !important;
+
+  h2, h3, h4, h5, h6 {
+    color: #045D56 !important;
+  }
+  
+  p, span:not(.badge), li, div {
+    color: #224845 !important;
+  }
+
+  .text-muted {
+    color: #4E6E6C !important;
+    opacity: 1 !important;
+  }
+}
+
+.custom-modal-sidebar {
+  background-color: #045D56 !important;
+  color: #FFFFFF !important;
+  border-left: 1px solid rgba(45, 212, 191, 0.2) !important;
+
+  h3, h4, h5, h6 {
+    color: #FFFFFF !important;
+    font-family: $font-family-brush !important;
+  }
+
+  p, span:not(.badge), li, div {
+    color: #FFFFFF !important;
+  }
+
+  .text-muted {
+    color: rgba(255, 255, 255, 0.85) !important;
+    opacity: 1 !important;
+  }
+
+  .summary-list {
+    .border-bottom {
+      border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+    }
+  }
+
+  .price-box-card {
+    background-color: #033E3B !important;
+    border: 1px solid rgba(45, 212, 191, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+
+    .text-accent {
+      color: #2DD4BF !important;
+    }
+  }
+}
+
+h1, h2, h3, .font-serif, .font-brush {
+  font-family: $font-family-brush !important;
+  color: #FFFFFF !important;
+}
+
+// ----------------------------------------------------
+// CONTENEDOR BUSCADOR Y FILTROS EN VERDE BOSQUE #045D56
+// ----------------------------------------------------
+.search-filter-box {
+  background-color: #045D56 !important;
+  border: 1px solid rgba(45, 212, 191, 0.35) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25) !important;
+  max-width: 1140px;
+  width: 100%;
+  position: relative;
+  z-index: 5;
+
+  .input-icon-wrapper {
+    position: relative;
+    width: 100%;
+
+    .search-icon, .select-icon {
+      position: absolute;
+      left: 0.95rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #045D56 !important;
+      font-size: 1.05rem;
+      pointer-events: none;
+      z-index: 5;
+    }
+  }
+
+  .custom-search-input, .custom-select-input {
+    background-color: #FFFFFF !important;
+    color: #033E3B !important;
+    font-weight: 600 !important;
+    border: 2px solid rgba(45, 212, 191, 0.4) !important;
+    border-radius: 14px !important;
+    height: 52px !important;
+    padding-left: 2.35rem !important;
+    font-size: 0.92rem !important;
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: #6E8E8B !important;
+      font-weight: 500 !important;
+      opacity: 1 !important;
+    }
+
+    &:focus {
+      background-color: #FFFFFF !important;
+      border-color: #0FA095 !important;
+      box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.45) !important;
+      color: #022927 !important;
+      outline: none !important;
+    }
+  }
+
+  select.custom-select-input {
+    padding-right: 2rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23045D56' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 14px 10px !important;
+    cursor: pointer;
+
+    option {
+      background-color: #FFFFFF !important;
+      color: #033E3B !important;
+      padding: 10px;
+    }
+  }
+}
+
+.font-sans {
+  font-family: $font-family-sans-serif !important;
+}
+
+// Navegación vertical texto
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+// Separadores elegantes tradicionales con degradé sutil de marca
+.divider-line {
+  height: 5px;
+  width: 100%;
+  margin: 2rem 0;
+  border: none;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(4, 93, 86, 0.35) 15%,
+    #0FA095 40%,
+    #2DD4BF 50%,
+    #0FA095 60%,
+    rgba(4, 93, 86, 0.35) 85%,
+    transparent 100%
+  );
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+}
+
+// -----------------------------------------
+// Separadores de Sección Ultra Premium (Gradiente Verde Agua & Glow)
+// -----------------------------------------
+.premium-divider {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  margin: 0 auto;
+  border: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(4, 93, 86, 0.2) 15%,
+    #0FA095 40%,
+    #2DD4BF 50%,
+    #0FA095 60%,
+    rgba(4, 93, 86, 0.2) 85%,
+    transparent 100%
+  );
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+
+  &::after {
+    content: '✦';
+    font-size: 0.75rem;
+    color: #045D56;
+    background-color: #83AAA8;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(4, 93, 86, 0.4);
+    box-shadow: 0 0 10px rgba(4, 93, 86, 0.2);
+  }
+}
+
+.premium-divider-dark {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  margin: 0 auto;
+  border: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(15, 160, 149, 0.3) 15%,
+    #0FA095 40%,
+    #2DD4BF 50%,
+    #0FA095 60%,
+    rgba(15, 160, 149, 0.3) 85%,
+    transparent 100%
+  );
+  box-shadow: 0 0 16px rgba(45, 212, 191, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+
+  &::after {
+    content: '✦';
+    font-size: 0.75rem;
+    color: #2DD4BF;
+    background-color: #033E3B;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(45, 212, 191, 0.6);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.7);
+  }
+}
+
+// ----------------------------------------------------
+// CARRUSEL TOURS DESTACADOS (INSPIRACIÓN PINTEREST)
+// ----------------------------------------------------
+.pinterest-carousel-container {
+  position: relative;
+  width: 100%;
+}
+
+.pinterest-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1.5rem;
+  padding: 0.5rem 0.25rem 1.5rem 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2DD4BF rgba(255, 255, 255, 0.15);
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    margin: 0 20px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #0FA095, #2DD4BF);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+
+    &:hover {
+      background: #2DD4BF;
+    }
+  }
+
+  .pinterest-carousel-item {
+    flex: 0 0 320px;
+    scroll-snap-align: start;
+    
+    @media (min-width: 768px) {
+      flex: 0 0 380px;
+    }
+
+    @media (min-width: 1200px) {
+      flex: 0 0 420px;
+    }
+  }
+
+  .pinterest-card {
+    position: relative;
+    height: 380px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #045D56;
+    border: 1px solid rgba(45, 212, 191, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .pinterest-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pinterest-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      background: linear-gradient(
+        to top,
+        rgba(4, 93, 86, 0.95) 0%,
+        rgba(4, 93, 86, 0.5) 35%,
+        rgba(4, 93, 86, 0.1) 60%,
+        transparent 100%
+      );
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.75rem;
+      transition: background 0.4s ease;
+
+      .pinterest-card-title {
+        font-family: $font-family-brush !important;
+        font-size: 1.85rem;
+        line-height: 1.15;
+        color: #FFFFFF !important;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        margin-bottom: 0.35rem;
+        transition: transform 0.3s ease;
+      }
+
+      .pinterest-card-subtitle {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-size: 0.9rem;
+        margin-bottom: 0;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(4, 93, 86, 0.4);
+      border-color: rgba(45, 212, 191, 0.6);
+
+      .pinterest-card-img {
+        transform: scale(1.06);
+      }
+
+      .pinterest-card-overlay {
+        background: linear-gradient(
+          to top,
+          rgba(4, 93, 86, 0.98) 0%,
+          rgba(4, 93, 86, 0.65) 45%,
+          rgba(4, 93, 86, 0.2) 70%,
+          transparent 100%
+        );
+
+        .pinterest-card-title {
+          transform: translateY(-2px);
+          color: #2DD4BF !important;
+        }
+      }
+    }
+  }
+}
