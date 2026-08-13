@@ -23,7 +23,7 @@ const contentStore = useContentStore();
           <div class="col-lg-6 position-relative">
             <!-- Bloque decorativo detrás de la imagen -->
             <div class="bg-accent position-absolute top-0 start-0 w-75 h-100" style="background-color: #0FA095; margin-left: -20px; margin-top: -20px; z-index: 0;"></div>
-            <img :src="contentStore.content.about.historyImage" :alt="contentStore.content.about.historyTitle" class="img-fluid rounded-0 shadow-lg object-fit-cover w-100 position-relative z-1" style="height: 600px;">
+            <img :src="contentStore.content.about.historyImage" :alt="contentStore.content.about.historyTitle" class="img-fluid rounded-4 shadow-lg object-fit-cover w-100 position-relative z-1 history-main-img">
           </div>
           <div class="col-lg-6 px-lg-5">
             <h2 class="font-brush display-2 mb-3 text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">{{ contentStore.content.about.historyTitle }}</h2>
@@ -195,6 +195,10 @@ const contentStore = useContentStore();
 
 .text-accent {
   color: #2DD4BF !important;
+}
+
+.history-main-img {
+  height: clamp(340px, 45vw, 600px);
 }
 
 .tracking-wide {

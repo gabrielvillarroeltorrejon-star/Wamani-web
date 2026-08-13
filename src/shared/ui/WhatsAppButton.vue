@@ -15,17 +15,19 @@ const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phoneNumber}&text=${
 
 <style scoped>
 .whatsapp-btn {
-  bottom: 24px;
-  right: 24px;
-  width: 60px;
-  height: 60px;
-  background-color: #045D56;
+  bottom: clamp(18px, 3.5vh, 26px);
+  right: clamp(16px, 3vw, 24px);
+  width: clamp(52px, 7vw, 60px);
+  height: clamp(52px, 7vw, 60px);
+  background-color: #25D366;
   border-radius: 50%;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.45);
   transition: transform 0.3s ease, background-color 0.3s ease;
+  z-index: 1040;
 }
 
-.whatsapp-btn:hover {
+.whatsapp-btn:hover, .whatsapp-btn:active {
   transform: scale(1.1);
-  background-color: #0FA095;
+  background-color: #1EBE5D;
 }
 </style>

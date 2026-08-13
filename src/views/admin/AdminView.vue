@@ -736,8 +736,8 @@ const handleRestore = () => {
       <!-- TABS CONTROL -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="card border-0 shadow-sm p-2 rounded-4 admin-tabs-card">
-            <ul class="nav nav-pills nav-fill gap-2">
+          <div class="card border-0 shadow-sm p-2 rounded-4 admin-tabs-card overflow-hidden">
+            <ul class="nav nav-pills nav-fill gap-2 flex-nowrap overflow-auto py-1 px-1 custom-scrollbar">
               <li class="nav-item">
                 <button 
                   class="nav-link py-3 fw-bold rounded-3 transition-all" 

@@ -5,6 +5,15 @@
 @import 'bootstrap/scss/bootstrap';
 
 // 3. Clases de utilidad y personalizaciones globales
+// 3. Clases de utilidad y personalizaciones globales
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: $light-cream;
   color: #FFFFFF;
@@ -14,7 +23,12 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-
+/* Evitar zoom automático indeseado en iPhones al tocar campos de texto */
+@media (max-width: 767.98px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
 
 p, .lead, .text-muted {
   color: #FFFFFF;

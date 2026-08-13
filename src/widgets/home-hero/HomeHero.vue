@@ -43,8 +43,16 @@ const contentStore = useContentStore();
 <style scoped>
 .hero-section {
   height: 100vh;
-  min-height: 800px;
+  min-height: 100svh;
+  max-height: 980px;
   background-color: var(--bs-dark);
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 540px;
+    height: 92vh;
+  }
 }
 
 .overlay {
@@ -58,7 +66,7 @@ const contentStore = useContentStore();
 }
 
 .hero-brand-logo {
-  height: 190px;
+  height: 180px;
   width: auto;
   max-width: 85vw;
   filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.7));
@@ -72,27 +80,30 @@ const contentStore = useContentStore();
 
 @media (max-width: 991px) {
   .hero-brand-logo {
-    height: 140px;
+    height: 135px;
   }
 }
 
 @media (max-width: 768px) {
   .hero-brand-logo {
-    height: 110px;
+    height: 105px;
   }
 }
 
 .hero-title {
-  font-size: clamp(5rem, 13vw, 11rem);
+  font-size: clamp(3.4rem, 11vw, 10.5rem);
   line-height: 1;
   text-shadow: 0 10px 30px rgba(0,0,0,0.35);
   transform: rotate(-3deg);
+  word-break: break-word;
 }
 
 .hero-subtitle {
-  letter-spacing: 0.5em;
-  font-size: 0.85rem;
+  letter-spacing: clamp(0.18em, 1.4vw, 0.45em);
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
   opacity: 0.9;
+  padding: 0 1rem;
+  max-width: 100%;
 }
 
 .hero-divider-overlay {

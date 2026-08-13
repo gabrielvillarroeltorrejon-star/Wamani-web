@@ -164,7 +164,7 @@ const handleBookWhatsApp = () => {
         </div>
 
         <!-- Sidebar / Booking Widget -->
-        <div class="col-lg-4">
+        <div id="booking-section" class="col-lg-4">
           <div class="sticky-top" style="top: 100px;">
             <div class="booking-sidebar p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.45);">
               
@@ -270,6 +270,21 @@ const handleBookWhatsApp = () => {
 
       </div>
     </div>
+
+    <!-- Barra fija de reserva para móviles -->
+    <div class="d-lg-none fixed-bottom p-3 border-top border-secondary border-opacity-50 shadow-2xl z-3" style="background-color: #033E3B !important;">
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <div>
+          <span class="small text-white opacity-75 d-block" style="font-size: 0.72rem;">Desde</span>
+          <strong class="text-accent fs-5 font-monospace">{{ formatPrice(experience.pricing.basePrice, 'CLP') }}</strong>
+          <span class="small text-white opacity-75 ms-1" style="font-size: 0.7rem;">/ pax</span>
+        </div>
+        <a href="#booking-section" class="btn btn-cyan-gradient px-4 py-2 fw-bold text-dark-mountain d-flex align-items-center gap-2 text-decoration-none shadow" style="border-radius: 12px; font-size: 0.9rem;">
+          <i class="bi bi-calendar2-check-fill"></i> Reservar Cupos
+        </a>
+      </div>
+    </div>
+
   </div>
 </template>
 

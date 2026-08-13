@@ -381,6 +381,22 @@ const printVoucher = () => {
           <p class="text-white opacity-85">Estás a un solo paso de asegurar tus cupos para esta gran aventura en el sur de Chile.</p>
         </div>
 
+        <!-- RESUMEN COMPACTO MÓVIL (d-lg-none) -->
+        <div class="col-12 d-lg-none mb-2">
+          <div class="p-3 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.4);">
+            <div class="d-flex align-items-center gap-3">
+              <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(45, 212, 191, 0.3);">
+              <div class="flex-grow-1">
+                <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ experience?.title }}</h4>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                  <span class="small text-white opacity-85" style="font-size: 0.78rem;"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} • {{ paxCount }} {{ paxCount === 1 ? 'viajero' : 'viajeros' }}</span>
+                  <strong class="text-accent fs-6 font-monospace">{{ formatPrice(totalPrice) }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- COLUMNA IZQUIERDA: FORMULARIO DEL CLIENTE -->
         <div class="col-12 col-lg-8">
           <form @submit.prevent="handleInitiatePayment" class="d-flex flex-column gap-4">

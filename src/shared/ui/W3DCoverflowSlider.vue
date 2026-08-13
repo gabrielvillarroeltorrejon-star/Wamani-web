@@ -65,7 +65,7 @@ const onTouchMove = (e: TouchEvent) => {
 const onTouchEnd = () => {
   isHovered.value = false;
   const swipeDistance = touchEndX - touchStartX;
-  if (Math.abs(swipeDistance) > 50) {
+  if (Math.abs(swipeDistance) > 35) {
     if (swipeDistance > 0) {
       prevSlide();
     } else {
@@ -348,22 +348,23 @@ onUnmounted(() => {
 // Tarjetas 3D
 .coverflow-card {
   position: absolute;
-  width: clamp(230px, 22vw, 320px);
-  height: clamp(350px, 52vh, 480px);
-  border-radius: 22px;
+  width: clamp(220px, 24vw, 320px);
+  height: clamp(340px, 50vh, 480px);
+  border-radius: 20px;
   overflow: hidden;
   background-color: #033E3B;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   transform-origin: center center;
-  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-              opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-              filter 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-              box-shadow 0.5s ease;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+              filter 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.45s ease;
   will-change: transform, opacity;
+  touch-action: pan-y;
 
   @media (max-width: 768px) {
-    width: 200px;
-    height: 320px;
+    width: clamp(190px, 58vw, 240px);
+    height: 330px;
     border-radius: 16px;
   }
 
