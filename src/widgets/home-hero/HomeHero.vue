@@ -1,19 +1,54 @@
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useContentStore } from '@/shared/stores/contentStore';
 import SectionDivider from '@/shared/ui/SectionDivider.vue';
 
 const contentStore = useContentStore();
+const videoRef = ref<HTMLVideoElement | null>(null);
+
+const videoSrc = computed(() => {
+  return contentStore.content.home.hero.videoUrl || '/hero-video.mp4';
+});
+
+const forcePlay = () => {
+  if (videoRef.value) {
+    videoRef.value.muted = true;
+    videoRef.value.defaultMuted = true;
+    const playPromise = videoRef.value.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Modo ahorro de batería o restricción móvil, se desbloqueará con el primer toque
+      });
+    }
+  }
+};
+
+onMounted(() => {
+  forcePlay();
+  window.addEventListener('touchstart', forcePlay, { once: true, passive: true });
+  window.addEventListener('click', forcePlay, { once: true, passive: true });
+});
 </script>
 
 <template>
   <section class="hero-section position-relative d-flex align-items-center justify-content-center overflow-hidden">
-    <!-- Video de fondo inmersivo de Wamani -->
+    <!-- Video de fondo inmersivo de Wamani con soporte nativo móvil -->
     <video 
-      :key="contentStore.content.home.hero.videoUrl"
-      :src="contentStore.content.home.hero.videoUrl" 
-      autoplay loop muted playsinline 
+      ref="videoRef"
+      :key="videoSrc"
+      autoplay 
+      loop 
+      muted 
+      playsinline 
+      webkit-playsinline
+      x5-playsinline
+      preload="auto"
+      poster="/961c6329-cc6b-4e0d-bff5-df7f6ce1f26b.jpg"
       class="hero-video position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
-    ></video>
+    >
+      <source :src="videoSrc" type="video/mp4">
+      <source src="/hero-video.mp4" type="video/mp4">
+    </video>
     
     <div class="overlay position-absolute top-0 start-0 w-100 h-100 z-1"></div>
     

@@ -135,7 +135,7 @@ const DEFAULT_CONTENT: SectionContent = {
     hero: {
       title: 'WAMANI',
       subtitle: 'Ecoturismo desde Chile',
-      videoUrl: 'https://wamani.cl/wp-content/uploads/2025/10/VIDEO-PAGINA-WEB.mp4'
+      videoUrl: '/hero-video.mp4'
     },
     services: {
       title: 'Nuestros Servicios',
