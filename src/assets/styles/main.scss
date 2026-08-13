@@ -208,6 +208,22 @@ input[type=number] {
     color: rgba(255, 255, 255, 0.85) !important;
     opacity: 1 !important;
   }
+
+  .summary-list {
+    .border-bottom {
+      border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+    }
+  }
+
+  .price-box-card {
+    background-color: #033E3B !important;
+    border: 1px solid rgba(45, 212, 191, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+
+    .text-accent {
+      color: #2DD4BF !important;
+    }
+  }
 }
 
 @media (min-width: 992px) {
@@ -239,23 +255,6 @@ input[type=number] {
     padding: 1.5rem !important;
     border-left: none !important;
     border-top: 3px solid rgba(45, 212, 191, 0.4) !important;
-  }
-}
-
-  .summary-list {
-    .border-bottom {
-      border-bottom-color: rgba(255, 255, 255, 0.15) !important;
-    }
-  }
-
-  .price-box-card {
-    background-color: #033E3B !important;
-    border: 1px solid rgba(45, 212, 191, 0.3) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-
-    .text-accent {
-      color: #2DD4BF !important;
-    }
   }
 }
 
