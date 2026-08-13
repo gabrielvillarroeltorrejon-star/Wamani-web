@@ -70,31 +70,22 @@ onMounted(() => {
 
 <template>
   <div class="app-layout">
-    <!-- Navbar Minimalista (Fija y transparente con Logo al Centro) -->
+    <!-- Navbar Minimalista (Fija y transparente sin logo) -->
     <header v-if="route.name !== 'admin'" class="position-absolute top-0 start-0 w-100 z-3 py-3 py-lg-4">
       <div class="container-fluid px-3 px-md-5 d-flex justify-content-between align-items-center position-relative">
         
-        <!-- Enlaces Izquierda (Desktop) -->
-        <nav class="d-none d-lg-flex gap-4 text-uppercase font-sans fw-medium" style="font-size: 0.85rem; letter-spacing: 0.15em;">
+        <!-- Navegación Desktop Centrada -->
+        <nav class="d-none d-lg-flex gap-5 text-uppercase font-sans fw-medium mx-auto" style="font-size: 0.85rem; letter-spacing: 0.15em;">
           <router-link to="/" class="text-white text-decoration-none nav-link-custom">Inicio</router-link>
           <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Portafolio</router-link>
           <router-link :to="{ path: '/', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
+          <router-link :to="{ path: '/', hash: '#destinos' }" class="text-white text-decoration-none nav-link-custom">Destinos</router-link>
+          <router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white text-decoration-none nav-link-custom">Reseñas</router-link>
+          <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
         </nav>
 
-        <!-- Logo Central (Desktop) -->
-        <router-link to="/" class="navbar-brand text-white logo-center d-none d-lg-flex align-items-center">
-          <img src="/Logo Wamani.png" alt="Wamani" height="46" class="d-inline-block" />
-        </router-link>
-
-        <!-- Enlaces Derecha + Idiomas (Desktop) -->
-        <div class="d-none d-lg-flex align-items-center gap-4">
-          <nav class="d-flex gap-4 text-uppercase font-sans fw-medium" style="font-size: 0.85rem; letter-spacing: 0.15em;">
-            <router-link :to="{ path: '/', hash: '#destinos' }" class="text-white text-decoration-none nav-link-custom">Destinos</router-link>
-            <router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white text-decoration-none nav-link-custom">Reseñas</router-link>
-            <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
-          </nav>
-
-          <!-- Idiomas Desktop -->
+        <!-- Idiomas Desktop (Alineado a la derecha) -->
+        <div class="d-none d-lg-flex align-items-center position-absolute end-0 me-4 me-lg-5">
           <div class="dropdown">
             <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cambiar idioma">
               <i class="fa-solid fa-globe opacity-90"></i>
@@ -111,31 +102,25 @@ onMounted(() => {
         </div>
 
         <!-- Controles Mobile / Tablet (d-flex d-lg-none) -->
-        <div class="d-flex d-lg-none w-100 justify-content-between align-items-center">
-          <router-link to="/" class="text-white text-decoration-none d-flex align-items-center">
-            <img src="/Logo Wamani.png" alt="Wamani" height="38" class="d-inline-block" />
-          </router-link>
-
-          <div class="d-flex align-items-center gap-3">
-            <div class="dropdown">
-              <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-globe opacity-90"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('es')"><span class="fi fi-es me-2"></span> Español</a></li>
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('en')"><span class="fi fi-gb me-2"></span> Inglés</a></li>
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('pt')"><span class="fi fi-br me-2"></span> Português</a></li>
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('fr')"><span class="fi fi-fr me-2"></span> Français</a></li>
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('it')"><span class="fi fi-it me-2"></span> Italiano</a></li>
-                <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('zh-CN')"><span class="fi fi-cn me-2"></span> 中文</a></li>
-              </ul>
-            </div>
-
-            <!-- Botón Hamburguesa -->
-            <button class="btn btn-link text-white p-1 border-0 fs-2 lh-1" @click="toggleMobileMenu" aria-label="Abrir menú">
-              <i class="bi bi-list"></i>
+        <div class="d-flex d-lg-none w-100 justify-content-end align-items-center gap-3">
+          <div class="dropdown">
+            <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-globe opacity-90"></i>
             </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('es')"><span class="fi fi-es me-2"></span> Español</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('en')"><span class="fi fi-gb me-2"></span> Inglés</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('pt')"><span class="fi fi-br me-2"></span> Português</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('fr')"><span class="fi fi-fr me-2"></span> Français</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('it')"><span class="fi fi-it me-2"></span> Italiano</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('zh-CN')"><span class="fi fi-cn me-2"></span> 中文</a></li>
+            </ul>
           </div>
+
+          <!-- Botón Hamburguesa -->
+          <button class="btn btn-link text-white p-1 border-0 fs-2 lh-1" @click="toggleMobileMenu" aria-label="Abrir menú">
+            <i class="bi bi-list"></i>
+          </button>
         </div>
 
         <!-- Traductor real oculto -->
