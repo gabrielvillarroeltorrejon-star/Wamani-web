@@ -503,6 +503,7 @@ export const useContentStore = defineStore('content', () => {
           summary: e.summary || '',
           description: e.description || '',
           destinationId: e.destination_id || 'Pucón',
+          macroZone: e.macro_zone || 'sur',
           difficulty: e.difficulty || 'easy',
           pricing: {
             basePrice: Number(e.base_price),
@@ -535,6 +536,12 @@ export const useContentStore = defineStore('content', () => {
           customerEmail: b.customer_email,
           customerPhone: b.customer_phone,
           customerRut: b.customer_rut,
+          customerDocumentType: b.customer_document_type || 'rut',
+          emergencyContactName: b.emergency_contact_name,
+          emergencyContactPhone: b.emergency_contact_phone,
+          medicalConditions: b.medical_conditions,
+          invoiceType: b.invoice_type || 'boleta',
+          billingDetails: b.billing_details || {},
           experienceTitle: b.experience_title,
           experienceSlug: b.experience_slug,
           bookingDate: b.booking_date,
@@ -582,6 +589,7 @@ export const useContentStore = defineStore('content', () => {
     summary: e.summary,
     description: e.description,
     destination_id: e.destinationId,
+    macro_zone: e.macroZone || 'sur',
     difficulty: e.difficulty,
     base_price: e.pricing.basePrice,
     cover_image: e.coverImage,
@@ -714,6 +722,42 @@ export const useContentStore = defineStore('content', () => {
     };
     bookings.value.unshift(newBooking);
     persist();
+
+    // Sincronizar reserva en Supabase en tiempo real
+    if (isSupabaseConfigured && supabase) {
+      try {
+        supabase.from('bookings').insert({
+          id: newBooking.id,
+          buy_order: newBooking.buyOrder || `BO-${Date.now()}`,
+          customer_name: newBooking.customerName,
+          customer_email: newBooking.customerEmail,
+          customer_phone: newBooking.customerPhone,
+          customer_rut: newBooking.customerRut || null,
+          customer_document_type: newBooking.customerDocumentType || 'rut',
+          emergency_contact_name: newBooking.emergencyContactName || null,
+          emergency_contact_phone: newBooking.emergencyContactPhone || null,
+          medical_conditions: newBooking.medicalConditions || null,
+          invoice_type: newBooking.invoiceType || 'boleta',
+          billing_details: newBooking.billingDetails || {},
+          experience_title: newBooking.experienceTitle,
+          experience_slug: newBooking.experienceSlug || null,
+          booking_date: newBooking.bookingDate,
+          pax: newBooking.pax,
+          total_price: newBooking.totalPrice,
+          status: newBooking.status,
+          source: newBooking.source,
+          payment_method: newBooking.paymentMethod || 'webpay',
+          authorization_code: newBooking.authorizationCode || null,
+          card_last4: newBooking.cardLast4 || null,
+          notes: newBooking.notes || null
+        }).then(({ error }) => {
+          if (error) console.warn('Supabase booking insert notice:', error);
+        });
+      } catch (e) {
+        console.warn('Error saving booking to Supabase:', e);
+      }
+    }
+
     return newBooking;
   };
 
@@ -722,6 +766,13 @@ export const useContentStore = defineStore('content', () => {
     if (booking) {
       booking.status = status;
       persist();
+
+      if (isSupabaseConfigured && supabase) {
+        supabase.from('bookings').update({ status }).eq('id', id).then(({ error }) => {
+          if (error) console.warn('Supabase booking update status notice:', error);
+        });
+      }
+
       return true;
     }
     return false;
@@ -730,8 +781,16 @@ export const useContentStore = defineStore('content', () => {
   const deleteBooking = (id: string) => {
     const index = bookings.value.findIndex(b => b.id === id);
     if (index !== -1) {
+      const removedId = bookings.value[index].id;
       bookings.value.splice(index, 1);
       persist();
+
+      if (isSupabaseConfigured && supabase) {
+        supabase.from('bookings').delete().eq('id', removedId).then(({ error }) => {
+          if (error) console.warn('Supabase booking delete notice:', error);
+        });
+      }
+
       return true;
     }
     return false;
