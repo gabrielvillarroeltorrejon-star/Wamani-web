@@ -726,6 +726,14 @@ export const useContentStore = defineStore('content', () => {
     // Sincronizar reserva en Supabase en tiempo real
     if (isSupabaseConfigured && supabase) {
       try {
+        const fullNotesCombined = [
+          newBooking.notes,
+          newBooking.customerDocumentType === 'passport' ? 'Documento: Pasaporte/DNI extranjero' : '',
+          newBooking.emergencyContactName ? `Contacto emergencia: ${newBooking.emergencyContactName} (${newBooking.emergencyContactPhone || 'S/N'})` : '',
+          newBooking.medicalConditions ? `Declaración salud: ${newBooking.medicalConditions}` : '',
+          newBooking.invoiceType === 'factura' ? `Comprobante: Factura (${JSON.stringify(newBooking.billingDetails)})` : ''
+        ].filter(Boolean).join(' | ');
+
         supabase.from('bookings').insert({
           id: newBooking.id,
           buy_order: newBooking.buyOrder || `BO-${Date.now()}`,
@@ -733,12 +741,6 @@ export const useContentStore = defineStore('content', () => {
           customer_email: newBooking.customerEmail,
           customer_phone: newBooking.customerPhone,
           customer_rut: newBooking.customerRut || null,
-          customer_document_type: newBooking.customerDocumentType || 'rut',
-          emergency_contact_name: newBooking.emergencyContactName || null,
-          emergency_contact_phone: newBooking.emergencyContactPhone || null,
-          medical_conditions: newBooking.medicalConditions || null,
-          invoice_type: newBooking.invoiceType || 'boleta',
-          billing_details: newBooking.billingDetails || {},
           experience_title: newBooking.experienceTitle,
           experience_slug: newBooking.experienceSlug || null,
           booking_date: newBooking.bookingDate,
@@ -749,7 +751,7 @@ export const useContentStore = defineStore('content', () => {
           payment_method: newBooking.paymentMethod || 'webpay',
           authorization_code: newBooking.authorizationCode || null,
           card_last4: newBooking.cardLast4 || null,
-          notes: newBooking.notes || null
+          notes: fullNotesCombined || null
         }).then(({ error }) => {
           if (error) console.warn('Supabase booking insert notice:', error);
         });
