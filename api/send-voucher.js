@@ -99,8 +99,30 @@ export default async function handler(req, res) {
           });
         } else {
           console.warn('Resend notice (verificar dominio si está en sandbox):', resendData);
-          // Si está en modo sandbox y el correo del cliente no es el del titular, notificar al admin
-          if (process.env.ADMIN_NOTIFICATION_EMAIL) {
+          // Si está en modo sandbox, intentar notificar al correo administrativo
+          const adminTarget = process.env.ADMIN_NOTIFICATION_EMAIL || 'experiencewamani@gmail.com';
+          const fallbackOwner = 'gabrielvillarroeltorrejon@gmail.com';
+          
+          let alertSent = false;
+          try {
+            const adminRes = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: fromEmail,
+                to: [adminTarget],
+                subject: `Nueva Reserva Recibida: ${booking.buyOrder} - ${booking.experienceTitle}`,
+                html: htmlContent
+              })
+            });
+            alertSent = adminRes.ok;
+          } catch (e) {}
+
+          // Si el adminTarget fue rechazado por sandbox, enviar al titular de la cuenta
+          if (!alertSent) {
             await fetch('https://api.resend.com/emails', {
               method: 'POST',
               headers: {
@@ -109,12 +131,13 @@ export default async function handler(req, res) {
               },
               body: JSON.stringify({
                 from: fromEmail,
-                to: [process.env.ADMIN_NOTIFICATION_EMAIL],
-                subject: `Nueva Reserva Recibida: ${booking.buyOrder} - ${booking.experienceTitle}`,
-                html: htmlContent
+                to: [fallbackOwner],
+                subject: `[Aviso Wamani] Nueva Reserva Recibida: ${booking.buyOrder} - ${booking.experienceTitle}`,
+                html: `<p><strong>Alerta para:</strong> ${adminTarget}</p>` + htmlContent
               })
             });
           }
+
           return res.status(200).json({
             success: true,
             sent: true,
