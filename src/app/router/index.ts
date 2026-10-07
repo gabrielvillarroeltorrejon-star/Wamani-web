@@ -29,6 +29,16 @@ const router = createRouter({
       component: () => import('@/views/about/AboutView.vue')
     },
     {
+      path: '/terminos-y-condiciones',
+      name: 'terms',
+      component: () => import('@/views/legal/TermsView.vue')
+    },
+    {
+      path: '/politica-de-privacidad',
+      name: 'privacy',
+      component: () => import('@/views/legal/PrivacyView.vue')
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/admin/AdminView.vue')

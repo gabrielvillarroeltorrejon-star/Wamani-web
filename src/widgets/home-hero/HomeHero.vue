@@ -47,7 +47,6 @@ onMounted(() => {
       class="hero-video position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
     >
       <source :src="videoSrc" type="video/mp4">
-      <source src="/hero-video.mp4" type="video/mp4">
     </video>
     
     <div class="overlay position-absolute top-0 start-0 w-100 h-100 z-1"></div>

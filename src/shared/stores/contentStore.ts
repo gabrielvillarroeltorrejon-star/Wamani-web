@@ -10,6 +10,17 @@ export interface Booking {
   customerEmail: string;
   customerPhone: string;
   customerRut?: string;
+  customerDocumentType?: 'rut' | 'passport';
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  medicalConditions?: string;
+  invoiceType?: 'boleta' | 'factura';
+  billingDetails?: {
+    businessName?: string;
+    rut?: string;
+    activity?: string;
+    address?: string;
+  };
   experienceTitle: string;
   experienceSlug?: string;
   bookingDate: string;
@@ -66,6 +77,20 @@ export interface GatewaySettings {
     adminEmail: string;
     sendVoucherToCustomer: boolean;
   };
+}
+
+export interface LegalInfo {
+  businessName: string;
+  rut: string;
+  sernaturRegistry: string;
+  sernaturUrl: string;
+  addressLegal: string;
+  city: string;
+  region: string;
+  legalRepresentative: string;
+  supportEmail: string;
+  emergencyPhone: string;
+  insurancePolicy: string;
 }
 
 export interface SectionContent {
@@ -127,6 +152,7 @@ export interface SectionContent {
     tripadvisorUrl: string;
     facebookUrl?: string;
   };
+  legal: LegalInfo;
   gateway: GatewaySettings;
 }
 
@@ -322,6 +348,19 @@ const DEFAULT_CONTENT: SectionContent = {
     instagramUrl: 'https://instagram.com/wamani.experience',
     tripadvisorUrl: 'https://www.tripadvisor.cl/'
   },
+  legal: {
+    businessName: 'Wamani Turismo y Expediciones SpA',
+    rut: '77.890.123-4',
+    sernaturRegistry: '84219',
+    sernaturUrl: 'https://serviciosturisticos.sernatur.cl/',
+    addressLegal: 'Av. Bernardo O\'Higgins 425',
+    city: 'Pucón',
+    region: 'Región de La Araucanía, Chile',
+    legalRepresentative: 'Gabriel Villarroel Torrejón',
+    supportEmail: 'contacto@wamani.cl',
+    emergencyPhone: '+56 9 8567 3376',
+    insurancePolicy: 'Póliza Colectiva de Accidentes Personales y Asistencia en Montaña N° CH-884920'
+  },
   gateway: {
     transbank: {
       environment: 'INTEGRATION',
@@ -424,6 +463,7 @@ export const useContentStore = defineStore('content', () => {
               : DEFAULT_CONTENT.about.advisors
           },
           contact: { ...DEFAULT_CONTENT.contact, ...parsed.contact },
+          legal: { ...DEFAULT_CONTENT.legal, ...parsed.legal },
           gateway: {
             transbank: { ...DEFAULT_CONTENT.gateway.transbank, ...parsed.gateway?.transbank },
             bankTransfer: { ...DEFAULT_CONTENT.gateway.bankTransfer, ...parsed.gateway?.bankTransfer },
@@ -533,8 +573,32 @@ export const useContentStore = defineStore('content', () => {
     }
   };
 
+  // Helpers for Supabase mapping
+  const mapExpToDb = (e: Experience) => ({
+    id: e.id,
+    slug: e.slug,
+    title: e.title,
+    subtitle: e.subtitle,
+    summary: e.summary,
+    description: e.description,
+    destination_id: e.destinationId,
+    difficulty: e.difficulty,
+    base_price: e.pricing.basePrice,
+    cover_image: e.coverImage,
+    gallery: e.gallery,
+    tags: e.tags,
+    categories: e.categories,
+    schedule: e.schedule,
+    meeting_point: e.meetingPoint,
+    cancellation_policy: e.cancellationPolicy,
+    itinerary: e.itinerary,
+    included: e.included,
+    not_included: e.notIncluded,
+    status: e.status
+  });
+
   // CRUD de Experiencias
-  const addExperience = (exp: Omit<Experience, 'id' | 'slug'>) => {
+  const addExperience = async (exp: Omit<Experience, 'id' | 'slug'>) => {
     const nextIdNum = experiences.value.length + 1;
     const cleanTitleSlug = exp.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const newExp: Experience = {
@@ -543,26 +607,53 @@ export const useContentStore = defineStore('content', () => {
       slug: `${cleanTitleSlug}-${nextIdNum}`,
       status: 'active'
     };
-    experiences.value.push(newExp);
+    experiences.value.unshift(newExp);
     persist();
+    
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('experiences').insert(mapExpToDb(newExp));
+      } catch (e) {
+        console.warn('Error saving new experience to Supabase:', e);
+      }
+    }
+    
     return newExp;
   };
 
-  const updateExperience = (id: string, updated: Partial<Experience>) => {
+  const updateExperience = async (id: string, updated: Partial<Experience>) => {
     const index = experiences.value.findIndex(e => e.id === id);
     if (index !== -1) {
       experiences.value[index] = { ...experiences.value[index], ...updated } as Experience;
       persist();
+      
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.from('experiences').update(mapExpToDb(experiences.value[index])).eq('id', id);
+        } catch (e) {
+          console.warn('Error updating experience in Supabase:', e);
+        }
+      }
+      
       return true;
     }
     return false;
   };
 
-  const deleteExperience = (id: string) => {
+  const deleteExperience = async (id: string) => {
     const index = experiences.value.findIndex(e => e.id === id);
     if (index !== -1) {
       experiences.value.splice(index, 1);
       persist();
+      
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.from('experiences').delete().eq('id', id);
+        } catch (e) {
+          console.warn('Error deleting experience in Supabase:', e);
+        }
+      }
+      
       return true;
     }
     return false;

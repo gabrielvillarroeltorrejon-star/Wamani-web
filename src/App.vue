@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import WhatsAppButton from '@/shared/ui/WhatsAppButton.vue'
 import MountainDivider from '@/shared/ui/MountainDivider.vue'
+import CookieConsentBanner from '@/shared/ui/CookieConsentBanner.vue'
 import { useContentStore } from '@/shared/stores/contentStore'
 
 const route = useRoute()
@@ -202,14 +203,19 @@ onMounted(() => {
               <h4 class="font-serif fw-bold h5 mb-0">Wamani Experience</h4>
             </div>
             
-            <!-- Logos de acreditación directos (sin caja) debajo de la marca -->
-            <div class="d-flex align-items-center gap-3 mb-4 ps-1">
-              <img src="/sernatur.webp" alt="Sernatur" height="36" class="object-fit-contain" style="filter: brightness(0) invert(1); opacity: 0.95;" />
+            <!-- Logos de acreditación directos con verificación SERNATUR -->
+            <div class="d-flex align-items-center gap-3 mb-2 ps-1">
+              <a :href="contentStore.content.legal.sernaturUrl" target="_blank" rel="noopener noreferrer" title="Verificar Registro Nacional de Prestadores Turísticos SERNATUR" class="d-inline-flex align-items-center text-decoration-none">
+                <img src="/sernatur.webp" alt="Sernatur" height="36" class="object-fit-contain" style="filter: brightness(0) invert(1); opacity: 0.95;" />
+              </a>
               <img src="/Logo_MarcaChile_Caja Roja.webp" alt="Marca Chile" height="36" class="object-fit-contain" />
             </div>
+            <p class="small text-accent mb-3" style="font-size: 0.8rem;">
+              <i class="bi bi-patch-check-fill me-1"></i>Reg. SERNATUR N° {{ contentStore.content.legal.sernaturRegistry }}
+            </p>
             
             <p class="text-white-50 small pe-md-2 lh-lg">
-              Diseñando experiencias inolvidables en el sur del mundo. Turismo de lujo, atención personalizada y conexión real con la naturaleza para viajeros exigentes.
+              Diseñando experiencias inolvidables en el sur del mundo. Ecoturismo y turismo aventura de excelencia para viajeros conscientes y exigentes.
             </p>
           </div>
           
@@ -272,17 +278,20 @@ onMounted(() => {
           </div>
         </div>
         
-        <!-- Línea Inferior -->
-        <div class="row border-top border-secondary border-opacity-25 mt-5 pt-4">
-          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-            <p class="mb-0 small text-white-50 text-uppercase" style="letter-spacing: 0.1em;">
-              © 2026 Wamani Experience. Todos los derechos reservados.
+        <!-- Línea Inferior Legal (Decreto 6/2021 de Comercio Electrónico) -->
+        <div class="row border-top border-secondary border-opacity-25 mt-5 pt-4 align-items-center">
+          <div class="col-12 col-lg-7 text-center text-lg-start mb-3 mb-lg-0">
+            <p class="mb-1 small text-white-50 text-uppercase" style="letter-spacing: 0.08em; font-size: 0.76rem;">
+              © 2026 {{ contentStore.content.legal.businessName }} • RUT: {{ contentStore.content.legal.rut }}
+            </p>
+            <p class="mb-0 small text-white-50" style="font-size: 0.72rem;">
+              {{ contentStore.content.legal.addressLegal }}, {{ contentStore.content.legal.city }}, {{ contentStore.content.legal.region }}. Todos los derechos reservados.
             </p>
           </div>
-          <div class="col-md-6 text-center text-md-end">
-            <div class="d-flex gap-4 justify-content-center justify-content-md-end small">
-              <a href="#" class="text-white-50 text-decoration-none nav-link-custom">Políticas de Privacidad</a>
-              <a href="#" class="text-white-50 text-decoration-none nav-link-custom">Términos y Condiciones</a>
+          <div class="col-12 col-lg-5 text-center text-lg-end">
+            <div class="d-flex gap-4 justify-content-center justify-content-lg-end small">
+              <router-link to="/politica-de-privacidad" class="text-white-50 text-decoration-none nav-link-custom">Políticas de Privacidad</router-link>
+              <router-link to="/terminos-y-condiciones" class="text-white-50 text-decoration-none nav-link-custom">Términos y Condiciones</router-link>
             </div>
           </div>
         </div>
@@ -290,6 +299,7 @@ onMounted(() => {
     </footer>
 
     <WhatsAppButton v-if="route.name !== 'admin'" />
+    <CookieConsentBanner v-if="route.name !== 'admin'" />
   </div>
 </template>
 

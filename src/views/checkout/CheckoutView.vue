@@ -24,39 +24,65 @@ const formatPrice = (val: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val);
 };
 
+import { formatRut, validateRut } from '@/shared/lib/rutUtils';
+
 // Formulario de Pasajero Principal
 const name = ref('');
 const lastname = ref('');
+const docType = ref<'rut' | 'passport'>('rut');
 const rut = ref('');
+const passport = ref('');
+const docError = ref(false);
+
 const email = ref('');
 const phone = ref('');
 const notes = ref('');
-const termsAccepted = ref(true);
 
-// Nombres de acompañantes adicionales
-const companions = ref<string[]>(Array.from({ length: Math.max(0, paxCount.value - 1) }, () => ''));
+// Ficha de Seguridad en Montaña & Contacto de Emergencia (SERNATUR)
+const emergencyName = ref('');
+const emergencyPhone = ref('');
+const medicalConditions = ref('');
 
-const fullNotes = computed(() => {
-  const compStr = companions.value.filter(c => c.trim()).length > 0
-    ? `Acompañantes: ${companions.value.filter(c => c.trim()).join(', ')}`
-    : '';
-  return [notes.value.trim(), compStr].filter(Boolean).join(' | ');
+// Documento Tributario (SII)
+const invoiceType = ref<'boleta' | 'factura'>('boleta');
+const billingBusinessName = ref('');
+const billingRut = ref('');
+const billingRutError = ref(false);
+const billingActivity = ref('');
+const billingAddress = ref('');
+
+// Aceptación de Términos (SERNAC: false por defecto)
+const termsAccepted = ref(false);
+const showLegalModal = ref(false);
+const legalModalTab = ref<'terms' | 'cancellation' | 'privacy'>('terms');
+
+const openLegalModal = (tab: 'terms' | 'cancellation' | 'privacy') => {
+  legalModalTab.value = tab;
+  showLegalModal.value = true;
+};
+
+// Formateo y Validación en tiempo real
+const handleRutInput = () => {
+  rut.value = formatRut(rut.value);
+  if (rut.value.length >= 8) {
+    docError.value = !validateRut(rut.value);
+  } else {
+    docError.value = false;
+  }
+};
+
+const handleBillingRutInput = () => {
+  billingRut.value = formatRut(billingRut.value);
+  if (billingRut.value.length >= 8) {
+    billingRutError.value = !validateRut(billingRut.value);
+  } else {
+    billingRutError.value = false;
+  }
+};
+
+const currentDocumentNumber = computed(() => {
+  return docType.value === 'rut' ? rut.value.trim() : passport.value.trim();
 });
-
-// Método de Pago
-const paymentMethod = ref<'webpay' | 'transfer'>((initialMethod.value === 'transfer' ? 'transfer' : 'webpay'));
-
-// Estados de Procesamiento y Modal de Pago
-const isProcessing = ref(false);
-const showWebpaySimulation = ref(false);
-const webpayCardNumber = ref('4518 9012 3456 7890');
-const webpayExp = ref('12/28');
-const webpayCvv = ref('789');
-const webpayBank = ref('Banco Santander Chile');
-
-// Estado Final de Compra
-const purchaseCompleted = ref(false);
-const completedBooking = ref<any>(null);
 
 // Generador de Código de Orden
 const generateBuyOrder = () => {
@@ -133,13 +159,32 @@ onMounted(async () => {
 });
 
 const handleInitiatePayment = async () => {
-  if (!name.value.trim() || !lastname.value.trim() || !email.value.trim() || !phone.value.trim() || !rut.value.trim()) {
-    alert('Por favor, completa todos los datos obligatorios del pasajero principal (incluyendo RUT o Pasaporte).');
+  if (!name.value.trim() || !lastname.value.trim() || !email.value.trim() || !phone.value.trim()) {
+    alert('Por favor, completa los nombres, apellidos, correo y teléfono del pasajero titular.');
     return;
   }
 
+  if (docType.value === 'rut') {
+    if (!rut.value.trim() || !validateRut(rut.value)) {
+      alert('Por favor, ingresa un RUT chileno válido (verifica el dígito verificador).');
+      return;
+    }
+  } else {
+    if (!passport.value.trim()) {
+      alert('Por favor, ingresa tu número de Pasaporte o DNI extranjero.');
+      return;
+    }
+  }
+
+  if (invoiceType.value === 'factura') {
+    if (!billingBusinessName.value.trim() || !billingRut.value.trim() || !validateRut(billingRut.value) || !billingActivity.value.trim() || !billingAddress.value.trim()) {
+      alert('Por favor, completa los datos tributarios de facturación (Razón Social, RUT de empresa válido, Giro y Dirección).');
+      return;
+    }
+  }
+
   if (!termsAccepted.value) {
-    alert('Debes aceptar los Términos y Condiciones y Políticas de Cancelación para continuar.');
+    alert('Debes aceptar los Términos y Condiciones, Políticas de Cancelación y Normas de Seguridad para continuar.');
     return;
   }
 
@@ -198,7 +243,18 @@ const handleInitiatePayment = async () => {
       customerName: `${name.value} ${lastname.value}`,
       customerEmail: email.value,
       customerPhone: phone.value,
-      customerRut: rut.value,
+      customerRut: currentDocumentNumber.value,
+      customerDocumentType: docType.value,
+      emergencyContactName: emergencyName.value || undefined,
+      emergencyContactPhone: emergencyPhone.value || undefined,
+      medicalConditions: medicalConditions.value || undefined,
+      invoiceType: invoiceType.value,
+      billingDetails: invoiceType.value === 'factura' ? {
+        businessName: billingBusinessName.value,
+        rut: billingRut.value,
+        activity: billingActivity.value,
+        address: billingAddress.value
+      } : undefined,
       experienceTitle: experience.value?.title || 'Servicio Turístico',
       experienceSlug: experience.value?.slug,
       bookingDate: travelDate.value,
@@ -229,7 +285,18 @@ const confirmWebpayPayment = (success: boolean) => {
       customerName: `${name.value} ${lastname.value}`,
       customerEmail: email.value,
       customerPhone: phone.value,
-      customerRut: rut.value,
+      customerRut: currentDocumentNumber.value,
+      customerDocumentType: docType.value,
+      emergencyContactName: emergencyName.value || undefined,
+      emergencyContactPhone: emergencyPhone.value || undefined,
+      medicalConditions: medicalConditions.value || undefined,
+      invoiceType: invoiceType.value,
+      billingDetails: invoiceType.value === 'factura' ? {
+        businessName: billingBusinessName.value,
+        rut: billingRut.value,
+        activity: billingActivity.value,
+        address: billingAddress.value
+      } : undefined,
       experienceTitle: experience.value?.title || 'Servicio Turístico',
       experienceSlug: experience.value?.slug,
       bookingDate: travelDate.value,
@@ -416,18 +483,71 @@ const printVoucher = () => {
                   <label class="form-label small fw-bold text-white">Apellidos *</label>
                   <input v-model="lastname" type="text" class="form-control admin-input text-white" placeholder="Ej: Pérez González" required>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">RUT o Pasaporte * (Requerido para seguros)</label>
-                  <input v-model="rut" type="text" class="form-control admin-input text-white" placeholder="12.345.678-9 o Pasaporte" required>
+
+                <!-- Selector de Documento de Identidad (RUT vs Pasaporte) -->
+                <div class="col-12">
+                  <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                    <label class="form-label small fw-bold text-white mb-0">Documento de Identificación * (Para seguro obligatorio SERNATUR)</label>
+                    <div class="btn-group btn-group-sm">
+                      <button 
+                        type="button" 
+                        class="btn py-1 px-3" 
+                        :class="docType === 'rut' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                        @click="docType = 'rut'"
+                      >
+                        RUT Chileno
+                      </button>
+                      <button 
+                        type="button" 
+                        class="btn py-1 px-3" 
+                        :class="docType === 'passport' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                        @click="docType = 'passport'"
+                      >
+                        Pasaporte / DNI Extranjero
+                      </button>
+                    </div>
+                  </div>
+
+                  <div v-if="docType === 'rut'">
+                    <input 
+                      v-model="rut" 
+                      @input="handleRutInput"
+                      type="text" 
+                      class="form-control admin-input text-white" 
+                      :class="{ 'is-invalid': docError, 'is-valid': rut.length >= 8 && !docError }"
+                      placeholder="Ej: 12.345.678-9" 
+                      required
+                    >
+                    <div v-if="docError" class="small text-danger mt-1">
+                      <i class="bi bi-exclamation-triangle-fill me-1"></i> El RUT ingresado no es válido (verifica el dígito verificador).
+                    </div>
+                    <div v-else-if="rut.length >= 8" class="small text-accent mt-1">
+                      <i class="bi bi-check-circle-fill me-1"></i> RUT verificado conforme al algoritmo oficial Módulo 11.
+                    </div>
+                  </div>
+                  <div v-else>
+                    <input 
+                      v-model="passport" 
+                      type="text" 
+                      class="form-control admin-input text-white" 
+                      placeholder="N° de Pasaporte o Documento de Identidad del país de origen" 
+                      required
+                    >
+                    <span class="small text-white opacity-75 mt-1 d-block" style="font-size: 0.78rem;">
+                      <i class="bi bi-info-circle me-1 text-accent"></i> Turistas extranjeros no residentes pueden optar a exención de IVA acreditando tarjeta migratoria (D.L. 825).
+                    </span>
+                  </div>
                 </div>
+
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Teléfono / WhatsApp *</label>
                   <input v-model="phone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 1234 5678" required>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Correo Electrónico (Para envío del voucher) *</label>
                   <input v-model="email" type="email" class="form-control admin-input text-white" placeholder="juan@ejemplo.com" required>
                 </div>
+
                 <div v-if="companions.length > 0" class="col-12 mt-3 pt-3 border-top border-secondary border-opacity-25">
                   <label class="form-label small fw-bold text-accent mb-2">
                     <i class="bi bi-people me-1"></i> Acompañantes adicionales ({{ companions.length }} {{ companions.length === 1 ? 'persona' : 'personas' }})
@@ -438,7 +558,7 @@ const printVoucher = () => {
                         v-model="companions[idx]" 
                         type="text" 
                         class="form-control form-control-sm admin-input text-white" 
-                        :placeholder="`Acompañante ${idx + 2}: Nombre y RUT`"
+                        :placeholder="`Acompañante ${idx + 2}: Nombre y RUT/Pasaporte`"
                       >
                     </div>
                   </div>
@@ -446,15 +566,99 @@ const printVoucher = () => {
 
                 <div class="col-12">
                   <label class="form-label small fw-bold text-white">Observaciones / Requerimientos Especiales (Opcional)</label>
-                  <textarea v-model="notes" class="form-control admin-input text-white" rows="2" placeholder="Alergias, talla de calzado para crampones, nivel de experiencia previa, etc."></textarea>
+                  <textarea v-model="notes" class="form-control admin-input text-white" rows="2" placeholder="Talla de calzado para trekking, nivel de experiencia previa, preferencias particulares..."></textarea>
                 </div>
               </div>
             </div>
 
-            <!-- 2. MÉTODO DE PAGO Y PASARELAS -->
+            <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
+            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
+              </h3>
+              <p class="small text-white opacity-85 mb-4" style="font-size: 0.85rem;">
+                Requerido por los estándares de seguridad de SERNATUR y pólizas de turismo aventura para coordinar protocolos de asistencia médica y primeros auxilios en terreno agreste.
+              </p>
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Nombre de Contacto de Emergencia</label>
+                  <input v-model="emergencyName" type="text" class="form-control admin-input text-white" placeholder="Ej: María Pérez (Familiar / Pareja)">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Teléfono de Contacto de Emergencia</label>
+                  <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 8765 4321">
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-white">Declaración de Salud / Condiciones Médicas Relevantes</label>
+                  <textarea v-model="medicalConditions" class="form-control admin-input text-white" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
+            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
+                  <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
+                </h3>
+                <div class="btn-group btn-group-sm">
+                  <button 
+                    type="button" 
+                    class="btn py-1 px-3" 
+                    :class="invoiceType === 'boleta' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                    @click="invoiceType = 'boleta'"
+                  >
+                    Boleta Electrónica
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn py-1 px-3" 
+                    :class="invoiceType === 'factura' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                    @click="invoiceType = 'factura'"
+                  >
+                    Factura Electrónica
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="invoiceType === 'boleta'" class="p-3 rounded-3 small text-white opacity-90" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+                <i class="bi bi-info-circle text-accent me-1"></i> Se emitirá Boleta Electrónica a nombre del pasajero titular y será despachada a tu correo electrónico registrado.
+              </div>
+
+              <div v-else class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Razón Social de la Empresa *</label>
+                  <input v-model="billingBusinessName" type="text" class="form-control admin-input text-white" placeholder="Ej: Servicios Profesionales SpA" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">RUT de la Empresa *</label>
+                  <input 
+                    v-model="billingRut" 
+                    @input="handleBillingRutInput" 
+                    type="text" 
+                    class="form-control admin-input text-white" 
+                    :class="{ 'is-invalid': billingRutError }" 
+                    placeholder="76.123.456-7" 
+                    required
+                  >
+                  <div v-if="billingRutError" class="small text-danger mt-1">RUT de empresa inválido.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Giro Comercial *</label>
+                  <input v-model="billingActivity" type="text" class="form-control admin-input text-white" placeholder="Ej: Actividades de Consultoría" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Dirección Tributaria / Comuna *</label>
+                  <input v-model="billingAddress" type="text" class="form-control admin-input text-white" placeholder="Ej: Av. Apoquindo 1234, Las Condes" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
             <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
               <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
-                <i class="bi bi-wallet2 fs-4"></i> 2. Selecciona tu Método de Pago
+                <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
               </h3>
 
               <div class="row g-3">
@@ -464,8 +668,8 @@ const printVoucher = () => {
                     <div class="d-flex align-items-center gap-3">
                       <input type="radio" v-model="paymentMethod" value="webpay" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
                       <div>
-                        <strong class="d-block text-white fs-6 mb-1">Transbank Webpay Plus (Pago Online Inmediato)</strong>
-                        <span class="small text-white opacity-85">Tarjetas de Crédito, Débito Redcompra, Prepago y OnePay. Acreditación automática al instante.</span>
+                        <strong class="d-block text-white fs-6 mb-1">Transbank Webpay Plus (Pago Seguro Online)</strong>
+                        <span class="small text-white opacity-85">Tarjetas de Crédito, Débito Redcompra y Prepago. Confirmación instantánea con token bancario seguro.</span>
                       </div>
                     </div>
                     <div class="d-none d-sm-flex align-items-center gap-2 ps-3">
@@ -482,7 +686,7 @@ const printVoucher = () => {
                       <input type="radio" v-model="paymentMethod" value="transfer" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
                       <div>
                         <strong class="d-block text-white fs-6 mb-1">Transferencia Bancaria Directa</strong>
-                        <span class="small text-white opacity-85">Transfiere directamente a la Cuenta Corriente de la empresa. Envías el comprobante por WhatsApp para validar.</span>
+                        <span class="small text-white opacity-85">Transfiere directamente a la Cuenta Corriente oficial de la empresa. Validación ágil con comprobante.</span>
                       </div>
                     </div>
                     <div class="d-none d-sm-flex align-items-center ps-3">
@@ -492,12 +696,15 @@ const printVoucher = () => {
                 </div>
               </div>
 
-              <!-- Checkbox Términos -->
+              <!-- Checkbox Términos (Reglamento de Comercio Electrónico / SERNAC) -->
               <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
-                <div class="form-check">
-                  <input v-model="termsAccepted" class="form-check-input" type="checkbox" id="termsCheck" required>
-                  <label class="form-check-label small text-white opacity-90" for="termsCheck">
-                    Acepto los Términos y Condiciones de Wamani Expeditions, políticas de cancelación de 48 hrs y normas de seguridad en montaña.
+                <div class="form-check d-flex align-items-start gap-2">
+                  <input v-model="termsAccepted" class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="termsCheck" required style="width: 20px; height: 20px; cursor: pointer;">
+                  <label class="form-check-label small text-white opacity-95" for="termsCheck">
+                    Declaro haber leído y acepto expresamente los 
+                    <a href="#" @click.prevent="openLegalModal('terms')" class="text-accent text-decoration-underline fw-bold">Términos y Condiciones</a>, la 
+                    <a href="#" @click.prevent="openLegalModal('cancellation')" class="text-accent text-decoration-underline fw-bold">Política de Cancelación (48h)</a> y la 
+                    <a href="#" @click.prevent="openLegalModal('privacy')" class="text-accent text-decoration-underline fw-bold">Política de Privacidad</a> de Wamani Experience.
                   </label>
                 </div>
               </div>
@@ -513,7 +720,7 @@ const printVoucher = () => {
           </form>
         </div>
 
-        <!-- COLUMNA DERECHA: RESUMEN DE COMPRA -->
+        <!-- COLUMNA DERECHA: RESUMEN DE COMPRA CON TRANSPARENCIA TOTAL -->
         <div class="col-12 col-lg-4">
           <div class="checkout-summary-card p-4 rounded-4 shadow-sm text-white sticky-top" style="top: 100px; background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
             
@@ -540,18 +747,22 @@ const printVoucher = () => {
                 <span class="fw-bold text-accent">× {{ paxCount }}</span>
               </div>
               <div class="d-flex justify-content-between mb-2 small">
-                <span class="text-white opacity-75">Seguro de accidentes:</span>
+                <span class="text-white opacity-75">Impuestos e IVA (19%):</span>
                 <span class="text-success fw-bold">Incluido</span>
               </div>
-              <div class="d-flex justify-content-between mb-0 small">
-                <span class="text-white opacity-75">Impuestos e IVA:</span>
-                <span class="text-success fw-bold">Incluidos</span>
+              <div class="d-flex justify-content-between mb-2 small">
+                <span class="text-white opacity-75">Seguro de accidentes:</span>
+                <span class="text-success fw-bold">Incluido SERNATUR</span>
+              </div>
+              <div class="d-flex justify-content-between mb-0 small pt-2 border-top border-secondary border-opacity-25">
+                <span class="text-white opacity-75">Entradas Parques CONAF:</span>
+                <span class="text-white-50" style="font-size: 0.76rem;">No incluidas</span>
               </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-end mb-4 pt-2">
               <div>
-                <span class="small text-white opacity-75 d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.08em;">Monto Total</span>
+                <span class="small text-white opacity-75 d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.08em;">Monto Total Final</span>
                 <span class="fs-3 fw-bold text-accent font-monospace">{{ formatPrice(totalPrice) }}</span>
               </div>
               <div class="text-end small text-white opacity-75">
@@ -561,9 +772,9 @@ const printVoucher = () => {
 
             <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #033E3B;">
               <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg" style="font-size: 0.78rem;">
-                <li><i class="bi bi-patch-check-fill text-accent me-2"></i>Guías de montaña certificados SERNATUR</li>
-                <li><i class="bi bi-shield-lock-fill text-accent me-2"></i>Pasarela bancaria encriptada Transbank</li>
-                <li><i class="bi bi-arrow-counterclockwise text-accent me-2"></i>Cancelación gratuita hasta 48 hrs antes</li>
+                <li><i class="bi bi-patch-check-fill text-accent me-2"></i>Guías registrados SERNATUR (Reg. {{ contentStore.content.legal.sernaturRegistry }})</li>
+                <li><i class="bi bi-shield-lock-fill text-accent me-2"></i>Pasarela Transbank Webpay Plus (SSL 256-Bit)</li>
+                <li><i class="bi bi-arrow-counterclockwise text-accent me-2"></i>Cancelación y reprogramación garantizada</li>
               </ul>
             </div>
 
@@ -572,6 +783,115 @@ const printVoucher = () => {
 
       </div>
     </div>
+
+    <!-- MODAL INFORMATIVO LEGAL INTERACTIVO (TÉRMINOS / CANCELACIÓN / PRIVACIDAD) -->
+    <Teleport to="body">
+      <div v-if="showLegalModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" style="z-index: 1060;">
+        <div class="modal-card p-4 p-md-5 text-white shadow-2xl rounded-4" style="max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; background: #045D56; border: 2px solid #2DD4BF;">
+          
+          <!-- Encabezado del Modal Legal -->
+          <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom border-secondary border-opacity-25 flex-shrink-0">
+            <div>
+              <span class="badge px-2 py-1 mb-1" style="background-color: #022C2A; color: #2DD4BF; font-size: 0.72rem;">TRANSPARENCIA NORMATIVA CHILE</span>
+              <h3 class="h5 fw-bold text-white mb-0">Marco Legal & Condiciones</h3>
+            </div>
+            <button type="button" class="btn btn-outline-light btn-sm rounded-circle p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" @click="showLegalModal = false">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Selector de Pestañas -->
+          <div class="d-flex gap-2 mb-3 flex-shrink-0">
+            <button 
+              type="button" 
+              class="btn btn-sm py-1 px-3 rounded-pill" 
+              :class="legalModalTab === 'terms' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+              @click="legalModalTab = 'terms'"
+            >
+              Términos Generales
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm py-1 px-3 rounded-pill" 
+              :class="legalModalTab === 'cancellation' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+              @click="legalModalTab = 'cancellation'"
+            >
+              Políticas de Cancelación
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm py-1 px-3 rounded-pill" 
+              :class="legalModalTab === 'privacy' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+              @click="legalModalTab = 'privacy'"
+            >
+              Privacidad (Datos)
+            </button>
+          </div>
+
+          <!-- Contenido con Scroll -->
+          <div class="overflow-y-auto pe-2 small lh-lg flex-grow-1" style="color: rgba(255,255,255,0.9);">
+            <!-- Pestaña 1: Términos -->
+            <div v-if="legalModalTab === 'terms'">
+              <h4 class="h6 fw-bold text-accent mb-2">1. Identificación y Servicios</h4>
+              <p class="mb-3">
+                Los servicios son operados por <strong>{{ contentStore.content.legal.businessName }}</strong> (RUT: {{ contentStore.content.legal.rut }}), agencia y prestador de turismo aventura registrado en <strong>SERNATUR con el N° {{ contentStore.content.legal.sernaturRegistry }}</strong>.
+              </p>
+              <h4 class="h6 fw-bold text-accent mb-2">2. Normas de Seguridad y Autoridad del Guía</h4>
+              <p class="mb-3">
+                En actividades de montaña y ecoturismo, la seguridad es prioritaria. Los guías certificados por SERNATUR tienen la facultad legal de modificar o suspender el itinerario ante condiciones climáticas riesgosas o conductas que comprometan al grupo. Es obligatorio el uso de equipo de seguridad provisto.
+              </p>
+              <h4 class="h6 fw-bold text-accent mb-2">3. Seguros Incluidos</h4>
+              <p class="mb-3">
+                Cada pasajero cuenta con cobertura de la Póliza Colectiva de Accidentes Personales y Asistencia en Turismo Aventura N° {{ contentStore.content.legal.insurancePolicy }}.
+              </p>
+              <h4 class="h6 fw-bold text-accent mb-2">4. Entradas a Parques Nacionales (CONAF)</h4>
+              <p class="mb-0">
+                Las tarifas no contemplan entradas a Parques Nacionales del Estado, las cuales deben ser gestionadas individualmente en la plataforma oficial <em>pasesparques.cl</em> de CONAF.
+              </p>
+            </div>
+
+            <!-- Pestaña 2: Cancelación -->
+            <div v-else-if="legalModalTab === 'cancellation'">
+              <h4 class="h6 fw-bold text-accent mb-2">Política de Cancelación y Reembolsos (Ley 19.496 Art. 3 bis)</h4>
+              <p class="mb-2">
+                Conforme a la naturaleza de cupos reservados para fechas fijas, se aplica la siguiente escala de devoluciones:
+              </p>
+              <ul class="mb-3 ps-3">
+                <li><strong>Más de 48 horas de anticipación:</strong> 100% de devolución del valor pagado o reprogramación sin costo alguno.</li>
+                <li><strong>Entre 48 y 24 horas antes:</strong> 50% de devolución del valor total de la reserva.</li>
+                <li><strong>Menos de 24 horas o inasistencia (No-Show):</strong> Sin devolución.</li>
+              </ul>
+              <h4 class="h6 fw-bold text-accent mb-2">Clima Adverso y Fuerza Mayor (Senapred / CONAF)</h4>
+              <p class="mb-0">
+                Si la excursión se cancela por alertas meteorológicas oficiales de SENAPRED o cierre decretado por CONAF/SERNAGEOMIN, el cliente podrá optar por reprogramación sin costo, voucher abierto por 12 meses o devolución íntegra del 100% de su dinero.
+              </p>
+            </div>
+
+            <!-- Pestaña 3: Privacidad -->
+            <div v-else>
+              <h4 class="h6 fw-bold text-accent mb-2">Tratamiento Seguro de Datos (Ley N° 19.628)</h4>
+              <p class="mb-2">
+                Tus datos de identificación, contacto y ficha de salud se recopilan con el único propósito de gestionar la reserva, emitir comprobantes tributarios ante el SII, activar seguros ante SERNATUR y coordinar asistencia médica de emergencia.
+              </p>
+              <p class="mb-0">
+                WAMANI no comercializa tus datos a terceros. Los pagos con tarjeta son tokenizados directamente por Transbank Webpay Plus bajo estándares internacionales PCI-DSS sin acceso a tus claves o números sensibles.
+              </p>
+            </div>
+          </div>
+
+          <!-- Pie del Modal -->
+          <div class="pt-3 mt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-shrink-0">
+            <router-link to="/terminos-y-condiciones" target="_blank" class="small text-accent text-decoration-underline" style="font-size: 0.8rem;">
+              Ver documento completo <i class="bi bi-box-arrow-up-right ms-1"></i>
+            </router-link>
+            <button type="button" class="btn btn-accent btn-sm px-4 fw-bold text-dark" @click="showLegalModal = false">
+              Cerrar y Continuar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </Teleport>
 
     <!-- MODAL SIMULADOR REALISTA DE PASARELA TRANSBANK WEBPAY PLUS -->
     <Teleport to="body">

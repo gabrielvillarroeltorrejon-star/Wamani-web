@@ -48,7 +48,7 @@ const handleLogin = () => {
 };
 
 // Tabs State
-const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway'>('services');
+const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal'>('services');
 
 // Notification State
 const toastMessage = ref('');
@@ -667,6 +667,26 @@ const saveGatewayContent = () => {
   triggerToast('¡Configuración de Pasarela y Transferencias guardada con éxito!');
 };
 
+// Formulario de Información Legal & SERNATUR
+const legalForm = ref({
+  businessName: contentStore.content.legal.businessName,
+  rut: contentStore.content.legal.rut,
+  sernaturRegistry: contentStore.content.legal.sernaturRegistry,
+  sernaturUrl: contentStore.content.legal.sernaturUrl,
+  addressLegal: contentStore.content.legal.addressLegal,
+  city: contentStore.content.legal.city,
+  region: contentStore.content.legal.region,
+  legalRepresentative: contentStore.content.legal.legalRepresentative,
+  supportEmail: contentStore.content.legal.supportEmail,
+  emergencyPhone: contentStore.content.legal.emergencyPhone,
+  insurancePolicy: contentStore.content.legal.insurancePolicy
+});
+
+const saveLegalContent = () => {
+  contentStore.updateContent({ legal: { ...legalForm.value } });
+  triggerToast('¡Datos Legales y Registro SERNATUR guardados exitosamente!');
+};
+
 const handleRestore = () => {
   if (confirm('¿Quieres restablecer todo el contenido, experiencias y reservas a sus valores de fábrica? Perderás cualquier cambio guardado.')) {
     contentStore.restoreDefaults();
@@ -674,6 +694,7 @@ const handleRestore = () => {
     aboutForm.value = JSON.parse(JSON.stringify(contentStore.content.about));
     contactForm.value = JSON.parse(JSON.stringify(contentStore.content.contact));
     gatewayForm.value = JSON.parse(JSON.stringify(contentStore.content.gateway));
+    legalForm.value = JSON.parse(JSON.stringify(contentStore.content.legal));
     triggerToast('¡Sitio web restaurado a los valores por defecto!');
   }
 };
@@ -808,6 +829,15 @@ const handleRestore = () => {
                   @click="activeTab = 'gateway'"
                 >
                   <i class="bi bi-credit-card-2-front-fill me-2"></i>Pasarela & Ajustes
+                </button>
+              </li>
+              <li class="nav-item">
+                <button 
+                  class="nav-link py-3 fw-bold rounded-3 transition-all" 
+                  :class="{ active: activeTab === 'legal' }"
+                  @click="activeTab = 'legal'"
+                >
+                  <i class="bi bi-shield-check me-2"></i>Legal & SERNATUR
                 </button>
               </li>
             </ul>
@@ -1557,6 +1587,101 @@ const handleRestore = () => {
             </div>
           </div>
 
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 9: INFORMACIÓN LEGAL, RAZÓN SOCIAL & SERNATUR -->
+    <div v-if="activeTab === 'legal'" class="tab-pane-content">
+      <div class="admin-module-card p-4 rounded-4 shadow-sm">
+        <form @submit.prevent="saveLegalContent" class="row g-4">
+          <!-- Bloque Identificación Corporativa -->
+          <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+              <div>
+                <span class="badge bg-accent text-dark-mountain px-3 py-1 mb-2 fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
+                  Decreto 6/2021 & Ley 19.496
+                </span>
+                <h3 class="h5 fw-bold text-white mb-1">
+                  <i class="bi bi-building-check me-2 text-accent"></i>Información Corporativa & Prestador Oficial
+                </h3>
+                <p class="small text-white opacity-85 mb-0">Datos legales y tributarios mostrados en el footer, comprobantes oficiales de compra y contratos de adhesión.</p>
+              </div>
+              <button type="submit" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow-sm flex-shrink-0">
+                <i class="bi bi-save2-fill me-2"></i>Guardar Ajustes Legales
+              </button>
+            </div>
+
+            <div class="p-3 rounded-4 admin-sub-card mb-4">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Razón Social Legal de la Empresa *</label>
+                  <input v-model="legalForm.businessName" type="text" class="form-control admin-input text-white" required placeholder="Wamani Turismo y Expediciones SpA">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">RUT Comercial de la Empresa *</label>
+                  <input v-model="legalForm.rut" type="text" class="form-control admin-input text-white" required placeholder="77.890.123-4">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Representante Legal *</label>
+                  <input v-model="legalForm.legalRepresentative" type="text" class="form-control admin-input text-white" required placeholder="Nombre del Representante">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Correo Oficial de Soporte y Reclamos *</label>
+                  <input v-model="legalForm.supportEmail" type="email" class="form-control admin-input text-white" required placeholder="contacto@wamani.cl">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Domicilio Legal y Comercial *</label>
+                  <input v-model="legalForm.addressLegal" type="text" class="form-control admin-input text-white" required placeholder="Av. Bernardo O'Higgins 425">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold text-white">Ciudad / Comuna *</label>
+                  <input v-model="legalForm.city" type="text" class="form-control admin-input text-white" required placeholder="Pucón">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold text-white">Región y País *</label>
+                  <input v-model="legalForm.region" type="text" class="form-control admin-input text-white" required placeholder="Región de La Araucanía, Chile">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloque SERNATUR & Turismo Aventura -->
+          <div class="col-12">
+            <h4 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-patch-check-fill text-accent fs-5"></i>
+              Acreditación SERNATUR & Pólizas de Seguro en Montaña (Ley N° 20.423)
+            </h4>
+            <div class="p-3 rounded-4 admin-sub-card">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Número de Registro Oficial SERNATUR *</label>
+                  <input v-model="legalForm.sernaturRegistry" type="text" class="form-control admin-input text-white" required placeholder="84219">
+                  <span class="small text-white opacity-75 mt-1 d-block" style="font-size: 0.75rem;">
+                    Identificador oficial visible en el footer, página nosotros y comprobantes de reserva.
+                  </span>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">URL Oficial de Verificación Ciudadana SERNATUR</label>
+                  <input v-model="legalForm.sernaturUrl" type="url" class="form-control admin-input text-white" required placeholder="https://serviciosturisticos.sernatur.cl/">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Póliza Colectiva de Seguro de Accidentes *</label>
+                  <input v-model="legalForm.insurancePolicy" type="text" class="form-control admin-input text-white" required placeholder="Póliza de Turismo Aventura y Asistencia N° CH-884920">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-white">Teléfono de Asistencia y Emergencias 24/7 *</label>
+                  <input v-model="legalForm.emergencyPhone" type="text" class="form-control admin-input text-white" required placeholder="+56 9 8567 3376">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3">
+            <button type="submit" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow-sm">
+              <i class="bi bi-save2-fill me-2"></i>Guardar Información Legal & SERNATUR
+            </button>
+          </div>
         </form>
       </div>
     </div>

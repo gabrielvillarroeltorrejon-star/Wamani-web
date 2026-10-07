@@ -146,7 +146,11 @@ const contentStore = useContentStore();
               <img :src="contentStore.content.about.accreditations.sernatur.imageUrl" alt="SERNATUR" class="w-100 h-100 object-fit-contain" style="filter: brightness(0) invert(1); transform: scale(1.12);" />
             </div>
             <h4 class="font-sans text-uppercase tracking-wide text-white fw-bold mb-1" style="font-size: 1.05rem; letter-spacing: 0.12em; color: #FFFFFF !important;">{{ contentStore.content.about.accreditations.sernatur.text }}</h4>
-            <p class="small text-white fw-medium mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">{{ contentStore.content.about.accreditations.sernatur.subtext }}</p>
+            <p class="small text-white fw-medium mb-1" style="font-size: 0.95rem; color: #FFFFFF !important;">{{ contentStore.content.about.accreditations.sernatur.subtext }}</p>
+            <p class="small text-accent fw-bold mb-1" style="font-size: 0.85rem;">Reg. N° {{ contentStore.content.legal.sernaturRegistry }}</p>
+            <a :href="contentStore.content.legal.sernaturUrl" target="_blank" rel="noopener noreferrer" class="small text-white opacity-75 text-decoration-underline" style="font-size: 0.78rem;">
+              Verificar en SERNATUR <i class="bi bi-box-arrow-up-right ms-1"></i>
+            </a>
           </div>
           
           <div class="accreditation-card text-center">

@@ -156,6 +156,15 @@ const generateVoucherHTML = (booking) => {
             <td class="label">Código Autorización:</td>
             <td class="value" style="font-family: monospace;">${booking.authorizationCode}</td>
           </tr>` : ''}
+          <tr>
+            <td class="label">Documento Tributario (SII):</td>
+            <td class="value">${booking.invoiceType === 'factura' ? 'Factura Electrónica' : 'Boleta Electrónica'}</td>
+          </tr>
+          ${booking.emergencyContactName ? `
+          <tr>
+            <td class="label">Contacto de Emergencia:</td>
+            <td class="value">${booking.emergencyContactName} (${booking.emergencyContactPhone || 'S/N'})</td>
+          </tr>` : ''}
           ${booking.notes ? `
           <tr>
             <td class="label">Notas / Acompañantes:</td>
@@ -168,15 +177,21 @@ const generateVoucherHTML = (booking) => {
           <span class="total-amount">${formattedPrice}</span>
         </div>
 
+        <div style="background-color: #E6FFFA; border-left: 4px solid #2DD4BF; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+          <strong>Cobertura SERNATUR:</strong> Pasajero cubierto bajo póliza colectiva de seguro de accidentes personales en turismo aventura. Guías de montaña certificados.
+        </div>
+
         <div style="background: #fdfdfd; border: 1px dashed #cccccc; padding: 15px; border-radius: 8px; font-size: 12px; color: #555555; line-height: 1.5;">
-          <strong>Punto de Encuentro:</strong> Oficina Wamani, Centro de Pucón, Región de La Araucanía.<br>
-          <strong>Recomendaciones:</strong> Presentarse 15 minutos antes de la hora acordada con vestimenta acorde a la actividad y calzado de trekking.
+          <strong>Punto de Encuentro:</strong> Centro de Pucón, Región de La Araucanía.<br>
+          <strong>Recomendaciones:</strong> Presentarse 15 minutos antes con vestimenta acorde y calzado de trekking.<br>
+          <em>* Entradas a Parques Nacionales CONAF no incluidas en la tarifa (gestionar en pasesparques.cl). Ante contingencias climáticas oficiales de SENAPRED, opera reprogramación o reintegro garantizado.</em>
         </div>
       </div>
 
       <div class="footer">
-        <p style="margin: 0 0 8px;">Wamani Experience • Turismo Exclusivo en Pucón, Chile</p>
-        <p style="margin: 0;">Contacto: <a href="mailto:contacto@wamani.cl">contacto@wamani.cl</a> | WhatsApp: +56 9 8567 3376</p>
+        <p style="margin: 0 0 6px; font-weight: bold;">Wamani Turismo y Expediciones SpA • RUT: 77.890.123-4</p>
+        <p style="margin: 0 0 8px;">Registro Nacional SERNATUR N° 84219 • Pucón, Chile</p>
+        <p style="margin: 0;">Contacto: <a href="mailto:contacto@wamani.cl">contacto@wamani.cl</a> | Asistencia: +56 9 8567 3376</p>
       </div>
     </div>
   </body>

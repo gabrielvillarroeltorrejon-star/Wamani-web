@@ -1,11 +1,25 @@
 <script setup lang="ts">
-const tours = [
-  { day: '07', month: 'OCTUBRE', title: 'BASE LAS TORRES', subtitle: 'Patagonia' },
-  { day: '16', month: 'OCTUBRE', title: 'VALLE DE LA LUNA', subtitle: 'Atacama' },
-  { day: '25', month: 'OCTUBRE', title: 'GLACIAR GREY', subtitle: 'Patagonia' },
-  { day: '04', month: 'NOVIEMBRE', title: 'GÉISERES DEL TATIO', subtitle: 'Atacama' },
-  { day: '09', month: 'NOVIEMBRE', title: 'CASCADAS SALTO GRANDE', subtitle: 'Patagonia' }
-];
+import { computed } from 'vue';
+import { useContentStore } from '@/shared/stores/contentStore';
+
+const contentStore = useContentStore();
+
+const tours = computed(() => {
+  return contentStore.experiences.slice(0, 5).map((exp, index) => {
+    // Generar fecha simulada dinámica
+    const date = new Date();
+    date.setDate(date.getDate() + (index + 1) * 3);
+    const months = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+    
+    return {
+      day: String(date.getDate()).padStart(2, '0'),
+      month: months[date.getMonth()],
+      title: exp.title.toUpperCase(),
+      subtitle: exp.destinationId,
+      original: exp
+    };
+  });
+});
 </script>
 
 <template>
