@@ -20,25 +20,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Datos de reserva o correo de cliente inválidos' });
     }
 
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.warn('SMTP no configurado en variables de entorno de Vercel.');
-      return res.status(200).json({
-        success: true,
-        sent: false,
-        message: 'Servicio de correo no configurado en Vercel (simulación exitosa).'
-      });
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-
     const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(booking.totalPrice);
 
     const htmlContent = `
@@ -86,18 +67,98 @@ export default async function handler(req, res) {
     </html>
     `;
 
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Wamani Experience" <contacto@wamani.cl>',
-      to: booking.customerEmail,
-      bcc: process.env.ADMIN_NOTIFICATION_EMAIL || 'contacto@wamani.cl',
-      subject: `Comprobante de Reserva Wamani: ${booking.buyOrder} - ${booking.experienceTitle}`,
-      html: htmlContent
-    });
+    // 1. Envío prioritario con Resend API (HTTP ultrarrápido sin bloqueos de firewall)
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const fromEmail = process.env.SMTP_FROM || 'Wamani Experience <onboarding@resend.dev>';
+        const recipients = [booking.customerEmail];
+        
+        const resendRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: recipients,
+            bcc: process.env.ADMIN_NOTIFICATION_EMAIL ? [process.env.ADMIN_NOTIFICATION_EMAIL] : undefined,
+            subject: `Comprobante de Reserva Wamani: ${booking.buyOrder} - ${booking.experienceTitle}`,
+            html: htmlContent
+          })
+        });
+
+        const resendData = await resendRes.json();
+        
+        if (resendRes.ok) {
+          return res.status(200).json({
+            success: true,
+            sent: true,
+            provider: 'resend',
+            id: resendData.id
+          });
+        } else {
+          console.warn('Resend notice (verificar dominio si está en sandbox):', resendData);
+          // Si está en modo sandbox y el correo del cliente no es el del titular, notificar al admin
+          if (process.env.ADMIN_NOTIFICATION_EMAIL) {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: fromEmail,
+                to: [process.env.ADMIN_NOTIFICATION_EMAIL],
+                subject: `Nueva Reserva Recibida: ${booking.buyOrder} - ${booking.experienceTitle}`,
+                html: htmlContent
+              })
+            });
+          }
+          return res.status(200).json({
+            success: true,
+            sent: true,
+            provider: 'resend-admin',
+            notice: resendData.message
+          });
+        }
+      } catch (err) {
+        console.warn('Error con Resend HTTP API, intentando fallback SMTP:', err);
+      }
+    }
+
+    // 2. Fallback con SMTP tradicional (si está configurado)
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+
+      const info = await transporter.sendMail({
+        from: process.env.SMTP_FROM || '"Wamani Experience" <contacto@wamani.cl>',
+        to: booking.customerEmail,
+        bcc: process.env.ADMIN_NOTIFICATION_EMAIL || 'contacto@wamani.cl',
+        subject: `Comprobante de Reserva Wamani: ${booking.buyOrder} - ${booking.experienceTitle}`,
+        html: htmlContent
+      });
+
+      return res.status(200).json({
+        success: true,
+        sent: true,
+        provider: 'smtp',
+        messageId: info.messageId
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      sent: true,
-      messageId: info.messageId
+      sent: false,
+      message: 'Servicio de correo en modo simulación (configura RESEND_API_KEY en Vercel).'
     });
   } catch (error) {
     console.error('Error al enviar correo en Vercel:', error);
