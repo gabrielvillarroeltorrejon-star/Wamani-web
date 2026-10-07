@@ -22,6 +22,16 @@ const searchDate = ref('');
 const searchPax = ref(1);
 const selectedDifficulty = ref('');
 const selectedCity = ref('');
+const selectedZone = ref('all');
+
+// Macrozonas de Chile
+const macrozones = [
+  { id: 'all', label: 'Todo Chile', icon: 'bi-globe-americas' },
+  { id: 'sur', label: 'Lagos & Volcanes (Sur)', icon: 'bi-tree-fill' },
+  { id: 'norte', label: 'Norte & Atacama', icon: 'bi-sun-fill' },
+  { id: 'patagonia', label: 'Patagonia & Glaciares', icon: 'bi-snow2' },
+  { id: 'centro', label: 'Zona Central & Cordillera', icon: 'bi-compass-fill' }
+];
 
 // Modal Detalle y Reserva
 const selectedExperience = ref<Experience | null>(null);
@@ -37,6 +47,9 @@ const cities = computed(() => {
 const getCityName = (id: string) => {
   if (id === 'dest-pucon') return 'Pucón';
   if (id === 'dest-panguipulli') return 'Panguipulli';
+  if (id === 'dest-atacama') return 'San Pedro de Atacama';
+  if (id === 'dest-patagonia') return 'Torres del Paine';
+  if (id === 'dest-cajon-maipo') return 'Cajón del Maipo (Santiago)';
   return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
@@ -44,11 +57,23 @@ const featuredExperiences = computed(() => contentStore.experiences.slice(0, 9))
 
 const filteredExperiences = computed(() => {
   return contentStore.experiences.filter(exp => {
-    const matchesSearch = exp.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          exp.tags.some(t => t.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    const matchesSearch = searchQuery.value ? (
+      exp.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+      exp.tags.some(t => t.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+      (exp.summary && exp.summary.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    ) : true;
     const matchesDiff = selectedDifficulty.value ? exp.difficulty === selectedDifficulty.value : true;
     const matchesCity = selectedCity.value ? exp.destinationId === selectedCity.value : true;
-    return matchesSearch && matchesDiff && matchesCity;
+    
+    // Filtro por macrozona de Chile
+    const matchesZone = selectedZone.value === 'all' || exp.macroZone === selectedZone.value || (
+      selectedZone.value === 'sur' && ['dest-pucon', 'dest-panguipulli'].includes(exp.destinationId) ||
+      selectedZone.value === 'norte' && exp.destinationId === 'dest-atacama' ||
+      selectedZone.value === 'patagonia' && exp.destinationId === 'dest-patagonia' ||
+      selectedZone.value === 'centro' && exp.destinationId === 'dest-cajon-maipo'
+    );
+    
+    return matchesSearch && matchesDiff && matchesCity && matchesZone;
   });
 });
 
@@ -86,6 +111,7 @@ const resetFilters = () => {
   searchPax.value = 1;
   selectedCity.value = '';
   selectedDifficulty.value = '';
+  selectedZone.value = 'all';
 };
 
 // Formato y cálculos
@@ -137,6 +163,7 @@ onMounted(() => {
   if (route.query.pax) searchPax.value = Number(route.query.pax) || 1;
   if (route.query.diff) selectedDifficulty.value = route.query.diff as string;
   if (route.query.city) selectedCity.value = route.query.city as string;
+  if (route.query.zone) selectedZone.value = route.query.zone as string;
 });
 </script>
 
@@ -146,8 +173,8 @@ onMounted(() => {
     <header class="portfolio-hero position-relative d-flex align-items-center justify-content-center text-center">
       <div class="hero-overlay"></div>
       <div class="position-relative z-1 text-white px-3">
-        <h1 class="display-2 fw-bold mb-3 font-brush text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 4px 14px rgba(0,0,0,0.9);">Portafolio de Servicios</h1>
-        <p class="lead fw-medium text-white mb-0" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-size: 1.25rem;">Descubre nuestras experiencias exclusivas y reserva tu próxima aventura.</p>
+        <h1 class="display-2 fw-bold mb-3 font-brush text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 4px 14px rgba(0,0,0,0.9);">Expediciones & Ecoturismo en Chile</h1>
+        <p class="lead fw-medium text-white mb-0" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-size: 1.25rem;">Descubre nuestras expediciones guiadas de norte a sur: Atacama, Lagos & Volcanes y Patagonia Austral.</p>
       </div>
     </header>
 
@@ -173,11 +200,26 @@ onMounted(() => {
       <!-- ENCABEZADO Y BUSCADOR CENTRADO ESTILO WAMANI DE LUJO -->
       <div class="catalog-header-container text-center mb-5">
         <h2 class="display-4 font-brush text-white fw-bold mb-2" style="font-family: 'Caveat', cursive !important; text-shadow: 0 3px 10px rgba(0,0,0,0.35);">
-          Explorar Todas las Experiencias
+          Explorar Todas las Expediciones
         </h2>
         <p class="lead text-white fw-medium mb-4" style="font-size: 1.2rem; color: #FFFFFF !important; text-shadow: 0 1px 4px rgba(0,0,0,0.3);">
-          Descubre aventuras únicas en los paisajes más imponentes del sur de Chile, define tu fecha y cotiza en vivo
+          Aventuras guiadas a lo largo de Chile: explora por macrozona, define tu fecha y cotiza en vivo
         </p>
+
+        <!-- SELECTOR DE MACROZONAS DE CHILE -->
+        <div class="macrozone-filter-bar mb-4 d-flex justify-content-center flex-wrap gap-2">
+          <button 
+            v-for="zone in macrozones" 
+            :key="zone.id"
+            type="button"
+            class="btn rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm transition-all"
+            :class="selectedZone === zone.id ? 'btn-macrozone-active' : 'btn-macrozone-inactive'"
+            @click="selectedZone = zone.id"
+          >
+            <i :class="['bi', zone.icon]"></i>
+            <span>{{ zone.label }}</span>
+          </button>
+        </div>
 
         <!-- CONTENEDOR BUSCADOR EN VERDE BOSQUE #045D56 -->
         <div class="search-filter-box mx-auto p-3 p-md-4 rounded-4 shadow-lg">
@@ -276,7 +318,7 @@ onMounted(() => {
                 <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
                 <div class="card-image-overlay"></div>
                 <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
-                  <i class="bi bi-geo-alt-fill me-1"></i>{{ exp.destinationId }}
+                  <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
                 </span>
               </div>
               <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
@@ -522,6 +564,30 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+  }
+}
+
+.macrozone-filter-bar {
+  .btn-macrozone-active {
+    background-color: #2DD4BF !important;
+    color: #022927 !important;
+    border: 1px solid #2DD4BF !important;
+    box-shadow: 0 4px 14px rgba(45, 212, 191, 0.4) !important;
+    transform: translateY(-2px);
+  }
+
+  .btn-macrozone-inactive {
+    background-color: rgba(3, 62, 59, 0.85) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    backdrop-filter: blur(8px);
+    
+    &:hover {
+      background-color: #045D56 !important;
+      border-color: #2DD4BF !important;
+      color: #2DD4BF !important;
+      transform: translateY(-1px);
+    }
   }
 }
 

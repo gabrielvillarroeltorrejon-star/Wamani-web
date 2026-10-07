@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import WhatsAppButton from '@/shared/ui/WhatsAppButton.vue'
 import MountainDivider from '@/shared/ui/MountainDivider.vue'
@@ -10,6 +10,11 @@ const route = useRoute()
 const contentStore = useContentStore()
 
 const isMobileMenuOpen = ref(false)
+const isScrolled = ref(false)
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 40
+}
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -49,6 +54,9 @@ const changeLanguage = (langCode: string) => {
 };
 
 onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
+
   // Configuración global para Google Translate
   (window as any).googleTranslateElementInit = () => {
     new (window as any).google.translate.TranslateElement({
@@ -67,26 +75,51 @@ onMounted(() => {
     document.head.appendChild(script);
   }
 })
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
   <div class="app-layout">
-    <!-- Navbar Minimalista (Fija y transparente sin logo) -->
-    <header v-if="route.name !== 'admin'" class="position-absolute top-0 start-0 w-100 z-3 py-3 py-lg-4">
+    <!-- Navbar Fija Inteligente (Transparente al inicio, con fondo blur al hacer scroll) -->
+    <header 
+      v-if="route.name !== 'admin'" 
+      class="navbar-sticky-wrapper fixed-top w-100 z-3 transition-all"
+      :class="{ 'navbar-scrolled shadow-lg': isScrolled, 'navbar-transparent py-3 py-lg-4': !isScrolled }"
+    >
       <div class="container-fluid px-3 px-md-5 d-flex justify-content-between align-items-center position-relative">
         
+        <!-- Logo compacto que emerge suavemente al hacer scroll -->
+        <router-link 
+          to="/" 
+          class="navbar-scrolled-logo d-flex align-items-center gap-2 text-decoration-none"
+          :class="{ 'opacity-100': isScrolled, 'opacity-0 pointer-events-none': !isScrolled }"
+        >
+          <img src="/Logo Wamani.png" alt="Wamani Logo" height="34" class="d-inline-block" />
+          <span class="font-serif fw-bold text-white fs-6 d-none d-sm-inline" style="letter-spacing: 0.12em;">WAMANI</span>
+        </router-link>
+
         <!-- Navegación Desktop Centrada -->
-        <nav class="d-none d-lg-flex gap-5 text-uppercase font-sans fw-medium mx-auto" style="font-size: 0.85rem; letter-spacing: 0.15em;">
+        <nav class="d-none d-lg-flex gap-4 gap-xl-5 text-uppercase font-sans fw-medium mx-auto" style="font-size: 0.85rem; letter-spacing: 0.12em;">
           <router-link to="/" class="text-white text-decoration-none nav-link-custom">Inicio</router-link>
-          <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Portafolio</router-link>
+          <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Expediciones</router-link>
           <router-link :to="{ path: '/', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
           <router-link :to="{ path: '/', hash: '#destinos' }" class="text-white text-decoration-none nav-link-custom">Destinos</router-link>
           <router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white text-decoration-none nav-link-custom">Reseñas</router-link>
           <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
         </nav>
 
-        <!-- Idiomas Desktop (Alineado a la derecha) -->
-        <div class="d-none d-lg-flex align-items-center position-absolute end-0 me-4 me-lg-5">
+        <!-- Controles Desktop (CTA + Idiomas) -->
+        <div class="d-none d-lg-flex align-items-center gap-3">
+          <!-- CTA Directo de Reserva -->
+          <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase d-inline-flex align-items-center gap-2 text-decoration-none shadow-sm">
+            <span>Ver Expediciones</span>
+            <i class="bi bi-compass"></i>
+          </router-link>
+
+          <!-- Idiomas Desktop -->
           <div class="dropdown">
             <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cambiar idioma">
               <i class="fa-solid fa-globe opacity-90"></i>
@@ -104,6 +137,11 @@ onMounted(() => {
 
         <!-- Controles Mobile / Tablet (d-flex d-lg-none) -->
         <div class="d-flex d-lg-none w-100 justify-content-end align-items-center gap-3">
+          <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none" style="font-size: 0.72rem;">
+            <span>Tours</span>
+            <i class="bi bi-compass"></i>
+          </router-link>
+
           <div class="dropdown">
             <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-solid fa-globe opacity-90"></i>
@@ -149,11 +187,16 @@ onMounted(() => {
 
               <!-- Links de Navegación Móvil -->
               <nav class="d-flex flex-column gap-3 py-2">
+                <!-- CTA Móvil -->
+                <router-link to="/experiencias" class="btn btn-accent-navbar w-100 py-2 fw-bold text-uppercase mb-2 d-flex align-items-center justify-content-center gap-2 text-decoration-none shadow-sm" @click="closeMobileMenu">
+                  <i class="bi bi-compass"></i> Ver Expediciones
+                </router-link>
+
                 <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-house-door me-2 text-accent"></i>Inicio
                 </router-link>
                 <router-link to="/experiencias" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-compass me-2 text-accent"></i>Portafolio de Tours
+                  <i class="bi bi-compass me-2 text-accent"></i>Expediciones & Tours
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#servicios' }" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-stars me-2 text-accent"></i>Nuestros Servicios
@@ -319,6 +362,45 @@ main {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.navbar-sticky-wrapper {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navbar-scrolled {
+  background: rgba(3, 62, 59, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.65rem !important;
+  border-bottom: 1px solid rgba(45, 212, 191, 0.25) !important;
+}
+
+.navbar-scrolled-logo {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
+.btn-accent-navbar {
+  background-color: #2DD4BF;
+  color: #022927 !important;
+  border-radius: 999px;
+  padding: 0.45rem 1.15rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  transition: all 0.25s ease;
+  border: none;
+  box-shadow: 0 4px 15px rgba(45, 212, 191, 0.25);
+}
+
+.btn-accent-navbar:hover {
+  background-color: #5EEAD4;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(45, 212, 191, 0.4);
 }
 .nav-link-custom {
   position: relative;

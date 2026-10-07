@@ -61,6 +61,27 @@ const openLegalModal = (tab: 'terms' | 'cancellation' | 'privacy') => {
   showLegalModal.value = true;
 };
 
+// Stepper Progresivo en 2 Pasos
+const currentStep = ref<1 | 2>(1);
+
+const goToStep2 = () => {
+  if (!name.value.trim() || !lastname.value.trim() || !email.value.trim() || !phone.value.trim() || !currentDocumentNumber.value) {
+    alert('Por favor completa los campos obligatorios del pasajero titular marcados con (*) antes de continuar.');
+    return;
+  }
+  if (docType.value === 'rut' && (rut.value.length < 8 || docError.value)) {
+    alert('Por favor ingresa un RUT chileno válido antes de continuar.');
+    return;
+  }
+  currentStep.value = 2;
+  window.scrollTo({ top: 140, behavior: 'smooth' });
+};
+
+const goToStep1 = () => {
+  currentStep.value = 1;
+  window.scrollTo({ top: 140, behavior: 'smooth' });
+};
+
 // Formateo y Validación en tiempo real
 const handleRutInput = () => {
   rut.value = formatRut(rut.value);
@@ -448,6 +469,46 @@ const printVoucher = () => {
           <p class="text-white opacity-85">Estás a un solo paso de asegurar tus cupos para esta gran aventura en el sur de Chile.</p>
         </div>
 
+        <!-- STEPPER VISUAL EN 2 PASOS (CRO) -->
+        <div class="col-12 mb-2">
+          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <div class="d-flex align-items-center justify-content-center gap-3 gap-md-5">
+              <!-- Paso 1 Tab -->
+              <div 
+                class="step-badge-item d-flex align-items-center gap-2 cursor-pointer transition-all"
+                :class="{ 'text-accent': currentStep === 1, 'text-white opacity-85': currentStep !== 1 }"
+                @click="goToStep1"
+              >
+                <div 
+                  class="rounded-circle d-flex align-items-center justify-content-center fw-bold font-monospace shadow-sm"
+                  :style="currentStep === 1 ? 'width: 32px; height: 32px; background-color: #2DD4BF; color: #022927;' : 'width: 32px; height: 32px; background-color: rgba(45,212,191,0.25); color: #2DD4BF;'"
+                >
+                  <i v-if="currentStep === 2" class="bi bi-check-lg fs-5"></i>
+                  <span v-else>1</span>
+                </div>
+                <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.78rem;">1. Pasajero Titular</span>
+              </div>
+
+              <!-- Separador -->
+              <div class="step-line-divider" style="width: 50px; height: 2px; background-color: rgba(45, 212, 191, 0.4);"></div>
+
+              <!-- Paso 2 Tab -->
+              <div 
+                class="step-badge-item d-flex align-items-center gap-2 transition-all"
+                :class="{ 'text-accent': currentStep === 2, 'text-white opacity-60': currentStep !== 2 }"
+              >
+                <div 
+                  class="rounded-circle d-flex align-items-center justify-content-center fw-bold font-monospace shadow-sm"
+                  :style="currentStep === 2 ? 'width: 32px; height: 32px; background-color: #2DD4BF; color: #022927;' : 'width: 32px; height: 32px; background-color: rgba(255,255,255,0.15); color: #fff;'"
+                >
+                  <span>2</span>
+                </div>
+                <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.78rem;">2. Seguridad & Pago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- RESUMEN COMPACTO MÓVIL (d-lg-none) -->
         <div class="col-12 d-lg-none mb-2">
           <div class="p-3 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.4);">
@@ -468,8 +529,8 @@ const printVoucher = () => {
         <div class="col-12 col-lg-8">
           <form @submit.prevent="handleInitiatePayment" class="d-flex flex-column gap-4">
             
-            <!-- 1. DATOS DEL PASAJERO TITULAR -->
-            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <!-- PASO 1: DATOS DEL PASAJERO TITULAR -->
+            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
               <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
                 <i class="bi bi-person-circle fs-4"></i> 1. Datos del Pasajero Titular
               </h3>
@@ -477,11 +538,11 @@ const printVoucher = () => {
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Nombre *</label>
-                  <input v-model="name" type="text" class="form-control admin-input text-white" placeholder="Ej: Juan" required>
+                  <input v-model="name" type="text" class="form-control admin-input text-white" placeholder="Ej: Juan" required autocomplete="given-name">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Apellidos *</label>
-                  <input v-model="lastname" type="text" class="form-control admin-input text-white" placeholder="Ej: Pérez González" required>
+                  <input v-model="lastname" type="text" class="form-control admin-input text-white" placeholder="Ej: Pérez González" required autocomplete="family-name">
                 </div>
 
                 <!-- Selector de Documento de Identidad (RUT vs Pasaporte) -->
@@ -541,11 +602,11 @@ const printVoucher = () => {
 
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Teléfono / WhatsApp *</label>
-                  <input v-model="phone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 1234 5678" required>
+                  <input v-model="phone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 1234 5678" required autocomplete="tel">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Correo Electrónico (Para envío del voucher) *</label>
-                  <input v-model="email" type="email" class="form-control admin-input text-white" placeholder="juan@ejemplo.com" required>
+                  <input v-model="email" type="email" class="form-control admin-input text-white" placeholder="juan@ejemplo.com" required autocomplete="email">
                 </div>
 
                 <div v-if="companions.length > 0" class="col-12 mt-3 pt-3 border-top border-secondary border-opacity-25">
@@ -568,154 +629,178 @@ const printVoucher = () => {
                   <label class="form-label small fw-bold text-white">Observaciones / Requerimientos Especiales (Opcional)</label>
                   <textarea v-model="notes" class="form-control admin-input text-white" rows="2" placeholder="Talla de calzado para trekking, nivel de experiencia previa, preferencias particulares..."></textarea>
                 </div>
+
+                <!-- Botón de Transición a Paso 2 -->
+                <div class="col-12 mt-4 pt-3 border-top border-secondary border-opacity-25">
+                  <button type="button" class="btn btn-accent w-100 py-3 fw-bold fs-5 text-dark-mountain shadow-lg d-flex align-items-center justify-content-center gap-2" @click="goToStep2">
+                    <span>Continuar a Seguridad y Pago (Paso 2)</span>
+                    <i class="bi bi-arrow-right-circle-fill fs-5"></i>
+                  </button>
+                  <p class="small text-white opacity-75 text-center mt-2 mb-0" style="font-size: 0.78rem;">
+                    Tus cupos quedan precargados temporalmente para evitar que se agoten.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
-            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
-              <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
-                <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
-              </h3>
-              <p class="small text-white opacity-85 mb-4" style="font-size: 0.85rem;">
-                Requerido por los estándares de seguridad de SERNATUR y pólizas de turismo aventura para coordinar protocolos de asistencia médica y primeros auxilios en terreno agreste.
-              </p>
+            <!-- PASO 2: SEGURIDAD, FACTURACIÓN Y PAGO -->
+            <div v-show="currentStep === 2" class="d-flex flex-column gap-4">
               
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Nombre de Contacto de Emergencia</label>
-                  <input v-model="emergencyName" type="text" class="form-control admin-input text-white" placeholder="Ej: María Pérez (Familiar / Pareja)">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Teléfono de Contacto de Emergencia</label>
-                  <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 8765 4321">
-                </div>
-                <div class="col-12">
-                  <label class="form-label small fw-bold text-white">Declaración de Salud / Condiciones Médicas Relevantes</label>
-                  <textarea v-model="medicalConditions" class="form-control admin-input text-white" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
-                </div>
+              <!-- Botón Volver a Paso 1 -->
+              <div class="d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-2" @click="goToStep1">
+                  <i class="bi bi-arrow-left"></i> Modificar datos del pasajero
+                </button>
+                <span class="badge bg-dark text-accent border border-secondary border-opacity-25 small">Paso 2 de 2</span>
               </div>
-            </div>
 
-            <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
-            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
-              <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
-                  <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
+              <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
+                  <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
                 </h3>
-                <div class="btn-group btn-group-sm">
-                  <button 
-                    type="button" 
-                    class="btn py-1 px-3" 
-                    :class="invoiceType === 'boleta' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
-                    @click="invoiceType = 'boleta'"
-                  >
-                    Boleta Electrónica
-                  </button>
-                  <button 
-                    type="button" 
-                    class="btn py-1 px-3" 
-                    :class="invoiceType === 'factura' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
-                    @click="invoiceType = 'factura'"
-                  >
-                    Factura Electrónica
-                  </button>
+                <p class="small text-white opacity-85 mb-4" style="font-size: 0.85rem;">
+                  Requerido por los estándares de seguridad de SERNATUR y pólizas de turismo aventura para coordinar protocolos de asistencia médica y primeros auxilios en terreno agreste.
+                </p>
+                
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">Nombre de Contacto de Emergencia</label>
+                    <input v-model="emergencyName" type="text" class="form-control admin-input text-white" placeholder="Ej: María Pérez (Familiar / Pareja)">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">Teléfono de Contacto de Emergencia</label>
+                    <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 8765 4321">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small fw-bold text-white">Declaración de Salud / Condiciones Médicas Relevantes</label>
+                    <textarea v-model="medicalConditions" class="form-control admin-input text-white" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
+                  </div>
                 </div>
               </div>
 
-              <div v-if="invoiceType === 'boleta'" class="p-3 rounded-3 small text-white opacity-90" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
-                <i class="bi bi-info-circle text-accent me-1"></i> Se emitirá Boleta Electrónica a nombre del pasajero titular y será despachada a tu correo electrónico registrado.
+              <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                  <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
+                  </h3>
+                  <div class="btn-group btn-group-sm">
+                    <button 
+                      type="button" 
+                      class="btn py-1 px-3" 
+                      :class="invoiceType === 'boleta' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                      @click="invoiceType = 'boleta'"
+                    >
+                      Boleta Electrónica
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn py-1 px-3" 
+                      :class="invoiceType === 'factura' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                      @click="invoiceType = 'factura'"
+                    >
+                      Factura Electrónica
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="invoiceType === 'boleta'" class="p-3 rounded-3 small text-white opacity-90" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+                  <i class="bi bi-info-circle text-accent me-1"></i> Se emitirá Boleta Electrónica a nombre del pasajero titular y será despachada a tu correo electrónico registrado.
+                </div>
+
+                <div v-else class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">Razón Social de la Empresa *</label>
+                    <input v-model="billingBusinessName" type="text" class="form-control admin-input text-white" placeholder="Ej: Servicios Profesionales SpA" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">RUT de la Empresa *</label>
+                    <input 
+                      v-model="billingRut" 
+                      @input="handleBillingRutInput" 
+                      type="text" 
+                      class="form-control admin-input text-white" 
+                      :class="{ 'is-invalid': billingRutError }" 
+                      placeholder="76.123.456-7" 
+                      required
+                    >
+                    <div v-if="billingRutError" class="small text-danger mt-1">RUT de empresa inválido.</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">Giro Comercial *</label>
+                    <input v-model="billingActivity" type="text" class="form-control admin-input text-white" placeholder="Ej: Actividades de Consultoría" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-white">Dirección Tributaria / Comuna *</label>
+                    <input v-model="billingAddress" type="text" class="form-control admin-input text-white" placeholder="Ej: Av. Apoquindo 1234, Las Condes" required>
+                  </div>
+                </div>
               </div>
 
-              <div v-else class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Razón Social de la Empresa *</label>
-                  <input v-model="billingBusinessName" type="text" class="form-control admin-input text-white" placeholder="Ej: Servicios Profesionales SpA" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">RUT de la Empresa *</label>
-                  <input 
-                    v-model="billingRut" 
-                    @input="handleBillingRutInput" 
-                    type="text" 
-                    class="form-control admin-input text-white" 
-                    :class="{ 'is-invalid': billingRutError }" 
-                    placeholder="76.123.456-7" 
-                    required
-                  >
-                  <div v-if="billingRutError" class="small text-danger mt-1">RUT de empresa inválido.</div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Giro Comercial *</label>
-                  <input v-model="billingActivity" type="text" class="form-control admin-input text-white" placeholder="Ej: Actividades de Consultoría" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Dirección Tributaria / Comuna *</label>
-                  <input v-model="billingAddress" type="text" class="form-control admin-input text-white" placeholder="Ej: Av. Apoquindo 1234, Las Condes" required>
-                </div>
-              </div>
-            </div>
+              <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
+                  <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
+                </h3>
 
-            <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
-            <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
-              <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
-                <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
-              </h3>
-
-              <div class="row g-3">
-                <!-- Opción A: Webpay Plus Transbank -->
-                <div class="col-12">
-                  <label class="payment-method-card d-flex align-items-center justify-content-between p-3 p-md-4 rounded-4 cursor-pointer" :class="{ selected: paymentMethod === 'webpay' }">
-                    <div class="d-flex align-items-center gap-3">
-                      <input type="radio" v-model="paymentMethod" value="webpay" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
-                      <div>
-                        <strong class="d-block text-white fs-6 mb-1">Transbank Webpay Plus (Pago Seguro Online)</strong>
-                        <span class="small text-white opacity-85">Tarjetas de Crédito, Débito Redcompra y Prepago. Confirmación instantánea con token bancario seguro.</span>
+                <div class="row g-3">
+                  <!-- Opción A: Webpay Plus Transbank -->
+                  <div class="col-12">
+                    <label class="payment-method-card d-flex align-items-center justify-content-between p-3 p-md-4 rounded-4 cursor-pointer" :class="{ selected: paymentMethod === 'webpay' }">
+                      <div class="d-flex align-items-center gap-3">
+                        <input type="radio" v-model="paymentMethod" value="webpay" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
+                        <div>
+                          <strong class="d-block text-white fs-6 mb-1">Transbank Webpay Plus (Pago Seguro Online)</strong>
+                          <span class="small text-white opacity-85">Tarjetas de Crédito, Débito Redcompra y Prepago. Confirmación instantánea con token bancario seguro.</span>
+                        </div>
                       </div>
-                    </div>
-                    <div class="d-none d-sm-flex align-items-center gap-2 ps-3">
-                      <span class="badge bg-dark text-white p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Redcompra</span>
-                      <span class="badge bg-dark text-accent p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Webpay</span>
-                    </div>
-                  </label>
-                </div>
-
-                <!-- Opción B: Transferencia Bancaria Directa -->
-                <div class="col-12">
-                  <label class="payment-method-card d-flex align-items-center justify-content-between p-3 p-md-4 rounded-4 cursor-pointer" :class="{ selected: paymentMethod === 'transfer' }">
-                    <div class="d-flex align-items-center gap-3">
-                      <input type="radio" v-model="paymentMethod" value="transfer" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
-                      <div>
-                        <strong class="d-block text-white fs-6 mb-1">Transferencia Bancaria Directa</strong>
-                        <span class="small text-white opacity-85">Transfiere directamente a la Cuenta Corriente oficial de la empresa. Validación ágil con comprobante.</span>
+                      <div class="d-none d-sm-flex align-items-center gap-2 ps-3">
+                        <span class="badge bg-dark text-white p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Redcompra</span>
+                        <span class="badge bg-dark text-accent p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Webpay</span>
                       </div>
-                    </div>
-                    <div class="d-none d-sm-flex align-items-center ps-3">
-                      <i class="bi bi-bank fs-3 text-accent"></i>
-                    </div>
-                  </label>
+                    </label>
+                  </div>
+
+                  <!-- Opción B: Transferencia Bancaria Directa -->
+                  <div class="col-12">
+                    <label class="payment-method-card d-flex align-items-center justify-content-between p-3 p-md-4 rounded-4 cursor-pointer" :class="{ selected: paymentMethod === 'transfer' }">
+                      <div class="d-flex align-items-center gap-3">
+                        <input type="radio" v-model="paymentMethod" value="transfer" name="payment" class="form-check-input mt-0" style="width: 22px; height: 22px;">
+                        <div>
+                          <strong class="d-block text-white fs-6 mb-1">Transferencia Bancaria Directa</strong>
+                          <span class="small text-white opacity-85">Transfiere directamente a la Cuenta Corriente oficial de la empresa. Validación ágil con comprobante.</span>
+                        </div>
+                      </div>
+                      <div class="d-none d-sm-flex align-items-center ps-3">
+                        <i class="bi bi-bank fs-3 text-accent"></i>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Checkbox Términos (Reglamento de Comercio Electrónico / SERNAC) -->
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                  <div class="form-check d-flex align-items-start gap-2">
+                    <input v-model="termsAccepted" class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="termsCheck" required style="width: 20px; height: 20px; cursor: pointer;">
+                    <label class="form-check-label small text-white opacity-95" for="termsCheck">
+                      Declaro haber leído y acepto expresamente los 
+                      <a href="#" @click.prevent="openLegalModal('terms')" class="text-accent text-decoration-underline fw-bold">Términos y Condiciones</a>, la 
+                      <a href="#" @click.prevent="openLegalModal('cancellation')" class="text-accent text-decoration-underline fw-bold">Política de Cancelación (48h)</a> y la 
+                      <a href="#" @click.prevent="openLegalModal('privacy')" class="text-accent text-decoration-underline fw-bold">Política de Privacidad</a> de Wamani Experience.
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <!-- Checkbox Términos (Reglamento de Comercio Electrónico / SERNAC) -->
-              <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
-                <div class="form-check d-flex align-items-start gap-2">
-                  <input v-model="termsAccepted" class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="termsCheck" required style="width: 20px; height: 20px; cursor: pointer;">
-                  <label class="form-check-label small text-white opacity-95" for="termsCheck">
-                    Declaro haber leído y acepto expresamente los 
-                    <a href="#" @click.prevent="openLegalModal('terms')" class="text-accent text-decoration-underline fw-bold">Términos y Condiciones</a>, la 
-                    <a href="#" @click.prevent="openLegalModal('cancellation')" class="text-accent text-decoration-underline fw-bold">Política de Cancelación (48h)</a> y la 
-                    <a href="#" @click.prevent="openLegalModal('privacy')" class="text-accent text-decoration-underline fw-bold">Política de Privacidad</a> de Wamani Experience.
-                  </label>
-                </div>
-              </div>
+              <!-- BOTÓN DE ACCIÓN PRINCIPAL -->
+              <button type="submit" class="btn btn-accent w-100 py-3 fw-bold fs-5 text-dark-mountain shadow-lg d-flex align-items-center justify-content-center gap-2" :disabled="isProcessing">
+                <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+                <i v-else class="bi" :class="paymentMethod === 'webpay' ? 'bi-credit-card-2-front-fill' : 'bi-check-circle-fill'"></i>
+                {{ isProcessing ? 'Conectando con Transbank...' : (paymentMethod === 'webpay' ? `Pagar con Webpay Plus (${formatPrice(totalPrice)})` : `Confirmar Reserva por Transferencia (${formatPrice(totalPrice)})`) }}
+              </button>
+
             </div>
-
-            <!-- BOTÓN DE ACCIÓN PRINCIPAL -->
-            <button type="submit" class="btn btn-accent w-100 py-3 fw-bold fs-5 text-dark-mountain shadow-lg d-flex align-items-center justify-content-center gap-2" :disabled="isProcessing">
-              <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-              <i v-else class="bi" :class="paymentMethod === 'webpay' ? 'bi-credit-card-2-front-fill' : 'bi-check-circle-fill'"></i>
-              {{ isProcessing ? 'Conectando con Transbank...' : (paymentMethod === 'webpay' ? `Pagar con Webpay Plus (${formatPrice(totalPrice)})` : `Confirmar Reserva por Transferencia (${formatPrice(totalPrice)})`) }}
-            </button>
 
           </form>
         </div>

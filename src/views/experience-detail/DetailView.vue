@@ -101,6 +101,38 @@ const handleBookWhatsApp = () => {
         <!-- Contenido Principal -->
         <div class="col-lg-8">
           
+          <!-- Barra Rápida de Atributos Clave (Key Facts Grid) -->
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-4 h-100 text-center d-flex flex-column align-items-center justify-content-center shadow-sm" style="background: rgba(3, 62, 59, 0.85); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <i class="bi bi-clock-history fs-3 text-accent mb-1"></i>
+                <span class="small text-white opacity-75 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">DURACIÓN</span>
+                <strong class="text-white fs-6">{{ experience.duration?.value }} {{ experience.duration?.unit === 'hours' ? 'Horas' : 'Días' }}</strong>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-4 h-100 text-center d-flex flex-column align-items-center justify-content-center shadow-sm" style="background: rgba(3, 62, 59, 0.85); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <i class="bi bi-activity fs-3 text-accent mb-1"></i>
+                <span class="small text-white opacity-75 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">EXIGENCIA</span>
+                <strong class="text-white fs-6">{{ formatDifficulty(experience.difficulty) }}</strong>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-4 h-100 text-center d-flex flex-column align-items-center justify-content-center shadow-sm" style="background: rgba(3, 62, 59, 0.85); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <i class="bi bi-people-fill fs-3 text-accent mb-1"></i>
+                <span class="small text-white opacity-75 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">GRUPO</span>
+                <strong class="text-white fs-6">Cupos Reducidos</strong>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-4 h-100 text-center d-flex flex-column align-items-center justify-content-center shadow-sm" style="background: rgba(3, 62, 59, 0.85); border: 1px solid rgba(45, 212, 191, 0.35);">
+                <i class="bi bi-translate fs-3 text-accent mb-1"></i>
+                <span class="small text-white opacity-75 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">IDIOMAS</span>
+                <strong class="text-white fs-6">Español / Inglés</strong>
+              </div>
+            </div>
+          </div>
+
           <!-- Descripción -->
           <div class="p-4 p-md-5 rounded-4 shadow-sm text-white mb-4" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
             <h2 class="h4 fw-bold mb-4 font-brush display-6" style="font-family: 'Caveat', cursive !important; color: #2DD4BF;">Sobre esta Experiencia</h2>
@@ -150,6 +182,48 @@ const handleBookWhatsApp = () => {
             </div>
           </div>
 
+          <!-- Qué debes traer contigo / Equipamiento Sugerido -->
+          <div class="p-4 p-md-5 rounded-4 shadow-sm text-white mb-4" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <h3 class="h5 fw-bold mb-3 d-flex align-items-center gap-2 text-white">
+              <i class="bi bi-backpack4-fill text-accent fs-4"></i>
+              <span>Qué debes traer contigo (Equipamiento sugerido)</span>
+            </h3>
+            <div class="row g-3 pt-2">
+              <div class="col-md-6">
+                <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg">
+                  <li class="d-flex align-items-start gap-2 mb-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Calzado adecuado:</strong> Zapatos de trekking o con suela de buen agarre (con caña para volcanes y terreno rocoso).</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 mb-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Vestimenta por capas:</strong> Primera capa transpirable, polar intermedio y cortavientos/impermeable.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Mochila:</strong> 20 a 30 litros para llevar ración de marcha y abrigo personal.</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg">
+                  <li class="d-flex align-items-start gap-2 mb-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Protección solar:</strong> Lentes de sol con filtro UV categoría 3 o 4, bloqueador solar y gorro/jockey.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2 mb-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Hidratación:</strong> Botella reutilizable con agua (mínimo 1.5 a 2 litros por persona).</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-check2 text-accent mt-1"></i>
+                    <span><strong>Ración de marcha:</strong> Frutos secos, barras energéticas o chocolates para energía durante el trayecto.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           <!-- Galería Fotográfica de la Experiencia -->
           <div v-if="experience.gallery && experience.gallery.length > 0" class="p-4 p-md-5 rounded-4 shadow-sm text-white mb-4" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
             <h2 class="h4 fw-bold mb-4 font-brush display-6" style="font-family: 'Caveat', cursive !important; color: #2DD4BF;">Galería Fotográfica</h2>
@@ -172,6 +246,19 @@ const handleBookWhatsApp = () => {
                 Cotización en Vivo
               </span>
               <h3 class="h4 fw-bold text-white mb-4 font-brush display-6" style="font-family: 'Caveat', cursive !important;">Reserva tu Cupo</h3>
+
+              <!-- Social Proof en Vivo -->
+              <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-1 text-warning small">
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <span class="text-white fw-bold ms-1">4.9/5</span>
+                </div>
+                <span class="small text-white opacity-75" style="font-size: 0.75rem;">TripAdvisor Verificado</span>
+              </div>
 
               <!-- Controles de Fecha y Pasajeros -->
               <div class="p-3 rounded-4 mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.3);">
@@ -259,9 +346,31 @@ const handleBookWhatsApp = () => {
                 <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="handleBookWhatsApp">
                   <i class="bi bi-whatsapp fs-5"></i> Reservar vía WhatsApp / Transferencia
                 </button>
-                <p class="text-center small text-white opacity-85 mt-2 mb-0" style="font-size: 0.75rem;">
-                  <i class="bi bi-shield-check text-accent me-1"></i> Reserva segura y garantizada por Wamani
-                </p>
+              </div>
+
+              <!-- Bloque de Garantías y Confianza Oficial Wamani -->
+              <div class="mt-4 p-3 rounded-4" style="background-color: rgba(2, 44, 42, 0.85); border: 1px solid rgba(45, 212, 191, 0.3);">
+                <span class="small fw-bold text-accent text-uppercase d-flex align-items-center gap-2 mb-2" style="font-size: 0.74rem; letter-spacing: 0.08em;">
+                  <i class="bi bi-shield-check fs-6"></i> Garantías Wamani Experience
+                </span>
+                <ul class="list-unstyled mb-0 small text-white opacity-90 d-flex flex-column gap-2" style="font-size: 0.78rem;">
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-patch-check-fill text-accent mt-0.5"></i>
+                    <span><strong>Prestador Oficial SERNATUR:</strong> Registro N° {{ contentStore.content.legal.sernaturRegistry }}.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-shield-fill-check text-accent mt-0.5"></i>
+                    <span><strong>Póliza de Asistencia Incluida:</strong> Cobertura de rescate y accidentes en montaña.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-cloud-sun-fill text-accent mt-0.5"></i>
+                    <span><strong>Garantía Climática / SENAPRED:</strong> Reprogramación 100% o devolución ante alertas y cierres de parques.</span>
+                  </li>
+                  <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-lock-fill text-accent mt-0.5"></i>
+                    <span><strong>Pago Cifrado Transbank:</strong> Acepta tarjetas chilenas e internacionales con estándar PCI-DSS.</span>
+                  </li>
+                </ul>
               </div>
 
             </div>

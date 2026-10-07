@@ -65,6 +65,12 @@ onMounted(() => {
       <p class="hero-subtitle font-sans text-uppercase mt-2 slide-up delay-2">
         {{ contentStore.content.home.hero.subtitle }}
       </p>
+
+      <!-- Indicador sutil de scroll hacia el catálogo de expediciones -->
+      <a href="#destinos" class="hero-scroll-cue text-white text-decoration-none mt-4 slide-up delay-3 d-inline-flex flex-column align-items-center gap-1" aria-label="Explorar expediciones de Chile">
+        <span class="font-sans text-uppercase fw-semibold scroll-cue-label">EXPLORAR EXPEDICIONES</span>
+        <i class="bi bi-chevron-down fs-5 scroll-bounce text-accent"></i>
+      </a>
     </div>
 
     <!-- Cumbres de la Cordillera pegadas exactamente al final sin bordes negros -->
@@ -154,6 +160,37 @@ onMounted(() => {
 
 .delay-1 { animation-delay: 0.2s; }
 .delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+
+.hero-scroll-cue {
+  opacity: 0.85;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.hero-scroll-cue:hover {
+  opacity: 1;
+  transform: translateY(2px);
+}
+
+.scroll-cue-label {
+  font-size: clamp(0.65rem, 1.2vw, 0.72rem);
+  letter-spacing: 0.25em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.scroll-bounce {
+  animation: scrollBounce 2s infinite ease-in-out;
+}
+
+@keyframes scrollBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
 
 @keyframes slideUp {
   to {

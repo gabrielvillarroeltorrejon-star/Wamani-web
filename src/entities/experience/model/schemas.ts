@@ -32,6 +32,7 @@ export const ExperienceSchema = z.object({
   summary: z.string(),
   description: z.string(),
   destinationId: z.string(),
+  macroZone: z.string().optional(),
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()

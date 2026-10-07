@@ -29,6 +29,9 @@ const cities = computed(() => {
 const getCityName = (id: string) => {
   if (id === 'dest-pucon') return 'Pucón';
   if (id === 'dest-panguipulli') return 'Panguipulli';
+  if (id === 'dest-atacama') return 'San Pedro de Atacama';
+  if (id === 'dest-patagonia') return 'Torres del Paine';
+  if (id === 'dest-cajon-maipo') return 'Cajón del Maipo';
   return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
@@ -246,7 +249,7 @@ const goToWebpay = () => {
               <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
               <div class="card-image-overlay"></div>
               <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
-                <i class="bi bi-geo-alt-fill me-1"></i>{{ exp.destinationId }}
+                <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
               </span>
             </div>
             <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
@@ -270,7 +273,7 @@ const goToWebpay = () => {
       
       <div class="text-center mt-5">
         <router-link to="/experiencias" class="btn btn-outline-dark rounded-pill px-5 py-3 fw-bold text-uppercase" style="letter-spacing: 0.1em; background-color: #045D56; color: #FFFFFF; border-color: rgba(45,212,191,0.5);">
-          Ver Todo El Portafolio
+          Ver Todas las Expediciones
         </router-link>
       </div>
       
