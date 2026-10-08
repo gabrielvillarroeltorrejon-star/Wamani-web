@@ -343,28 +343,28 @@ const DEFAULT_CONTENT: SectionContent = {
     phone: '+56 9 8567 3376',
     whatsappNumber: '56985673376',
     whatsappMessage: 'Hola Wamani, me gustaría consultar por sus experiencias.',
-    email: 'contacto@wamani.cl',
+    email: 'experiencewamani@gmail.com',
     address: 'O\'Higgins 425, Pucón, Chile',
     instagramUrl: 'https://instagram.com/wamani.experience',
     tripadvisorUrl: 'https://www.tripadvisor.cl/'
   },
   legal: {
-    businessName: 'Wamani Turismo y Expediciones SpA',
-    rut: '77.890.123-4',
+    businessName: 'Wamani experience spa',
+    rut: '78.199.034-5',
     sernaturRegistry: '84219',
     sernaturUrl: 'https://serviciosturisticos.sernatur.cl/',
     addressLegal: 'Av. Bernardo O\'Higgins 425',
     city: 'Pucón',
     region: 'Región de La Araucanía, Chile',
     legalRepresentative: 'Gabriel Villarroel Torrejón',
-    supportEmail: 'contacto@wamani.cl',
+    supportEmail: 'experiencewamani@gmail.com',
     emergencyPhone: '+56 9 8567 3376',
     insurancePolicy: 'Póliza Colectiva de Accidentes Personales y Asistencia en Montaña N° CH-884920'
   },
   gateway: {
     transbank: {
       environment: 'INTEGRATION',
-      commerceCode: '597055555532',
+      commerceCode: '53104647',
       apiKey: '579B532A7440BB063079DED945F63E22AFD11A5FD53A474E83623606EA7AB382',
       isEnabled: true
     },
@@ -372,15 +372,15 @@ const DEFAULT_CONTENT: SectionContent = {
       bankName: 'Banco Santander Chile',
       accountType: 'Cuenta Corriente',
       accountNumber: '89-01234-5',
-      accountRut: '77.890.123-4',
-      accountHolder: 'Wamani SpA',
-      notificationEmail: 'pagos@wamani.cl',
-      instructions: 'Una vez realizada la transferencia, envía el comprobante vía WhatsApp o al correo pagos@wamani.cl indicando tu número de orden.',
+      accountRut: '78.199.034-5',
+      accountHolder: 'Wamani experience spa',
+      notificationEmail: 'experiencewamani@gmail.com',
+      instructions: 'Una vez realizada la transferencia, envía el comprobante vía WhatsApp o al correo experiencewamani@gmail.com indicando tu número de orden.',
       isEnabled: true
     },
     emailNotifications: {
       smtpConfigured: true,
-      adminEmail: 'reservas@wamani.cl',
+      adminEmail: 'experiencewamani@gmail.com',
       sendVoucherToCustomer: true
     }
   }

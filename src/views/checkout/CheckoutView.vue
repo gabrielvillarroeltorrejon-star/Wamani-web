@@ -425,9 +425,9 @@ const printVoucher = () => {
                 <li><strong>Banco:</strong> {{ contentStore.content.gateway.bankTransfer.bankName || 'Banco Santander Chile' }}</li>
                 <li><strong>Tipo de Cuenta:</strong> {{ contentStore.content.gateway.bankTransfer.accountType || 'Cuenta Corriente Empresa' }}</li>
                 <li><strong>Número de Cuenta:</strong> {{ contentStore.content.gateway.bankTransfer.accountNumber || '89-765432-1' }}</li>
-                <li><strong>Titular:</strong> {{ contentStore.content.gateway.bankTransfer.accountHolder || 'Wamani Turismo y Expediciones SpA' }}</li>
-                <li><strong>RUT Empresa:</strong> {{ contentStore.content.gateway.bankTransfer.accountRut || '77.892.410-K' }}</li>
-                <li><strong>Correo de Notificación:</strong> {{ contentStore.content.gateway.bankTransfer.notificationEmail || 'pagos@wamani.cl' }}</li>
+                <li><strong>Titular:</strong> {{ contentStore.content.gateway.bankTransfer.accountHolder || 'Wamani experience spa' }}</li>
+                <li><strong>RUT Empresa:</strong> {{ contentStore.content.gateway.bankTransfer.accountRut || '78.199.034-5' }}</li>
+                <li><strong>Correo de Notificación:</strong> {{ contentStore.content.gateway.bankTransfer.notificationEmail || 'experiencewamani@gmail.com' }}</li>
                 <li><strong>Asunto / Comentario:</strong> {{ completedBooking.buyOrder }} - {{ completedBooking.customerName }}</li>
               </ul>
               <p v-if="contentStore.content.gateway.bankTransfer.instructions" class="small text-white opacity-85 mt-2 mb-0 border-top border-secondary border-opacity-25 pt-2">

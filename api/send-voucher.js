@@ -58,9 +58,9 @@ export default async function handler(req, res) {
           </p>
         </div>
         <div style="background: #022C2A; color: #fff; padding: 18px; text-align: center; font-size: 11px; line-height: 1.6;">
-          <strong>Wamani Turismo y Expediciones SpA</strong> • RUT: 77.890.123-4<br>
+          <strong>Wamani experience spa</strong> • RUT: 78.199.034-5<br>
           Registro Nacional SERNATUR N° 84219 • Pucón, Chile<br>
-          Contacto: contacto@wamani.cl | Asistencia: +56 9 8567 3376
+          Contacto: experiencewamani@gmail.com | Asistencia: +56 9 8567 3376
         </div>
       </div>
     </body>
