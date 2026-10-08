@@ -114,8 +114,7 @@ const generateBuyOrder = () => {
 // Despacho de Correo Transaccional (Voucher PDF/HTML)
 const triggerVoucherEmail = async (booking: any) => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    await fetch(`${apiUrl}/api/email/send-voucher`, {
+    await fetch('/api/send-voucher', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ booking })
@@ -138,8 +137,7 @@ onMounted(async () => {
   if (tokenWs) {
     isProcessing.value = true;
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/webpay/commit`, {
+      const res = await fetch('/api/webpay-commit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token_ws: tokenWs })
@@ -213,42 +211,39 @@ const handleInitiatePayment = async () => {
 
   if (paymentMethod.value === 'webpay') {
     isProcessing.value = true;
-    const apiUrl = import.meta.env.VITE_API_URL;
     let redirectedToRealWebpay = false;
 
-    // Si hay backend configurado, iniciar transacción oficial con Transbank
-    if (apiUrl) {
-      try {
-        const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${paxCount.value}&method=webpay`;
-        const res = await fetch(`${apiUrl}/api/webpay/create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            buyOrder,
-            sessionId: `SES-${Date.now()}`,
-            amount: totalPrice.value,
-            returnUrl
-          })
-        });
-        const data = await res.json();
-        if (data.token && data.url) {
-          redirectedToRealWebpay = true;
-          // Crear y enviar formulario POST automático hacia Transbank
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = data.url;
-          const tokenInput = document.createElement('input');
-          tokenInput.type = 'hidden';
-          tokenInput.name = 'token_ws';
-          tokenInput.value = data.token;
-          form.appendChild(tokenInput);
-          document.body.appendChild(form);
-          form.submit();
-          return;
-        }
-      } catch (e) {
-        console.warn('Backend Webpay API no disponible en este momento, usando simulador interactivo.');
+    // Iniciar transacción oficial con Transbank
+    try {
+      const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${paxCount.value}&method=webpay`;
+      const res = await fetch('/api/webpay-create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyOrder,
+          sessionId: `SES-${Date.now()}`,
+          amount: totalPrice.value,
+          returnUrl
+        })
+      });
+      const data = await res.json();
+      if (data.token && data.url) {
+        redirectedToRealWebpay = true;
+        // Crear y enviar formulario POST automático hacia Transbank
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.url;
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token_ws';
+        tokenInput.value = data.token;
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+        return;
       }
+    } catch (e) {
+      console.warn('Backend Webpay API no disponible en este momento, usando simulador interactivo:', e);
     }
 
     // Fallback: abrir simulador interactivo
