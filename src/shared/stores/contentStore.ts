@@ -415,10 +415,24 @@ const DEFAULT_BOOKINGS: Booking[] = [
   }
 ];
 
+export interface DiscountCode {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed_amount';
+  value: number;
+  isActive: boolean;
+}
+
+const DEFAULT_DISCOUNT_CODES: DiscountCode[] = [
+  { id: 'disc-1', code: 'WAMANI20', type: 'percentage', value: 20, isActive: true },
+  { id: 'disc-2', code: '10LUKAS', type: 'fixed_amount', value: 10000, isActive: true }
+];
+
 export const useContentStore = defineStore('content', () => {
   const experiences = ref<Experience[]>([]);
   const content = ref<SectionContent>(DEFAULT_CONTENT);
   const bookings = ref<Booking[]>([]);
+  const discountCodes = ref<DiscountCode[]>([]);
   const isDarkMode = ref(false);
 
   // Desactivado: forzar siempre modo claro
@@ -438,6 +452,7 @@ export const useContentStore = defineStore('content', () => {
     const savedExperiences = localStorage.getItem('wamani_experiences');
     const savedContent = localStorage.getItem('wamani_content');
     const savedBookings = localStorage.getItem('wamani_bookings');
+    const savedDiscounts = localStorage.getItem('wamani_discounts');
     localStorage.removeItem('wamani_dark_mode');
 
     if (savedExperiences) {
@@ -483,6 +498,13 @@ export const useContentStore = defineStore('content', () => {
     } else {
       bookings.value = [...DEFAULT_BOOKINGS];
       localStorage.setItem('wamani_bookings', JSON.stringify(DEFAULT_BOOKINGS));
+    }
+    
+    if (savedDiscounts) {
+      discountCodes.value = JSON.parse(savedDiscounts);
+    } else {
+      discountCodes.value = [...DEFAULT_DISCOUNT_CODES];
+      localStorage.setItem('wamani_discounts', JSON.stringify(DEFAULT_DISCOUNT_CODES));
     }
 
     applyTheme();
@@ -569,6 +591,7 @@ export const useContentStore = defineStore('content', () => {
     localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
     localStorage.setItem('wamani_content', JSON.stringify(content.value));
     localStorage.setItem('wamani_bookings', JSON.stringify(bookings.value));
+    localStorage.setItem('wamani_discounts', JSON.stringify(discountCodes.value));
 
     // Si Supabase está configurado, guardar también en la nube de forma asíncrona
     if (isSupabaseConfigured && supabase) {
@@ -828,10 +851,36 @@ export const useContentStore = defineStore('content', () => {
     applyTheme();
   };
 
+  const addDiscountCode = (code: Omit<DiscountCode, 'id'>) => {
+    const newCode: DiscountCode = {
+      ...code,
+      id: `disc-${Date.now()}`
+    };
+    discountCodes.value.push(newCode);
+    persist();
+  };
+
+  const updateDiscountCode = (id: string, code: Partial<DiscountCode>) => {
+    const idx = discountCodes.value.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      discountCodes.value[idx] = { ...discountCodes.value[idx], ...code };
+      persist();
+    }
+  };
+
+  const deleteDiscountCode = (id: string) => {
+    discountCodes.value = discountCodes.value.filter(d => d.id !== id);
+    persist();
+  };
+
   return {
     experiences,
     content,
     bookings,
+    discountCodes,
+    addDiscountCode,
+    updateDiscountCode,
+    deleteDiscountCode,
     isDarkMode,
     toggleDarkMode,
     addExperience,

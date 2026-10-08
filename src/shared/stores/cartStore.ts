@@ -114,22 +114,16 @@ export const useCartStore = defineStore('cart', {
     },
     
     async applyCoupon(code: string) {
-      // TODO: Connect to Supabase to validate `discount_codes`
-      // For now, hardcode a mock for Sprint 2 testing:
-      if (code.toUpperCase() === 'WAMANI20') {
-        this.activeCoupon = {
-          code: 'WAMANI20',
-          type: 'percentage',
-          value: 20
-        };
-        return true;
-      }
+      const { useContentStore } = await import('./contentStore');
+      const contentStore = useContentStore();
       
-      if (code.toUpperCase() === '10LUKAS') {
+      const found = contentStore.discountCodes.find(d => d.code.toUpperCase() === code.toUpperCase());
+      
+      if (found && found.isActive) {
         this.activeCoupon = {
-          code: '10LUKAS',
-          type: 'fixed_amount',
-          value: 10000
+          code: found.code,
+          type: found.type as 'percentage' | 'fixed_amount',
+          value: found.value
         };
         return true;
       }

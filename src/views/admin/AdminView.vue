@@ -678,6 +678,75 @@ const saveGatewayContent = () => {
   triggerToast('¡Configuración de Pasarela y Transferencias guardada con éxito!');
 };
 
+// --- PROMOTIONS & DISCOUNT CODES ---
+const showDiscountModal = ref(false);
+const discountMode = ref<'add' | 'edit'>('add');
+const editingDiscountId = ref<string | null>(null);
+
+const discountForm = ref({
+  code: '',
+  type: 'percentage' as 'percentage' | 'fixed_amount',
+  value: 10,
+  isActive: true
+});
+
+const openAddDiscountModal = () => {
+  discountMode.value = 'add';
+  editingDiscountId.value = null;
+  discountForm.value = {
+    code: '',
+    type: 'percentage',
+    value: 10,
+    isActive: true
+  };
+  showDiscountModal.value = true;
+};
+
+const openEditDiscountModal = (discount: any) => {
+  discountMode.value = 'edit';
+  editingDiscountId.value = discount.id;
+  discountForm.value = {
+    code: discount.code,
+    type: discount.type,
+    value: discount.value,
+    isActive: discount.isActive
+  };
+  showDiscountModal.value = true;
+};
+
+const saveDiscount = () => {
+  if (discountMode.value === 'add') {
+    contentStore.addDiscountCode({
+      code: discountForm.value.code.toUpperCase(),
+      type: discountForm.value.type,
+      value: Number(discountForm.value.value),
+      isActive: discountForm.value.isActive
+    });
+    triggerToast('Código de descuento añadido exitosamente.');
+  } else if (editingDiscountId.value) {
+    contentStore.updateDiscountCode(editingDiscountId.value, {
+      code: discountForm.value.code.toUpperCase(),
+      type: discountForm.value.type,
+      value: Number(discountForm.value.value),
+      isActive: discountForm.value.isActive
+    });
+    triggerToast('Código de descuento actualizado.');
+  }
+  showDiscountModal.value = false;
+};
+
+const deleteDiscount = (id: string) => {
+  if (confirm('¿Deseas eliminar este código de descuento?')) {
+    contentStore.deleteDiscountCode(id);
+    triggerToast('Código eliminado.');
+  }
+};
+
+const toggleDiscountStatus = (id: string, currentStatus: boolean) => {
+  contentStore.updateDiscountCode(id, { isActive: !currentStatus });
+  triggerToast(currentStatus ? 'Código desactivado.' : 'Código activado.');
+};
+
 // Formulario de Información Legal & SERNATUR
 const legalForm = ref({
   businessName: contentStore.content.legal.businessName,
@@ -1420,6 +1489,78 @@ const handleRestore = () => {
         </div>
       </div>
 
+      <!-- TAB PANEL: PROMOCIONES Y DESCUENTOS -->
+      <div v-if="activeTab === 'promotions'" class="tab-pane-content">
+        <div class="admin-module-card p-4 rounded-4 shadow-sm">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+              <h3 class="h5 fw-bold mb-1 text-white">Códigos de Descuento ({{ contentStore.discountCodes.length }})</h3>
+              <p class="small text-white opacity-85 mb-0">Crea códigos promocionales para aplicar rebajas en el carrito de compras.</p>
+            </div>
+            <button class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain" @click="openAddDiscountModal">
+              <i class="bi bi-plus-lg me-2"></i>Nuevo Código
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle admin-table mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Valor</th>
+                  <th scope="col" style="width: 120px;" class="text-center">Estado</th>
+                  <th scope="col" class="text-end" style="width: 150px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="discount in contentStore.discountCodes" :key="discount.id">
+                  <td>
+                    <span class="badge bg-dark text-accent border border-secondary border-opacity-25 font-monospace fs-6 px-3 py-2">
+                      {{ discount.code }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="text-white">
+                      <i class="bi me-2 text-accent" :class="discount.type === 'percentage' ? 'bi-percent' : 'bi-currency-dollar'"></i>
+                      {{ discount.type === 'percentage' ? 'Porcentaje' : 'Monto Fijo' }}
+                    </span>
+                  </td>
+                  <td class="fw-bold text-accent fs-6">
+                    {{ discount.type === 'percentage' ? discount.value + '%' : formatPrice(discount.value) }}
+                  </td>
+                  <td class="text-center">
+                    <button 
+                      class="btn btn-sm w-100 fw-bold border-0" 
+                      :class="discount.isActive ? 'btn-outline-success text-success bg-success bg-opacity-10' : 'btn-outline-secondary text-secondary bg-secondary bg-opacity-10'"
+                      @click="toggleDiscountStatus(discount.id, discount.isActive)"
+                      :title="discount.isActive ? 'Desactivar' : 'Activar'"
+                    >
+                      <i class="bi me-1" :class="discount.isActive ? 'bi-check-circle-fill' : 'bi-dash-circle-fill'"></i>
+                      {{ discount.isActive ? 'Activo' : 'Inactivo' }}
+                    </button>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-accent me-1 px-2 py-1" @click="openEditDiscountModal(discount)" title="Editar Código">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger px-2 py-1" @click="deleteDiscount(discount.id)" title="Eliminar Código">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="contentStore.discountCodes.length === 0">
+                  <td colspan="5" class="text-center py-5 text-white opacity-75">
+                    <i class="bi bi-tags fs-2 d-block mb-2 text-accent"></i>
+                    No hay códigos de descuento creados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB PANEL 8: PASARELA DE PAGO, TRANSFERENCIAS & CIBERSEGURIDAD -->
       <div v-if="activeTab === 'gateway'" class="tab-pane-content">
         <form @submit.prevent="saveGatewayContent" class="row g-4">
@@ -2019,6 +2160,48 @@ const handleRestore = () => {
           <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3 mt-4">
             <button type="button" class="btn btn-outline-light me-2 px-4" @click="showCrmModal = false">Cancelar</button>
             <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain">Registrar Reserva</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR DESCUENTO (PROMOCIÓN) -->
+    <div v-if="showDiscountModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
+      <div class="modal-card p-4 shadow-lg overflow-y-auto text-white" style="width: 100%; max-width: 500px; max-height: 85vh; border-radius: 24px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <h3 class="h5 fw-bold text-white mb-0">
+            <i class="bi bi-ticket-perforated me-2 text-accent"></i>{{ discountMode === 'add' ? 'Nuevo Código de Descuento' : 'Editar Código' }}
+          </h3>
+          <button class="btn-close btn-close-white" @click="showDiscountModal = false"></button>
+        </div>
+
+        <form @submit.prevent="saveDiscount" class="row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white">Código (ej: VERANO20)</label>
+            <input v-model="discountForm.code" type="text" class="form-control admin-input text-white text-uppercase" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-white">Tipo de Descuento</label>
+            <select v-model="discountForm.type" class="form-select admin-input text-white" required>
+              <option value="percentage">Porcentaje (%)</option>
+              <option value="fixed_amount">Monto Fijo ($)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-white">Valor</label>
+            <input v-model="discountForm.value" type="number" class="form-control admin-input text-white" required min="1">
+          </div>
+          <div class="col-12 mt-3">
+            <div class="form-check form-switch">
+              <input v-model="discountForm.isActive" class="form-check-input" type="checkbox" id="discountStatusSwitch">
+              <label class="form-check-label text-white ms-2" for="discountStatusSwitch">
+                Código Activo (puede usarse en el carrito)
+              </label>
+            </div>
+          </div>
+          <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3 mt-4">
+            <button type="button" class="btn btn-outline-light me-2 px-4" @click="showDiscountModal = false">Cancelar</button>
+            <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain">Guardar Código</button>
           </div>
         </form>
       </div>

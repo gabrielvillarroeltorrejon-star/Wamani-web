@@ -2,12 +2,14 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
+import { useCartStore } from '@/shared/stores/cartStore';
 import WCard from '@/shared/ui/WCard.vue';
 import WButton from '@/shared/ui/WButton.vue';
 import type { Experience } from '@/entities/experience/model/schemas';
 
 const router = useRouter();
 const contentStore = useContentStore();
+const cartStore = useCartStore();
 
 // Fecha de hoy mínima
 const todayDate = new Date().toISOString().split('T')[0];
@@ -126,6 +128,23 @@ const goToWhatsApp = (expTitle: string) => {
   );
   const wa = contentStore.content.contact.whatsappNumber || '56985673376';
   window.open(`https://wa.me/${wa}?text=${msg}`, '_blank');
+};
+
+const addToCartAction = () => {
+  if (!selectedExperience.value) return;
+  cartStore.addToCart({
+    tourId: selectedExperience.value.id,
+    tourTitle: selectedExperience.value.title,
+    scheduleId: `sched-${modalDate.value}`,
+    scheduleDate: modalDate.value,
+    scheduleTime: selectedExperience.value.schedule || '08:00',
+    tickets: [{
+      type: 'adult',
+      quantity: modalPax.value,
+      unitPrice: selectedExperience.value.pricing.basePrice
+    }]
+  });
+  closeModal();
 };
 
 const goToWebpay = () => {
@@ -467,6 +486,9 @@ const goToWebpay = () => {
 
               <!-- ACCIONES DE COMPRA -->
               <div class="d-flex flex-column gap-3">
+                <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
+                  <i class="bi bi-cart-plus-fill fs-5"></i> Agregar al Carrito
+                </button>
                 <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
                   <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
                 </button>
