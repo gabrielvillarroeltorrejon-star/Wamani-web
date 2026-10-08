@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { useContentStore } from '@/shared/stores/contentStore';
-import SectionDivider from '@/shared/ui/SectionDivider.vue';
 
 const contentStore = useContentStore();
 </script>
 
 <template>
-  <div class="about-view text-dark">
+  <div class="about-view">
     <!-- Hero Section -->
     <section class="about-hero position-relative d-flex align-items-center justify-content-center text-center" :style="{ backgroundImage: 'url(' + (contentStore.content.about.heroImage || '/961c6329-cc6b-4e0d-bff5-df7f6ce1f26b.jpg') + ')' }">
       <div class="overlay position-absolute top-0 start-0 w-100 h-100"></div>
@@ -38,8 +37,6 @@ const contentStore = useContentStore();
         </div>
       </div>
     </section>
-
-    <SectionDivider dark />
 
     <!-- Misión y Visión (Contenedores Cuadrados y Centrados) -->
     <section class="mission-vision-section py-5">
@@ -88,8 +85,6 @@ const contentStore = useContentStore();
       </div>
     </section>
 
-    <SectionDivider dark />
-
     <!-- Equipo & Advisors (Asesores) -->
     <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" class="advisors-section py-5 my-0">
       <div class="container py-4">
@@ -121,8 +116,6 @@ const contentStore = useContentStore();
         </div>
       </div>
     </section>
-
-    <SectionDivider v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" dark />
 
     <!-- Calidad y Acreditaciones -->
     <section class="quality-section py-5 my-0">

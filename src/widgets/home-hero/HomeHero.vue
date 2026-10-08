@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useContentStore } from '@/shared/stores/contentStore';
-import SectionDivider from '@/shared/ui/SectionDivider.vue';
 
 const contentStore = useContentStore();
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -69,7 +68,7 @@ onMounted(() => {
 
       <!-- CTA Button Principal con interacciones Kowalski -->
       <div class="mt-4 slide-up delay-3 d-flex flex-column align-items-center gap-3">
-        <a href="#destinos" class="btn btn-cyan-gradient px-5 py-3 fs-6 font-sans text-uppercase rounded-pill text-decoration-none shadow-sm fw-bold">
+        <a href="#destinos" class="btn btn-hero-glass px-5 py-3 fs-6 font-sans text-uppercase rounded-pill text-decoration-none shadow-sm fw-bold">
           Ver Expediciones
         </a>
         
@@ -80,10 +79,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Cumbres de la Cordillera pegadas exactamente al final sin bordes negros -->
-    <div class="hero-divider-overlay position-absolute start-0 w-100 z-3 m-0 p-0">
-      <SectionDivider />
-    </div>
   </section>
 </template>
 
@@ -223,6 +218,25 @@ onMounted(() => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.btn-hero-glass {
+  background: rgba(4, 93, 86, 0.45) !important; /* Turquesa oscuro transparente */
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  
+  &:hover {
+    background: rgba(4, 93, 86, 0.75) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:active {
+    transform: scale(0.97) translateY(0);
   }
 }
 </style>

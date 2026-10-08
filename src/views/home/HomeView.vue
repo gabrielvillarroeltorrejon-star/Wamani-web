@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router';
 import HomeHero from '@/widgets/home-hero/HomeHero.vue';
 import HomeServices from '@/widgets/home-services/HomeServices.vue';
 import HomeDestinations from '@/widgets/home-destinations/HomeDestinations.vue';
+import HomePackages from '@/widgets/home-packages/HomePackages.vue';
 import ReviewsCarousel from '@/widgets/reviews/ReviewsCarousel.vue';
-import SectionDivider from '@/shared/ui/SectionDivider.vue';
 import W3DCoverflowSlider from '@/shared/ui/W3DCoverflowSlider.vue';
 import { useContentStore } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
@@ -74,6 +74,24 @@ const formatDifficulty = (diff: string) => {
 
 const goToWhatsApp = (expTitle: string) => {
   const formattedTotal = formatCurrency(totalModalPriceCLP.value, 'CLP');
+
+  // Registrar automáticamente prospecto de venta en el CRM
+  contentStore.addBooking({
+    customerName: 'Prospecto WhatsApp',
+    customerEmail: 'contacto@whatsapp.com',
+    customerPhone: '+' + (contentStore.content.contact.whatsappNumber || '56985673376'),
+    experienceTitle: expTitle,
+    bookingDate: modalDate.value,
+    pax: modalPax.value,
+    totalPrice: totalModalPriceCLP.value,
+    status: 'pending',
+    source: 'whatsapp',
+    paymentMethod: 'whatsapp',
+    buyOrder: `WAP-${Date.now().toString().slice(-6)}`,
+    notes: `Lead iniciado desde portada para ${modalPax.value} pax (${modalDate.value})`,
+    passengers: []
+  });
+
   const msg = encodeURIComponent(
     `Hola Wamani Experience, deseo reservar el tour: *${expTitle}*\n` +
     `📅 Fecha de excursión: *${modalDate.value}*\n` +
@@ -129,7 +147,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-light-cream">
+  <div>
     <!-- 1. Hero Principal con cumbres sobrepuestas en el borde inferior del video -->
     <HomeHero />
 
@@ -143,21 +161,17 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- LÍNEA SEPARADORA -->
-    <SectionDivider />
-
     <!-- 3. Nuestros Servicios -->
     <HomeServices />
     
-    <SectionDivider />
-
     <!-- 4. Buscador y Destinos -->
     <HomeDestinations />
-    
-    <SectionDivider />
+
+    <!-- 4.5. Paquetes Promocionales -->
+    <HomePackages />
 
     <!-- 5. Opiniones y Social Proof -->
-    <section id="opiniones" class="py-5 bg-light-cream">
+    <section id="opiniones" class="py-5">
       <div class="container py-5" style="max-width: 1100px;">
         
         <div class="text-center mb-5">
@@ -383,9 +397,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.bg-light-cream {
-  background-color: var(--bs-light);
-}
+
 .max-w-700 {
   max-width: 700px;
 }

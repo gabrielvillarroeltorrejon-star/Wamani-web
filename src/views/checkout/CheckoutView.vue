@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useContentStore } from '@/shared/stores/contentStore';
+import { useContentStore, type Passenger } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
+import { formatRut, validateRut } from '@/shared/lib/rutUtils';
 
 const route = useRoute();
 const contentStore = useContentStore();
@@ -18,7 +19,29 @@ const experience = computed(() => {
   return contentStore.experiences.find(e => e.slug === expSlug.value) || contentStore.experiences[0];
 });
 
+// Número efectivo de pasajeros según carrito o compra directa
+const effectivePaxCount = computed(() => {
+  if (cartStore.items.length > 0) {
+    return Math.max(1, cartStore.totalItems);
+  }
+  return paxCount.value;
+});
+
+// Título de la experiencia o paquete adquirido
+const resolvedExperienceTitle = computed(() => {
+  if (cartStore.items.length > 0) {
+    if (cartStore.items.length === 1) {
+      return cartStore.items[0].tourTitle;
+    }
+    return `Itinerario Wamani Multitour (${cartStore.items.length} tours)`;
+  }
+  return experience.value?.title || 'Expedición Wamani';
+});
+
 const totalPrice = computed(() => {
+  if (cartStore.items.length > 0) {
+    return cartStore.totalToPay;
+  }
   return (experience.value?.pricing.basePrice || 50000) * paxCount.value;
 });
 
@@ -26,11 +49,10 @@ const formatPrice = (val: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val);
 };
 
-import { formatRut, validateRut } from '@/shared/lib/rutUtils';
-
-// Formulario de Pasajero Principal
+// Formulario de Pasajero Principal (Titular)
 const name = ref('');
 const lastname = ref('');
+const titularAge = ref<number | ''>('');
 const docType = ref<'rut' | 'passport'>('rut');
 const rut = ref('');
 const passport = ref('');
@@ -39,6 +61,50 @@ const docError = ref(false);
 const email = ref('');
 const phone = ref('');
 const notes = ref('');
+
+// Acompañantes adicionales (cuando pax > 1)
+export interface CompanionPassenger {
+  fullName: string;
+  documentType: 'rut' | 'passport';
+  documentNumber: string;
+  age?: number | '';
+  phone?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  medicalConditions?: string;
+}
+
+const accompanyingPassengers = ref<CompanionPassenger[]>([]);
+
+const syncAccompanyingPassengers = () => {
+  const needed = Math.max(0, effectivePaxCount.value - 1);
+  while (accompanyingPassengers.value.length < needed) {
+    accompanyingPassengers.value.push({
+      fullName: '',
+      documentType: 'rut',
+      documentNumber: '',
+      age: '',
+      phone: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      medicalConditions: ''
+    });
+  }
+  if (accompanyingPassengers.value.length > needed) {
+    accompanyingPassengers.value.splice(needed);
+  }
+};
+
+watch(effectivePaxCount, () => {
+  syncAccompanyingPassengers();
+}, { immediate: true });
+
+const handleCompanionRutInput = (index: number) => {
+  const comp = accompanyingPassengers.value[index];
+  if (comp && comp.documentType === 'rut') {
+    comp.documentNumber = formatRut(comp.documentNumber);
+  }
+};
 
 // Ficha de Seguridad en Montaña & Contacto de Emergencia (SERNATUR)
 const emergencyName = ref('');
@@ -66,15 +132,93 @@ const openLegalModal = (tab: 'terms' | 'cancellation' | 'privacy') => {
 // Stepper Progresivo en 2 Pasos
 const currentStep = ref<1 | 2>(1);
 
+// Estado de Pasarela y Proceso de Pago
+const paymentMethod = ref<'webpay' | 'transfer'>(initialMethod.value === 'transfer' ? 'transfer' : 'webpay');
+const isProcessing = ref(false);
+const completedBooking = ref<any | null>(null);
+const purchaseCompleted = ref(false);
+
+// Simulador Transbank Webpay Plus
+const showWebpaySimulation = ref(false);
+const webpayCardNumber = ref('•••• •••• •••• 4242');
+const webpayExp = ref('12/28');
+const webpayCvv = ref('789');
+const webpayBank = ref('Banco de Chile');
+
+const currentDocumentNumber = computed(() => {
+  return docType.value === 'rut' ? rut.value.trim() : passport.value.trim();
+});
+
+const fullNotes = computed(() => {
+  const parts: string[] = [];
+  if (notes.value.trim()) parts.push(`Observaciones: ${notes.value.trim()}`);
+  if (emergencyName.value.trim() || emergencyPhone.value.trim()) {
+    parts.push(`Emergencia: ${emergencyName.value.trim()} (${emergencyPhone.value.trim()})`);
+  }
+  if (medicalConditions.value.trim()) {
+    parts.push(`Salud: ${medicalConditions.value.trim()}`);
+  }
+  return parts.join(' | ');
+});
+
+// Constructor de Nómina Oficial de Pasajeros
+const buildPassengersManifest = (): Passenger[] => {
+  const manifest: Passenger[] = [
+    {
+      fullName: `${name.value.trim()} ${lastname.value.trim()}`,
+      documentType: docType.value,
+      documentNumber: currentDocumentNumber.value,
+      age: titularAge.value ? Number(titularAge.value) : undefined,
+      phone: phone.value.trim(),
+      emergencyContactName: emergencyName.value.trim() || undefined,
+      emergencyContactPhone: emergencyPhone.value.trim() || undefined,
+      medicalConditions: medicalConditions.value.trim() || undefined
+    }
+  ];
+
+  accompanyingPassengers.value.forEach((p, idx) => {
+    manifest.push({
+      fullName: p.fullName.trim() || `Acompañante ${idx + 2}`,
+      documentType: p.documentType,
+      documentNumber: p.documentNumber.trim() || 'N/A',
+      age: p.age ? Number(p.age) : undefined,
+      phone: p.phone?.trim() || phone.value.trim(),
+      emergencyContactName: p.emergencyContactName?.trim() || emergencyName.value.trim() || undefined,
+      emergencyContactPhone: p.emergencyContactPhone?.trim() || emergencyPhone.value.trim() || undefined,
+      medicalConditions: p.medicalConditions?.trim() || undefined
+    });
+  });
+
+  return manifest;
+};
+
 const goToStep2 = () => {
   if (!name.value.trim() || !lastname.value.trim() || !email.value.trim() || !phone.value.trim() || !currentDocumentNumber.value) {
     alert('Por favor completa los campos obligatorios del pasajero titular marcados con (*) antes de continuar.');
     return;
   }
   if (docType.value === 'rut' && (rut.value.length < 8 || docError.value)) {
-    alert('Por favor ingresa un RUT chileno válido antes de continuar.');
+    alert('Por favor ingresa un RUT chileno válido para el pasajero titular antes de continuar.');
     return;
   }
+
+  // Validación de la nómina de acompañantes
+  for (let i = 0; i < accompanyingPassengers.value.length; i++) {
+    const comp = accompanyingPassengers.value[i];
+    if (!comp.fullName.trim()) {
+      alert(`Por favor ingresa el nombre completo del Pasajero #${i + 2}.`);
+      return;
+    }
+    if (!comp.documentNumber.trim()) {
+      alert(`Por favor ingresa el RUT o Pasaporte del Pasajero #${i + 2}.`);
+      return;
+    }
+    if (comp.documentType === 'rut' && !validateRut(comp.documentNumber)) {
+      alert(`El RUT ingresado para el Pasajero #${i + 2} no es válido.`);
+      return;
+    }
+  }
+
   currentStep.value = 2;
   window.scrollTo({ top: 140, behavior: 'smooth' });
 };
@@ -102,10 +246,6 @@ const handleBillingRutInput = () => {
     billingRutError.value = false;
   }
 };
-
-const currentDocumentNumber = computed(() => {
-  return docType.value === 'rut' ? rut.value.trim() : passport.value.trim();
-});
 
 // Generador de Código de Orden
 const generateBuyOrder = () => {
@@ -151,19 +291,20 @@ onMounted(async () => {
           customerEmail: email.value || 'cliente@wamani.cl',
           customerPhone: phone.value || '+56985673376',
           customerRut: rut.value || 'N/A',
-          experienceTitle: 'Itinerario Wamani Multitour',
-          experienceSlug: 'cart',
+          experienceTitle: resolvedExperienceTitle.value,
+          experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
           bookingDate: travelDate.value,
-          pax: cartStore.totalItems,
-          totalPrice: data.amount || cartStore.totalToPay,
-            cartItems: JSON.parse(JSON.stringify(cartStore.items)),
+          pax: effectivePaxCount.value,
+          totalPrice: data.amount || (cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value),
+          cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
           status: 'confirmed',
           source: 'automatic',
           paymentMethod: 'webpay',
           buyOrder: data.buyOrder || generateBuyOrder(),
           authorizationCode: data.authorizationCode,
           cardLast4: data.cardDetail?.card_number || '****',
-          notes: fullNotes.value
+          notes: fullNotes.value,
+          passengers: buildPassengersManifest()
         });
         completedBooking.value = newBooking;
         cartStore.clearCart();
@@ -219,21 +360,20 @@ const handleInitiatePayment = async () => {
 
     // Iniciar transacción oficial con Transbank
     try {
-      const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${paxCount.value}&method=webpay`;
+      const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${effectivePaxCount.value}&method=webpay`;
       const res = await fetch('/api/webpay-create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           buyOrder,
           sessionId: `SES-${Date.now()}`,
-          amount: cartStore.totalToPay,
+          amount: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
           returnUrl
         })
       });
       const data = await res.json();
       if (data.token && data.url) {
         redirectedToRealWebpay = true;
-        // Crear y enviar formulario POST automático hacia Transbank
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = data.url;
@@ -250,7 +390,6 @@ const handleInitiatePayment = async () => {
       console.warn('Backend Webpay API no disponible en este momento, usando simulador interactivo:', e);
     }
 
-    // Fallback: abrir simulador interactivo
     if (!redirectedToRealWebpay) {
       setTimeout(() => {
         isProcessing.value = false;
@@ -275,22 +414,22 @@ const handleInitiatePayment = async () => {
         activity: billingActivity.value,
         address: billingAddress.value
       } : undefined,
-      experienceTitle: 'Itinerario Wamani Multitour',
-      experienceSlug: 'cart',
+      experienceTitle: resolvedExperienceTitle.value,
+      experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
       bookingDate: travelDate.value,
-      pax: cartStore.totalItems,
-      totalPrice: cartStore.totalToPay,
-        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
-        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
+      pax: effectivePaxCount.value,
+      totalPrice: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
+      cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
       status: 'pending',
       source: 'automatic',
       paymentMethod: 'transfer',
       buyOrder,
-      notes: fullNotes.value
+      notes: fullNotes.value,
+      passengers: buildPassengersManifest()
     });
 
     completedBooking.value = newBooking;
-        cartStore.clearCart();
+    cartStore.clearCart();
     purchaseCompleted.value = true;
     triggerVoucherEmail(newBooking);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -320,24 +459,24 @@ const confirmWebpayPayment = (success: boolean) => {
         activity: billingActivity.value,
         address: billingAddress.value
       } : undefined,
-      experienceTitle: 'Itinerario Wamani Multitour',
-      experienceSlug: 'cart',
+      experienceTitle: resolvedExperienceTitle.value,
+      experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
       bookingDate: travelDate.value,
-      pax: cartStore.totalItems,
-      totalPrice: cartStore.totalToPay,
-        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
-        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
+      pax: effectivePaxCount.value,
+      totalPrice: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
+      cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
       status: 'confirmed',
       source: 'automatic',
       paymentMethod: 'webpay',
       buyOrder,
       authorizationCode: authCode,
       cardLast4: webpayCardNumber.value.replace(/\s/g, '').slice(-4),
-      notes: fullNotes.value
+      notes: fullNotes.value,
+      passengers: buildPassengersManifest()
     });
 
     completedBooking.value = newBooking;
-        cartStore.clearCart();
+    cartStore.clearCart();
     purchaseCompleted.value = true;
     triggerVoucherEmail(newBooking);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -423,6 +562,47 @@ const printVoucher = () => {
                       <strong class="text-accent font-monospace">{{ completedBooking.authorizationCode }}</strong>
                       <span class="small text-white opacity-75 ms-3">Tarjeta: **** {{ completedBooking.cardLast4 }}</span>
                     </div>
+
+                    <!-- Nómina Completa de Pasajeros Registrados en el Voucher -->
+                    <div v-if="completedBooking.passengers && completedBooking.passengers.length > 0" class="col-12 border-top border-secondary border-opacity-25 pt-3 mt-2">
+                      <span class="small text-accent fw-bold text-uppercase d-block mb-2 tracking-wider">
+                        <i class="bi bi-people-fill me-1"></i> Nómina Oficial de Pasajeros Registrada ({{ completedBooking.passengers.length }} PAX):
+                      </span>
+                      <div class="table-responsive rounded-3 overflow-hidden border border-secondary border-opacity-25">
+                        <table class="table table-sm table-dark table-hover mb-0 small align-middle">
+                          <thead style="background: rgba(4, 93, 86, 0.9);">
+                            <tr>
+                              <th scope="col" style="width: 30px;" class="text-center">#</th>
+                              <th scope="col">Nombre Completo</th>
+                              <th scope="col">RUT / Pasaporte</th>
+                              <th scope="col">Edad</th>
+                              <th scope="col">Teléfono</th>
+                              <th scope="col">Ficha Médica</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(p, i) in completedBooking.passengers" :key="i">
+                              <td class="text-accent fw-bold text-center">{{ i + 1 }}</td>
+                              <td class="text-white fw-semibold">
+                                {{ p.fullName }}
+                                <span v-if="i === 0" class="badge bg-primary text-white ms-1" style="font-size: 0.65rem;">Titular</span>
+                              </td>
+                              <td>
+                                <span class="badge bg-dark text-white font-monospace border border-secondary border-opacity-25">
+                                  {{ p.documentNumber || p.documentId || completedBooking.customerRut || 'N/A' }}
+                                </span>
+                              </td>
+                              <td>{{ p.age ? `${p.age} años` : '-' }}</td>
+                              <td>{{ p.phone || completedBooking.customerPhone }}</td>
+                              <td>
+                                <span v-if="p.medicalConditions" class="badge bg-warning text-dark text-wrap">{{ p.medicalConditions }}</span>
+                                <span v-else class="text-success small"><i class="bi bi-check-circle me-1"></i>Ninguna</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -476,7 +656,7 @@ const printVoucher = () => {
 
         <!-- STEPPER VISUAL EN 2 PASOS (CRO) -->
         <div class="col-12 mb-2">
-          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm text-dark bg-white" >
+          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
             <div class="d-flex align-items-center justify-content-center gap-3 gap-md-5">
               <!-- Paso 1 Tab -->
               <div 
@@ -491,7 +671,7 @@ const printVoucher = () => {
                   <i v-if="currentStep === 2" class="bi bi-check-lg fs-5"></i>
                   <span v-else>1</span>
                 </div>
-                <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.78rem;">1. Pasajero Titular</span>
+                <span class="fw-bold small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.78rem;">1. Nómina de Pasajeros</span>
               </div>
 
               <!-- Separador -->
@@ -516,13 +696,13 @@ const printVoucher = () => {
 
         <!-- RESUMEN COMPACTO MÓVIL (d-lg-none) -->
         <div class="col-12 d-lg-none mb-2">
-          <div class="p-3 rounded-4 shadow-sm text-white" >
+          <div class="p-3 rounded-4 shadow-sm text-white" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
             <div class="d-flex align-items-center gap-3">
               <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(45, 212, 191, 0.3);">
               <div class="flex-grow-1">
                 <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ experience?.title }}</h4>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
-                  <span class="small text-white opacity-85" style="font-size: 0.78rem;"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} • {{ paxCount }} {{ paxCount === 1 ? 'viajero' : 'viajeros' }}</span>
+                  <span class="small text-white opacity-85" style="font-size: 0.78rem;"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} • {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'viajero' : 'viajeros' }}</span>
                   <strong class="text-accent fs-6 font-monospace">{{ formatPrice(cartStore.totalToPay) }}</strong>
                 </div>
               </div>
@@ -534,11 +714,16 @@ const printVoucher = () => {
         <div class="col-12 col-lg-8">
           <form @submit.prevent="handleInitiatePayment" class="d-flex flex-column gap-4">
             
-            <!-- PASO 1: DATOS DEL PASAJERO TITULAR -->
-            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
-              <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
-                <i class="bi bi-person-circle fs-4"></i> 1. Datos del Pasajero Titular
-              </h3>
+            <!-- PASO 1: DATOS DE LOS PASAJEROS -->
+            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
+                  <i class="bi bi-person-circle fs-4"></i> 1. Pasajero Titular (Responsable de la Reserva)
+                </h3>
+                <span class="badge bg-dark text-accent border border-accent border-opacity-25 px-3 py-2 font-monospace">
+                  <i class="bi bi-people-fill me-1"></i> Total: {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'PAX' : 'PAX' }}
+                </span>
+              </div>
               
               <div class="row g-3">
                 <div class="col-md-6">
@@ -553,7 +738,7 @@ const printVoucher = () => {
                 <!-- Selector de Documento de Identidad (RUT vs Pasaporte) -->
                 <div class="col-12">
                   <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                    <label class="form-label small fw-bold text-white mb-0">Documento de Identificación * (Para seguro obligatorio SERNATUR)</label>
+                    <label class="form-label small fw-bold text-white mb-0">Documento de Identificación * (Seguro SERNATUR)</label>
                     <div class="btn-group btn-group-sm">
                       <button 
                         type="button" 
@@ -605,27 +790,131 @@ const printVoucher = () => {
                   </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold text-white">Edad *</label>
+                  <input v-model.number="titularAge" type="number" min="1" max="110" class="form-control admin-input text-dark fw-medium" placeholder="Ej: 32">
+                </div>
+                <div class="col-md-4">
                   <label class="form-label small fw-bold text-white">Teléfono / WhatsApp *</label>
                   <input v-model="phone" type="tel" class="form-control admin-input text-dark fw-medium" placeholder="+56 9 1234 5678" required autocomplete="tel">
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Correo Electrónico (Para envío del voucher) *</label>
+                <div class="col-md-4">
+                  <label class="form-label small fw-bold text-white">Correo Electrónico (Voucher) *</label>
                   <input v-model="email" type="email" class="form-control admin-input text-dark fw-medium" placeholder="juan@ejemplo.com" required autocomplete="email">
                 </div>
 
-                <div v-if="companions.length > 0" class="col-12 mt-3 pt-3 border-top border-secondary border-opacity-25">
-                  <label class="form-label small fw-bold text-accent mb-2">
-                    <i class="bi bi-people me-1"></i> Acompañantes adicionales ({{ companions.length }} {{ companions.length === 1 ? 'persona' : 'personas' }})
-                  </label>
-                  <div class="row g-2">
-                    <div v-for="(_, idx) in companions" :key="idx" class="col-md-6">
-                      <input 
-                        v-model="companions[idx]" 
-                        type="text" 
-                        class="form-control form-control-sm admin-input text-dark fw-medium" 
-                        :placeholder="`Acompañante ${idx + 2}: Nombre y RUT/Pasaporte`"
-                      >
+                <!-- NÓMINA DE PASAJEROS ACOMPAÑANTES (SI PAX > 1) -->
+                <div v-if="accompanyingPassengers.length > 0" class="col-12 mt-4 pt-3 border-top border-secondary border-opacity-25">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <div>
+                      <h4 class="h6 fw-bold text-accent mb-1 d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill fs-5"></i> Nómina de Pasajeros Acompañantes ({{ accompanyingPassengers.length }} {{ accompanyingPassengers.length === 1 ? 'viajero adicional' : 'viajeros adicionales' }})
+                      </h4>
+                      <p class="small text-white opacity-85 mb-0" style="font-size: 0.82rem;">
+                        Datos obligatorios solicitados por SERNATUR para activación de la póliza de turismo aventura y rescate en montaña.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-column gap-3">
+                    <div 
+                      v-for="(comp, idx) in accompanyingPassengers" 
+                      :key="idx" 
+                      class="p-3 p-md-4 rounded-4" 
+                      style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.35);"
+                    >
+                      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 font-monospace">
+                            PASAJERO #{{ idx + 2 }}
+                          </span>
+                          <span class="small text-white opacity-75">Acompañante</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                          <button 
+                            type="button" 
+                            class="btn py-1 px-3" 
+                            :class="comp.documentType === 'rut' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                            @click="comp.documentType = 'rut'"
+                          >
+                            RUT Chileno
+                          </button>
+                          <button 
+                            type="button" 
+                            class="btn py-1 px-3" 
+                            :class="comp.documentType === 'passport' ? 'btn-accent fw-bold' : 'btn-outline-light'" 
+                            @click="comp.documentType = 'passport'"
+                          >
+                            Pasaporte / DNI
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="row g-3">
+                        <div class="col-md-7">
+                          <label class="form-label small fw-bold text-white mb-1">Nombre Completo del Pasajero *</label>
+                          <input 
+                            v-model="comp.fullName" 
+                            type="text" 
+                            class="form-control admin-input text-dark fw-medium" 
+                            placeholder="Nombre y Apellidos del pasajero" 
+                            required
+                          >
+                        </div>
+                        <div class="col-md-5">
+                          <label class="form-label small fw-bold text-white mb-1">
+                            {{ comp.documentType === 'rut' ? 'RUT Chileno *' : 'Pasaporte o DNI Extranjero *' }}
+                          </label>
+                          <input 
+                            v-model="comp.documentNumber" 
+                            @input="handleCompanionRutInput(idx)"
+                            type="text" 
+                            class="form-control admin-input text-dark fw-medium font-monospace" 
+                            :placeholder="comp.documentType === 'rut' ? '12.345.678-9' : 'N° Pasaporte o ID'" 
+                            required
+                          >
+                        </div>
+
+                        <div class="col-sm-4">
+                          <label class="form-label small fw-bold text-white mb-1">Edad *</label>
+                          <input 
+                            v-model.number="comp.age" 
+                            type="number" 
+                            min="1" 
+                            max="110" 
+                            class="form-control admin-input text-dark fw-medium" 
+                            placeholder="Ej: 28"
+                          >
+                        </div>
+                        <div class="col-sm-8">
+                          <label class="form-label small fw-bold text-white mb-1">Teléfono Móvil (Opcional)</label>
+                          <input 
+                            v-model="comp.phone" 
+                            type="tel" 
+                            class="form-control admin-input text-dark fw-medium" 
+                            placeholder="+56 9 8765 4321 (o mismo del titular)"
+                          >
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label small fw-bold text-white mb-1">Contacto de Emergencia Propio (Opcional)</label>
+                          <input 
+                            v-model="comp.emergencyContactName" 
+                            type="text" 
+                            class="form-control admin-input text-dark fw-medium" 
+                            placeholder="Nombre y Teléfono (o usa el del titular)"
+                          >
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label small fw-bold text-white mb-1">Ficha Médica / Alergias Relevantes (Opcional)</label>
+                          <input 
+                            v-model="comp.medicalConditions" 
+                            type="text" 
+                            class="form-control admin-input text-dark fw-medium" 
+                            placeholder="Alergias severas, medicación o 'Ninguna'"
+                          >
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -660,7 +949,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
                 <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
                   <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
                 </h3>
@@ -685,7 +974,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
                     <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
@@ -744,7 +1033,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
                 <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
                   <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
                 </h3>
@@ -932,9 +1221,9 @@ const printVoucher = () => {
               <p class="mb-3">
                 En actividades de montaña y ecoturismo, la seguridad es prioritaria. Los guías certificados por SERNATUR tienen la facultad legal de modificar o suspender el itinerario ante condiciones climáticas riesgosas o conductas que comprometan al grupo. Es obligatorio el uso de equipo de seguridad provisto.
               </p>
-              <h4 class="h6 fw-bold text-accent mb-2">3. Seguros Incluidos</h4>
+              <h4 class="h6 fw-bold text-accent mb-2">3. Previsión de Salud y Primeros Auxilios</h4>
               <p class="mb-3">
-                Cada pasajero cuenta con cobertura de la Póliza Colectiva de Accidentes Personales y Asistencia en Turismo Aventura N° {{ contentStore.content.legal.insurancePolicy }}.
+                Las actividades se realizan bajo estrictos protocolos de gestión de riesgo y primeros auxilios con guías certificados por SERNATUR. Cada pasajero es responsable de contar con su previsión médica o seguro de viaje personal vigente, y de declarar oportunamente cualquier condición física o de salud preexistente.
               </p>
               <h4 class="h6 fw-bold text-accent mb-2">4. Entradas a Parques Nacionales (CONAF)</h4>
               <p class="mb-0">
@@ -1164,6 +1453,7 @@ const printVoucher = () => {
   z-index: 1200;
 }
 </style>
+
 
 
 

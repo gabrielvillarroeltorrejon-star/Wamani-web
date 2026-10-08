@@ -4,19 +4,19 @@
 
 // 1. Colores de Marca
 $dark-mountain:   #045D56; // Verde agua profundo
-$earth-brown:     #0FA095; // Verde agua primario del logo (más clarito y vibrante)
-$light-cream:     #FAFAFA; // Fondo Premium Off-White (#FAFAFA)
+$earth-brown:     #0FA095; // Verde agua primario del logo
+$light-cream:     #2BA59A; // Fondo Turquesa suave (antes Off-White)
 $accent-gold:     #2DD4BF; // Turquesa Neón / Resplandor
 $white:           #FFFFFF;
 $text-dark:       #1C1C1E; // Rich dark for typography
-$gray-muted:      #64748b; // Muted gray for secondary text
+$gray-muted:      #E0F2F1; // Gris/Turquesa claro para texto secundario
 
 // 2. Override de variables Bootstrap
 $primary:         $earth-brown; 
 $secondary:       $gray-muted;
 $accent:          $earth-brown;
 $body-bg:         $light-cream;
-$body-color:      $text-dark;
+$body-color:      $white;
 
 $theme-colors: (
   "primary":    $primary,

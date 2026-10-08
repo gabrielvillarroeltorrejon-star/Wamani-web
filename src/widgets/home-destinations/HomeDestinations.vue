@@ -296,9 +296,12 @@ const goToWebpay = () => {
         </div>
       </div>
       
-      <div class="text-center mt-5">
-        <router-link to="/experiencias" class="btn btn-outline-dark rounded-pill px-5 py-3 fw-bold text-uppercase" style="letter-spacing: 0.1em; background-color: #045D56; color: #FFFFFF; border-color: rgba(45,212,191,0.5);">
+      <div class="text-center mt-5 d-flex justify-content-center flex-wrap gap-3">
+        <router-link to="/experiencias" class="btn rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm" style="letter-spacing: 0.1em; background-color: #045D56; color: #FFFFFF; border: 1px solid rgba(45,212,191,0.5);">
           Ver Todas las Expediciones
+        </router-link>
+        <router-link to="/experiencias#paquetes" class="btn rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm d-inline-flex align-items-center gap-2" style="letter-spacing: 0.1em; background-color: #2DD4BF; color: #022927; border: none;">
+          <i class="bi bi-box-seam-fill"></i> Paquetes & Combos de Expedición
         </router-link>
       </div>
       

@@ -4,6 +4,16 @@ import { mockExperiences } from '@/entities/experience/api/mockData';
 import type { Experience } from '@/entities/experience/model/schemas';
 import { supabase, isSupabaseConfigured } from '@/shared/api/supabaseClient';
 
+export interface Passenger {
+  fullName: string;
+  documentType: 'rut' | 'passport' | 'dni';
+  documentNumber: string;
+  age?: number | string;
+  phone?: string;
+  emergencyContact?: string;
+  medicalConditions?: string;
+}
+
 export interface Booking {
   id: string;
   customerName: string;
@@ -27,12 +37,13 @@ export interface Booking {
   pax: number;
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'cancelled';
-  source: 'automatic' | 'manual';
-  paymentMethod?: 'webpay' | 'transfer' | 'cash' | 'manual';
+  source: 'automatic' | 'manual' | 'whatsapp';
+  paymentMethod?: 'webpay' | 'transfer' | 'cash' | 'manual' | 'whatsapp';
   buyOrder?: string;
   authorizationCode?: string;
   cardLast4?: string;
   notes?: string;
+  passengers?: Passenger[];
   createdAt: string;
 }
 
@@ -389,28 +400,71 @@ const DEFAULT_CONTENT: SectionContent = {
 const DEFAULT_BOOKINGS: Booking[] = [
   {
     id: 'b-1001',
+    buyOrder: 'WAM-2026-884920',
     customerName: 'Carolina Valenzuela',
     customerEmail: 'caro.valen@gmail.com',
     customerPhone: '+56988776655',
+    customerRut: '17.849.321-4',
+    customerDocumentType: 'rut',
     experienceTitle: 'Termas Pucón Indómito + Sunset en Lancha',
     bookingDate: '2026-10-12',
     pax: 2,
     totalPrice: 130000,
     status: 'confirmed',
     source: 'automatic',
+    paymentMethod: 'webpay',
+    authorizationCode: '674829',
+    cardLast4: '4820',
+    notes: 'Pago Transbank Webpay Plus verificado.',
+    passengers: [
+      {
+        fullName: 'Carolina Valenzuela Silva',
+        documentType: 'rut',
+        documentNumber: '17.849.321-4',
+        age: 32,
+        phone: '+56988776655',
+        emergencyContact: 'Felipe Valenzuela (+56911223344)',
+        medicalConditions: 'Ninguna'
+      },
+      {
+        fullName: 'Felipe Valenzuela Silva',
+        documentType: 'rut',
+        documentNumber: '18.392.110-K',
+        age: 29,
+        phone: '+56911223344',
+        emergencyContact: 'Carolina Valenzuela (+56988776655)',
+        medicalConditions: 'Alergia a la penicilina'
+      }
+    ],
     createdAt: new Date().toISOString()
   },
   {
     id: 'b-1002',
+    buyOrder: 'WAP-938210',
     customerName: 'Ricardo Medina',
     customerEmail: 'r.medina@outlook.com',
     customerPhone: '+56944332211',
+    customerRut: '15.420.198-2',
+    customerDocumentType: 'rut',
     experienceTitle: 'Ascenso al Volcán Villarrica',
     bookingDate: '2026-10-15',
     pax: 1,
     totalPrice: 120000,
     status: 'pending',
-    source: 'manual',
+    source: 'whatsapp',
+    paymentMethod: 'whatsapp',
+    notes: 'Prospecto iniciado por WhatsApp. Coordinando detalles de traslado.',
+    passengers: [
+      {
+        fullName: 'Ricardo Medina Lagos',
+        documentType: 'rut',
+        documentNumber: '15.420.198-2',
+        age: 38,
+        phone: '+56944332211',
+        emergencyContact: 'Lorena Lagos (+56999887766)',
+        medicalConditions: 'Usa lentes de contacto en montaña'
+      }
+    ],
     createdAt: new Date().toISOString()
   }
 ];
@@ -428,11 +482,60 @@ const DEFAULT_DISCOUNT_CODES: DiscountCode[] = [
   { id: 'disc-2', code: '10LUKAS', type: 'fixed_amount', value: 10000, isActive: true }
 ];
 
+export interface TourPackage {
+  id: string;
+  title: string;
+  description: string;
+  bundlePrice: number;
+  originalPrice: number;
+  imageUrl: string;
+  includedTourIds: string[];
+  badgeText: string;
+  isActive: boolean;
+}
+
+const DEFAULT_PACKAGES: TourPackage[] = [
+  {
+    id: 'pkg-1',
+    title: 'Pack Volcanes & Aguas Termales',
+    description: 'La combinación definitiva de adrenalina y relajo: Ascenso al Volcán Villarrica y desconexión en Termas Pucón Indómito con atardecer en lancha.',
+    bundlePrice: 175000,
+    originalPrice: 203000,
+    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    includedTourIds: ['exp-001', 'exp-002'],
+    badgeText: 'Ahorra 15%',
+    isActive: true
+  },
+  {
+    id: 'pkg-2',
+    title: 'Pack Aventura Lacustre & Trekking',
+    description: 'Disfruta de senderos milenarios, bosques de araucarias y vistas panorámicas del lago con guías certificados y equipamiento completo.',
+    bundlePrice: 155000,
+    originalPrice: 185000,
+    imageUrl: 'https://images.unsplash.com/photo-1518182170546-076616fd4aa8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80',
+    includedTourIds: ['exp-002', 'exp-003'],
+    badgeText: 'Más Popular',
+    isActive: true
+  },
+  {
+    id: 'pkg-3',
+    title: 'Pack Desconexión Total en la Araucanía',
+    description: 'Circuito de aguas termales cordilleranas, navegación al atardecer y gastronomía local en una experiencia relajante para parejas y grupos.',
+    bundlePrice: 125000,
+    originalPrice: 150000,
+    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    includedTourIds: ['exp-001', 'exp-004'],
+    badgeText: 'Imperdible',
+    isActive: true
+  }
+];
+
 export const useContentStore = defineStore('content', () => {
   const experiences = ref<Experience[]>([]);
   const content = ref<SectionContent>(DEFAULT_CONTENT);
   const bookings = ref<Booking[]>([]);
   const discountCodes = ref<DiscountCode[]>([]);
+  const tourPackages = ref<TourPackage[]>([]);
   const isDarkMode = ref(false);
 
   // Desactivado: forzar siempre modo claro
@@ -494,7 +597,17 @@ export const useContentStore = defineStore('content', () => {
     }
 
     if (savedBookings) {
-      bookings.value = JSON.parse(savedBookings);
+      try {
+        const parsed = JSON.parse(savedBookings);
+        if (Array.isArray(parsed) && parsed.length > 0 && !parsed[0].buyOrder) {
+          bookings.value = [...DEFAULT_BOOKINGS];
+          localStorage.setItem('wamani_bookings', JSON.stringify(DEFAULT_BOOKINGS));
+        } else {
+          bookings.value = parsed;
+        }
+      } catch {
+        bookings.value = [...DEFAULT_BOOKINGS];
+      }
     } else {
       bookings.value = [...DEFAULT_BOOKINGS];
       localStorage.setItem('wamani_bookings', JSON.stringify(DEFAULT_BOOKINGS));
@@ -505,6 +618,24 @@ export const useContentStore = defineStore('content', () => {
     } else {
       discountCodes.value = [...DEFAULT_DISCOUNT_CODES];
       localStorage.setItem('wamani_discounts', JSON.stringify(DEFAULT_DISCOUNT_CODES));
+    }
+    
+    const savedPackages = localStorage.getItem('wamani_packages');
+    if (savedPackages) {
+      try {
+        const parsed = JSON.parse(savedPackages);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].includedTourIds?.includes('1')) {
+          tourPackages.value = [...DEFAULT_PACKAGES];
+          localStorage.setItem('wamani_packages', JSON.stringify(DEFAULT_PACKAGES));
+        } else {
+          tourPackages.value = parsed;
+        }
+      } catch {
+        tourPackages.value = [...DEFAULT_PACKAGES];
+      }
+    } else {
+      tourPackages.value = [...DEFAULT_PACKAGES];
+      localStorage.setItem('wamani_packages', JSON.stringify(DEFAULT_PACKAGES));
     }
 
     applyTheme();
@@ -592,6 +723,7 @@ export const useContentStore = defineStore('content', () => {
     localStorage.setItem('wamani_content', JSON.stringify(content.value));
     localStorage.setItem('wamani_bookings', JSON.stringify(bookings.value));
     localStorage.setItem('wamani_discounts', JSON.stringify(discountCodes.value));
+    localStorage.setItem('wamani_packages', JSON.stringify(tourPackages.value));
 
     // Si Supabase está configurado, guardar también en la nube de forma asíncrona
     if (isSupabaseConfigured && supabase) {
@@ -873,6 +1005,28 @@ export const useContentStore = defineStore('content', () => {
     persist();
   };
 
+  const addPackage = (pkg: Omit<TourPackage, 'id'>) => {
+    const newPkg: TourPackage = {
+      ...pkg,
+      id: `pkg-${Date.now()}`
+    };
+    tourPackages.value.push(newPkg);
+    persist();
+  };
+
+  const updatePackage = (id: string, pkg: Partial<TourPackage>) => {
+    const idx = tourPackages.value.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      tourPackages.value[idx] = { ...tourPackages.value[idx], ...pkg };
+      persist();
+    }
+  };
+
+  const deletePackage = (id: string) => {
+    tourPackages.value = tourPackages.value.filter(p => p.id !== id);
+    persist();
+  };
+
   return {
     experiences,
     content,
@@ -895,6 +1049,10 @@ export const useContentStore = defineStore('content', () => {
     deleteBooking,
     updateContent,
     updateGatewaySettings,
-    restoreDefaults
+    restoreDefaults,
+    tourPackages,
+    addPackage,
+    updatePackage,
+    deletePackage
   };
 });

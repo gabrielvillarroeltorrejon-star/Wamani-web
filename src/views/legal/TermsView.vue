@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { useContentStore } from '@/shared/stores/contentStore';
 
 const contentStore = useContentStore();
@@ -156,9 +156,9 @@ const contentStore = useContentStore();
               </section>
 
               <section class="mb-5">
-                <h3 class="h4 fw-bold text-accent mb-3">8. Cobertura de Seguros</h3>
+                <h3 class="h4 fw-bold text-accent mb-3">8. Previsión de Salud y Asistencia</h3>
                 <p>
-                  Todos los pasajeros que participan en experiencias guiadas operadas directamente por WAMANI se encuentran amparados por una póliza colectiva de <strong>Seguro de Accidentes Personales y Asistencia en Turismo Aventura</strong> (Póliza N° {{ contentStore.content.legal.insurancePolicy }}), vigente en el territorio de la República de Chile, que contempla cobertura de gastos médicos y traslado de urgencia según las condiciones particulares de la póliza contratada ante la compañía aseguradora correspondiente.
+                  Las actividades guiadas de WAMANI se ejecutan bajo estrictos estándares de seguridad y primeros auxilios con guías certificados por SERNATUR y equipamiento técnico homologado. Cada participante es responsable de contar con su propia previsión de salud (Fonasa, Isapre o seguro de asistencia en viaje internacional) vigente durante el desarrollo de la excursión, así como de completar con veracidad la Declaración de Salud y Aceptación de Riesgo al momento de reservar.
                 </p>
               </section>
 
@@ -219,3 +219,4 @@ const contentStore = useContentStore();
   color: rgba(255, 255, 255, 0.92);
 }
 </style>
+

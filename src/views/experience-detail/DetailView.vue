@@ -71,6 +71,24 @@ const handleAddToCart = () => {
 
 const handleBookWhatsApp = () => {
   if (!experience.value) return;
+
+  // Registrar prospecto de venta en el CRM
+  contentStore.addBooking({
+    customerName: 'Prospecto WhatsApp',
+    customerEmail: 'contacto@whatsapp.com',
+    customerPhone: '+' + (contentStore.content.contact.whatsappNumber || '56985673376'),
+    experienceTitle: experience.value.title,
+    bookingDate: selectedDate.value,
+    pax: paxCount.value,
+    totalPrice: totalPriceCLP.value,
+    status: 'pending',
+    source: 'whatsapp',
+    paymentMethod: 'whatsapp',
+    buyOrder: `WAP-${Date.now().toString().slice(-6)}`,
+    notes: `Lead iniciado desde detalle de tour para ${paxCount.value} pax (${selectedDate.value})`,
+    passengers: []
+  });
+
   const msg = encodeURIComponent(
     `Hola Wamani Experience, deseo reservar el tour: *${experience.value.title}*\n` +
     `📅 Fecha de excursión: *${selectedDate.value}*\n` +

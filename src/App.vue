@@ -90,7 +90,7 @@ onUnmounted(() => {
     <header 
       v-if="route.name !== 'admin'" 
       class="navbar-sticky-wrapper fixed-top w-100 z-3 transition-all"
-      :class="{ 'navbar-scrolled shadow-lg': isScrolled, 'navbar-transparent py-3 py-lg-4': !isScrolled }"
+      :class="{ 'navbar-scrolled': isScrolled, 'navbar-transparent py-3 py-lg-4': !isScrolled }"
     >
       <div class="container-fluid px-3 px-md-5 d-flex justify-content-between align-items-center position-relative">
         
@@ -105,7 +105,7 @@ onUnmounted(() => {
         </router-link>
 
         <!-- Navegación Desktop Centrada -->
-        <nav class="d-none d-lg-flex gap-4 gap-xl-5 text-uppercase font-sans fw-medium mx-auto" style="font-size: 0.85rem; letter-spacing: 0.12em;">
+        <nav class="nav-pill d-none d-lg-flex align-items-center gap-4 gap-xl-5 text-uppercase font-sans fw-medium mx-auto px-4 py-2" style="font-size: 0.85rem; letter-spacing: 0.12em;">
           <router-link to="/" class="text-white text-decoration-none nav-link-custom">Inicio</router-link>
           <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Expediciones</router-link>
           <router-link :to="{ path: '/', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
@@ -117,25 +117,19 @@ onUnmounted(() => {
         <!-- Controles Desktop (CTA + Idiomas + Carrito) -->
         <div class="d-none d-lg-flex align-items-center gap-3">
           <!-- Carrito de Compras -->
-          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative me-1" @click="cartStore.toggleCart" title="Ver carrito">
+          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative me-1 nav-icon-hover" @click="cartStore.toggleCart" title="Ver carrito">
             <i class="bi bi-cart3"></i>
             <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
               {{ cartStore.totalItems }}
             </span>
           </button>
 
-          <!-- CTA Directo de Reserva -->
-          <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase d-inline-flex align-items-center gap-2 text-decoration-none shadow-sm">
-            <span>Ver Expediciones</span>
-            <i class="bi bi-compass"></i>
-          </router-link>
-
           <!-- Idiomas Desktop -->
           <div class="dropdown">
-            <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cambiar idioma">
+            <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none d-flex align-items-center gap-1 nav-icon-hover" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cambiar idioma">
               <i class="fa-solid fa-globe opacity-90"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 custom-dropdown-glass">
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('es')"><span class="fi fi-es me-2"></span> Español</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('en')"><span class="fi fi-gb me-2"></span> Inglés</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('pt')"><span class="fi fi-br me-2"></span> Português</a></li>
@@ -150,23 +144,18 @@ onUnmounted(() => {
         <div class="d-flex d-lg-none w-100 justify-content-end align-items-center gap-3">
           
           <!-- Carrito de Compras Móvil -->
-          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative" @click="cartStore.toggleCart" aria-label="Ver carrito">
+          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative nav-icon-hover" @click="cartStore.toggleCart" aria-label="Ver carrito">
             <i class="bi bi-cart3"></i>
             <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
               {{ cartStore.totalItems }}
             </span>
           </button>
 
-          <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none" style="font-size: 0.72rem;">
-            <span>Tours</span>
-            <i class="bi bi-compass"></i>
-          </router-link>
-
           <div class="dropdown">
-            <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Cambiar idioma">
+            <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 dropdown-toggle text-decoration-none nav-icon-hover" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Cambiar idioma">
               <i class="fa-solid fa-globe opacity-90"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 custom-dropdown-glass">
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('es')"><span class="fi fi-es me-2"></span> Español</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('en')"><span class="fi fi-gb me-2"></span> Inglés</a></li>
               <li><a class="dropdown-item" href="#" @click.prevent="changeLanguage('pt')"><span class="fi fi-br me-2"></span> Português</a></li>
@@ -177,7 +166,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Botón Hamburguesa -->
-          <button class="btn btn-link text-white p-1 border-0 fs-2 lh-1" @click="toggleMobileMenu" aria-label="Abrir menú">
+          <button class="btn btn-link text-white p-1 border-0 fs-2 lh-1 nav-icon-hover" @click="toggleMobileMenu" aria-label="Abrir menú">
             <i class="bi bi-list"></i>
           </button>
         </div>
@@ -207,11 +196,6 @@ onUnmounted(() => {
 
               <!-- Links de Navegación Móvil -->
               <nav class="d-flex flex-column gap-3 py-2">
-                <!-- CTA Móvil -->
-                <router-link to="/experiencias" class="btn btn-accent-navbar w-100 py-2 fw-bold text-uppercase mb-2 d-flex align-items-center justify-content-center gap-2 text-decoration-none shadow-sm" @click="closeMobileMenu">
-                  <i class="bi bi-compass"></i> Ver Expediciones
-                </router-link>
-
                 <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-house-door me-2 text-accent"></i>Inicio
                 </router-link>
@@ -402,7 +386,18 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.premium-footer { background-color: #1C1C1E; }
+.premium-footer { 
+  background: linear-gradient(180deg, #045D56 0%, #033E3B 100%);
+  border-top: 1px solid rgba(45, 212, 191, 0.25);
+}
+
+.premium-footer .text-white-50 {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.premium-footer a.text-white-50:hover {
+  color: #2DD4BF !important;
+}
 .app-layout {
   min-height: 100vh;
   display: flex;
@@ -425,12 +420,52 @@ main {
 }
 
 .navbar-scrolled {
-  background: rgba(28, 28, 30, 0.92) !important; /* Taste: Premium carbon dark */
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  background: transparent !important;
   padding-top: 0.75rem !important;
   padding-bottom: 0.75rem !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: none !important;
+}
+
+.nav-pill {
+  background: rgba(4, 93, 86, 0.4); /* Transparente verdoso */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.4s ease;
+}
+
+.navbar-scrolled .nav-pill {
+  background: rgba(4, 93, 86, 0.7); /* Verdoso más intenso al hacer scroll */
+}
+
+.nav-icon-hover {
+  transition: color 0.3s ease, transform 0.2s ease;
+  
+  &:hover {
+    color: #0FA095 !important;
+    transform: scale(1.1);
+  }
+}
+
+.custom-dropdown-glass {
+  background: rgba(4, 93, 86, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 0.5rem 0;
+  
+  .dropdown-item {
+    color: white !important;
+    transition: background 0.3s ease, color 0.3s ease;
+    padding: 0.5rem 1.25rem;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #0FA095 !important;
+    }
+  }
 }
 
 .navbar-scrolled-logo {

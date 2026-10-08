@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
@@ -7,7 +7,7 @@ import type { Experience } from '@/entities/experience/model/schemas';
 import WCard from '@/shared/ui/WCard.vue';
 import WButton from '@/shared/ui/WButton.vue';
 import W3DCoverflowSlider from '@/shared/ui/W3DCoverflowSlider.vue';
-import SectionDivider from '@/shared/ui/SectionDivider.vue';
+import HomePackages from '@/widgets/home-packages/HomePackages.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -180,6 +180,17 @@ const goToWebpay = () => {
   });
 };
 
+const scrollToHash = () => {
+  if (route.hash) {
+    setTimeout(() => {
+      const el = document.querySelector(route.hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 250);
+  }
+};
+
 onMounted(() => {
   if (route.query.q) searchQuery.value = route.query.q as string;
   if (route.query.date) searchDate.value = route.query.date as string;
@@ -187,6 +198,11 @@ onMounted(() => {
   if (route.query.diff) selectedDifficulty.value = route.query.diff as string;
   if (route.query.city) selectedCity.value = route.query.city as string;
   if (route.query.zone) selectedZone.value = route.query.zone as string;
+  scrollToHash();
+});
+
+watch(() => route.hash, () => {
+  scrollToHash();
 });
 </script>
 
@@ -201,9 +217,6 @@ onMounted(() => {
       </div>
     </header>
 
-    <!-- LÍNEA SEPARADORA SUPERIOR FULL-WIDTH -->
-    <SectionDivider />
-
     <!-- TOURS DESTACADOS (SLIDER 3D COVERFLOW FULL WIDTH & VH) -->
     <section class="featured-3d-section py-4 px-2 px-md-4">
       <div class="container-fluid px-lg-4">
@@ -214,8 +227,8 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- LÍNEA SEPARADORA INFERIOR FULL-WIDTH -->
-    <SectionDivider />
+    <!-- PAQUETES & COMBOS DE EXPEDICIÓN (CARRUSEL 3D CON MODAL Y RESERVA DIRECTA) -->
+    <HomePackages />
 
     <div class="container py-5">
       <!-- CATÁLOGO PRINCIPAL -->
@@ -242,6 +255,15 @@ onMounted(() => {
             <i :class="['bi', zone.icon]"></i>
             <span>{{ zone.label }}</span>
           </button>
+
+          <a 
+            href="#paquetes" 
+            class="btn rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm text-decoration-none"
+            style="background: rgba(45, 212, 191, 0.15); border: 1px solid #2DD4BF; color: #2DD4BF;"
+          >
+            <i class="bi bi-box-seam-fill"></i>
+            <span>Paquetes & Combos</span>
+          </a>
         </div>
 
         <!-- CONTENEDOR BUSCADOR EN VERDE BOSQUE #045D56 -->

@@ -30,7 +30,7 @@ const closeModal = () => {
 </script>
 
 <template>
-  <section id="servicios" class="home-services py-5 bg-light-cream position-relative text-dark">
+  <section id="servicios" class="home-services py-5 position-relative">
     <div class="container py-5">
       
       <div class="text-center mb-5">

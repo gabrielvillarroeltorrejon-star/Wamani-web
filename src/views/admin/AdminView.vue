@@ -48,7 +48,7 @@ const handleLogin = () => {
 };
 
 // Tabs State
-const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal' | 'promotions'>('services');
+const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal' | 'promotions' | 'packages'>('services');
 import { supabase } from '@/shared/api/supabaseClient';
 const supabaseOrders = ref([]);
 const fetchOrders = async () => {
@@ -496,31 +496,118 @@ const crmForm = ref({
   notes: ''
 });
 
+// CRM State & Details Modal
+const selectedBookingForDetails = ref<any | null>(null);
+const showBookingDetailsModal = ref(false);
+
+const openBookingDetailsModal = (booking: any) => {
+  selectedBookingForDetails.value = booking;
+  showBookingDetailsModal.value = true;
+};
+
+const copyManifestToClipboard = () => {
+  if (!selectedBookingForDetails.value) return;
+  const b = selectedBookingForDetails.value;
+  let text = `📋 FICHA DE RESERVA WAMANI - ${b.buyOrder || b.id}\n`;
+  text += `Tour/Expedición: ${b.experienceTitle}\n`;
+  text += `Fecha de Salida: ${b.bookingDate} | Pasajeros: ${b.pax} PAX\n`;
+  text += `Titular: ${b.customerName} (${b.customerRut || 'N/A'}) | Tel: ${b.customerPhone || 'N/A'} | Email: ${b.customerEmail || 'N/A'}\n`;
+  text += `Estado: ${b.status?.toUpperCase()} | Pago: ${b.paymentMethod?.toUpperCase()} | Monto: $${(b.totalPrice || 0).toLocaleString('es-CL')}\n`;
+  if (b.notes) text += `Notas: ${b.notes}\n`;
+  text += `\n--- NÓMINA OFICIAL DE PASAJEROS ---\n`;
+  if (b.passengers && b.passengers.length > 0) {
+    b.passengers.forEach((p: any, idx: number) => {
+      text += `[PAX #${idx + 1}] ${p.fullName} | DOC: ${p.documentNumber || p.documentId || 'N/A'} | EDAD: ${p.age || 'N/A'} | TEL: ${p.phone || 'N/A'}\n`;
+      if (p.emergencyContactName || p.emergencyContactPhone) {
+        text += `   ↳ Contacto Emergencia: ${p.emergencyContactName || ''} (${p.emergencyContactPhone || ''})\n`;
+      }
+      if (p.medicalConditions) {
+        text += `   ↳ Ficha Médica / Alergias: ${p.medicalConditions}\n`;
+      }
+    });
+  } else {
+    text += `[PAX #1 - Titular] ${b.customerName} | DOC: ${b.customerRut || 'N/A'} | TEL: ${b.customerPhone || 'N/A'}\n`;
+  }
+  navigator.clipboard.writeText(text);
+  triggerToast('¡Nómina de pasajeros copiada al portapapeles!');
+};
+
+// Fuente de verdad unificada de todas las reservas y prospectos
+const allCrmBookings = computed(() => {
+  const storeList = contentStore.bookings.map(b => ({
+    id: b.id,
+    buyOrder: b.buyOrder || `WAM-${b.id.slice(-6)}`,
+    customerName: b.customerName,
+    customerEmail: b.customerEmail,
+    customerPhone: b.customerPhone,
+    customerRut: b.customerRut || 'N/A',
+    customerDocumentType: b.customerDocumentType || 'rut',
+    experienceTitle: b.experienceTitle,
+    bookingDate: b.bookingDate,
+    pax: b.pax || 1,
+    totalPrice: b.totalPrice || 0,
+    paymentMethod: b.paymentMethod || 'manual',
+    status: b.status || 'pending',
+    source: b.source || 'automatic',
+    authorizationCode: b.authorizationCode,
+    cardLast4: b.cardLast4,
+    notes: b.notes,
+    passengers: b.passengers || [],
+    createdAt: b.createdAt
+  }));
+
+  // Extra órdenes de Supabase si existen y no están en store
+  const existingIds = new Set(storeList.map(b => b.id));
+  const extraSupabase = (supabaseOrders.value || []).filter((so: any) => !existingIds.has(so.id)).map((so: any) => ({
+    id: so.id,
+    buyOrder: so.buy_order || so.id,
+    customerName: so.customer_name || 'Cliente Webpay',
+    customerEmail: so.customer_email || 'N/A',
+    customerPhone: so.customer_phone || 'N/A',
+    customerRut: so.customer_rut || 'N/A',
+    customerDocumentType: 'rut',
+    experienceTitle: so.order_items_v2?.[0]?.tour_title || 'Expedición Wamani',
+    bookingDate: so.created_at ? new Date(so.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    pax: so.pax || 1,
+    totalPrice: so.total_price_clp || 0,
+    paymentMethod: so.payment_method || 'webpay',
+    status: so.payment_status || 'confirmed',
+    source: 'automatic',
+    authorizationCode: so.authorization_code,
+    cardLast4: so.card_last_four,
+    notes: so.notes || '',
+    passengers: so.passengers || [],
+    createdAt: so.created_at || new Date().toISOString()
+  }));
+
+  return [...storeList, ...extraSupabase];
+});
+
 const totalRevenue = computed(() => {
-  return supabaseOrders.value
-    .filter(b => b.payment_status === 'confirmed')
-    .reduce((sum, b) => sum + b.total_price_clp, 0);
+  return allCrmBookings.value
+    .filter(b => b.status === 'confirmed')
+    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 });
 
 const pendingBookingsCount = computed(() => {
-  return supabaseOrders.value.filter(b => b.payment_status === 'pending').length;
+  return allCrmBookings.value.filter(b => b.status === 'pending').length;
 });
 
 const totalPax = computed(() => {
-  return supabaseOrders.value
-    .filter(b => b.payment_status !== 'cancelled')
-    .reduce((sum, b) => sum + b.pax, 0);
+  return allCrmBookings.value
+    .filter(b => b.status !== 'cancelled')
+    .reduce((sum, b) => sum + (b.pax || 0), 0);
 });
 
 const filteredBookings = computed(() => {
-  return supabaseOrders.value.filter(b => {
+  return allCrmBookings.value.filter(b => {
     const q = crmSearchQuery.value.toLowerCase();
-    const matchesSearch = b.customer_name?.toLowerCase().includes(q) || 
-                          b.customer_email?.toLowerCase().includes(q) ||
-                          (b.customer_rut && b.customer_rut?.toLowerCase().includes(q)) ||
-                          (b.buy_order && b.buy_order?.toLowerCase().includes(q)) ||
-                          b.experienceTitle.toLowerCase().includes(q);
-    const matchesStatus = crmStatusFilter.value === 'all' || b.payment_status === crmStatusFilter.value;
+    const matchesSearch = (b.customerName || '').toLowerCase().includes(q) || 
+                          (b.customerEmail || '').toLowerCase().includes(q) ||
+                          (b.customerRut || '').toLowerCase().includes(q) ||
+                          (b.buyOrder || '').toLowerCase().includes(q) ||
+                          (b.experienceTitle || '').toLowerCase().includes(q);
+    const matchesStatus = crmStatusFilter.value === 'all' || b.status === crmStatusFilter.value;
     return matchesSearch && matchesStatus;
   });
 });
@@ -557,7 +644,15 @@ const saveBooking = () => {
     status: crmForm.value.status,
     buyOrder,
     notes: crmForm.value.notes,
-    source: 'manual'
+    source: 'manual',
+    passengers: [
+      {
+        fullName: crmForm.value.customerName,
+        documentType: 'rut',
+        documentNumber: crmForm.value.customerRut || 'N/A',
+        phone: crmForm.value.customerPhone
+      }
+    ]
   });
   triggerToast('Venta registrada manualmente en el CRM.');
   showCrmModal.value = false;
@@ -576,32 +671,36 @@ const deleteBooking = (id: string) => {
 };
 
 const exportCrmToCsv = () => {
-  const headers = ['ID', 'Orden Compra', 'Cliente', 'RUT/Pasaporte', 'Email', 'Telefono', 'Experiencia', 'Fecha', 'Pasajeros', 'Total CLP', 'Metodo Pago', 'Cod Autorizacion', 'Origen', 'Estado', 'Notas'];
-  const rows = supabaseOrders.value.map(b => [
-    `"${b.id}"`,
-    `"${b.buy_order || ''}"`,
-    `"${(b.customer_name || '').replace(/"/g, '""')}"`,
-    `"${b.customer_rut || ''}"`,
-    `"${(b.customer_email || '').replace(/"/g, '""')}"`,
-    `"${(b.customer_phone || '').replace(/"/g, '""')}"`,
-    `"${(b.experienceTitle || '').replace(/"/g, '""')}"`,
-    `"${b.created_at || ''}"`,
-    b.pax,
-    b.total_price_clp,
-    `"${b.payment_method || 'manual'}"`,
-    `"${b.authorizationCode || ''}"`,
-    `"${b.source || 'manual'}"`,
-    `"${b.payment_status}"`,
-    `"${(b.notes || '').replace(/"/g, '""')}"`
-  ]);
+  const headers = ['ID', 'Orden Compra', 'Cliente', 'RUT/Pasaporte', 'Email', 'Telefono', 'Experiencia', 'Fecha', 'Pasajeros', 'Total CLP', 'Metodo Pago', 'Cod Autorizacion', 'Origen', 'Estado', 'Nomina Pasajeros', 'Notas'];
+  const rows = allCrmBookings.value.map(b => {
+    const passengersText = (b.passengers || []).map((p: any, i: number) => 
+      `Pax ${i+1}: ${p.fullName} (${p.documentNumber})`
+    ).join(' | ');
+    return [
+      `"${b.id}"`,
+      `"${b.buyOrder || ''}"`,
+      `"${(b.customerName || '').replace(/"/g, '""')}"`,
+      `"${b.customerRut || ''}"`,
+      `"${(b.customerEmail || '').replace(/"/g, '""')}"`,
+      `"${(b.customerPhone || '').replace(/"/g, '""')}"`,
+      `"${(b.experienceTitle || '').replace(/"/g, '""')}"`,
+      `"${b.bookingDate || ''}"`,
+      b.pax,
+      b.totalPrice,
+      `"${b.paymentMethod || ''}"`,
+      `"${b.authorizationCode || ''}"`,
+      `"${b.source || ''}"`,
+      `"${b.status || ''}"`,
+      `"${passengersText.replace(/"/g, '""')}"`,
+      `"${(b.notes || '').replace(/"/g, '""')}"`
+    ].join(',');
+  });
 
-  const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const encodedUri = encodeURI(csvContent);
   const link = document.createElement('a');
-  const dateStr = new Date().toISOString().split('T')[0];
-  link.setAttribute('href', url);
-  link.setAttribute('download', `reservas_crm_wamani_${dateStr}.csv`);
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `reservas_wamani_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -745,6 +844,161 @@ const deleteDiscount = (id: string) => {
 const toggleDiscountStatus = (id: string, currentStatus: boolean) => {
   contentStore.updateDiscountCode(id, { isActive: !currentStatus });
   triggerToast(currentStatus ? 'Código desactivado.' : 'Código activado.');
+};
+
+// --- 10. PACKAGES MANAGEMENT ---
+const showPackageModal = ref(false);
+const packageMode = ref<'add' | 'edit'>('add');
+const editingPackageId = ref<string | null>(null);
+
+const packageForm = ref({
+  title: '',
+  description: '',
+  imageUrl: '',
+  includedTourIds: [] as string[],
+  badgeText: '',
+  pricingType: 'percentage' as 'percentage' | 'fixed_discount' | 'manual',
+  discountPercentage: 15,
+  fixedDiscountAmount: 20000,
+  manualBundlePrice: 0,
+  isActive: true
+});
+
+// Suma total original calculada en vivo según los tours seleccionados
+const calculatedOriginalPrice = computed(() => {
+  let total = 0;
+  for (const tourId of packageForm.value.includedTourIds) {
+    const exp = contentStore.experiences.find(e => e.id === tourId || e.slug === tourId);
+    if (exp) {
+      total += exp.pricing.basePrice;
+    }
+  }
+  return total;
+});
+
+// Precio de oferta final calculado automáticamente
+const calculatedBundlePrice = computed(() => {
+  const orig = calculatedOriginalPrice.value;
+  if (orig <= 0) return 0;
+  
+  if (packageForm.value.pricingType === 'percentage') {
+    const pct = Math.min(100, Math.max(0, packageForm.value.discountPercentage));
+    return Math.round(orig * (1 - pct / 100));
+  } else if (packageForm.value.pricingType === 'fixed_discount') {
+    return Math.max(0, orig - packageForm.value.fixedDiscountAmount);
+  } else {
+    return Math.max(0, packageForm.value.manualBundlePrice);
+  }
+});
+
+// Ahorro total calculado
+const calculatedSavings = computed(() => {
+  return Math.max(0, calculatedOriginalPrice.value - calculatedBundlePrice.value);
+});
+
+// Porcentaje efectivo de ahorro
+const calculatedEffectivePercentage = computed(() => {
+  if (calculatedOriginalPrice.value <= 0) return 0;
+  return Math.round((calculatedSavings.value / calculatedOriginalPrice.value) * 100);
+});
+
+const openAddPackageModal = () => {
+  packageMode.value = 'add';
+  editingPackageId.value = null;
+  packageForm.value = {
+    title: '',
+    description: '',
+    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    includedTourIds: [],
+    badgeText: 'Ahorra 15%',
+    pricingType: 'percentage',
+    discountPercentage: 15,
+    fixedDiscountAmount: 20000,
+    manualBundlePrice: 0,
+    isActive: true
+  };
+  showPackageModal.value = true;
+};
+
+const openEditPackageModal = (pkg: any) => {
+  packageMode.value = 'edit';
+  editingPackageId.value = pkg.id;
+  
+  const orig = pkg.originalPrice || 0;
+  const bundle = pkg.bundlePrice || 0;
+  const savings = Math.max(0, orig - bundle);
+  const pct = orig > 0 ? Math.round((savings / orig) * 100) : 15;
+
+  packageForm.value = {
+    title: pkg.title,
+    description: pkg.description,
+    imageUrl: pkg.imageUrl,
+    includedTourIds: [...pkg.includedTourIds],
+    badgeText: pkg.badgeText || '',
+    pricingType: 'percentage',
+    discountPercentage: pct > 0 ? pct : 15,
+    fixedDiscountAmount: savings,
+    manualBundlePrice: bundle,
+    isActive: pkg.isActive
+  };
+  showPackageModal.value = true;
+};
+
+const toggleTourSelection = (tourId: string) => {
+  const index = packageForm.value.includedTourIds.indexOf(tourId);
+  if (index >= 0) {
+    packageForm.value.includedTourIds.splice(index, 1);
+  } else {
+    packageForm.value.includedTourIds.push(tourId);
+  }
+};
+
+const savePackage = () => {
+  if (packageForm.value.includedTourIds.length === 0) {
+    alert('Debes seleccionar al menos 1 tour para armar el paquete.');
+    return;
+  }
+
+  const finalBundlePrice = calculatedBundlePrice.value > 0 ? calculatedBundlePrice.value : 50000;
+  const finalOriginalPrice = calculatedOriginalPrice.value > 0 ? calculatedOriginalPrice.value : finalBundlePrice;
+
+  let badge = packageForm.value.badgeText.trim();
+  if (!badge && calculatedEffectivePercentage.value > 0) {
+    badge = `Ahorra ${calculatedEffectivePercentage.value}%`;
+  }
+
+  const dataToSave = {
+    title: packageForm.value.title.trim(),
+    description: packageForm.value.description.trim(),
+    imageUrl: packageForm.value.imageUrl.trim() || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    includedTourIds: [...packageForm.value.includedTourIds],
+    badgeText: badge,
+    bundlePrice: finalBundlePrice,
+    originalPrice: finalOriginalPrice,
+    isActive: packageForm.value.isActive
+  };
+
+  if (packageMode.value === 'add') {
+    contentStore.addPackage(dataToSave);
+    triggerToast('Paquete de tours creado exitosamente.');
+  } else if (editingPackageId.value) {
+    contentStore.updatePackage(editingPackageId.value, dataToSave);
+    triggerToast('Paquete de tours actualizado.');
+  }
+
+  showPackageModal.value = false;
+};
+
+const deletePackage = (id: string) => {
+  if (confirm('¿Estás seguro de que deseas eliminar este paquete promocional?')) {
+    contentStore.deletePackage(id);
+    triggerToast('Paquete eliminado.');
+  }
+};
+
+const togglePackageStatus = (id: string, currentStatus: boolean) => {
+  contentStore.updatePackage(id, { isActive: !currentStatus });
+  triggerToast(currentStatus ? 'Paquete desactivado.' : 'Paquete publicado.');
 };
 
 // Formulario de Información Legal & SERNATUR
@@ -893,7 +1147,21 @@ const handleRestore = () => {
                   <i class="bi bi-telephone-fill me-2"></i>Contacto & Redes
                 </button>
               </li>
-              <li class="nav-item">  <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'crm' }" @click="activeTab = 'crm'">    <i class="bi bi-graph-up-arrow me-2"></i>CRM Reservas  </button></li><li class="nav-item">  <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'promotions' }" @click="activeTab = 'promotions'">    <i class="bi bi-ticket-perforated me-2"></i>Promociones  </button></li>
+              <li class="nav-item">
+                <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'crm' }" @click="activeTab = 'crm'">
+                  <i class="bi bi-graph-up-arrow me-2"></i>CRM Reservas
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'promotions' }" @click="activeTab = 'promotions'">
+                  <i class="bi bi-ticket-perforated me-2"></i>Códigos Descuento
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'packages' }" @click="activeTab = 'packages'">
+                  <i class="bi bi-box-seam me-2"></i>Paquetes de Tours ({{ contentStore.tourPackages.length }})
+                </button>
+              </li>
               <li class="nav-item">
                 <button 
                   class="nav-link py-3 fw-bold rounded-3 transition-all" 
@@ -1386,19 +1654,19 @@ const handleRestore = () => {
         <div class="admin-module-card p-4 rounded-4 shadow-sm">
           <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
             <div>
-              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ supabaseOrders.value.length }})</h3>
-              <p class="small text-white opacity-85 mb-0">Gestión de leads automáticos y ventas directas con opción de exportar datos.</p>
+              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ allCrmBookings.length }})</h3>
+              <p class="small text-white opacity-85 mb-0">Gestión de prospectos WhatsApp, ventas Webpay y nómina oficial de pasajeros.</p>
             </div>
             
             <div class="d-flex flex-wrap gap-2 align-items-center">
-              <input v-model="crmSearchQuery" type="text" class="form-control form-control-sm admin-input text-white" placeholder="Buscar cliente o tour..." style="min-width: 200px;">
+              <input v-model="crmSearchQuery" type="text" class="form-control form-control-sm admin-input text-white" placeholder="Buscar cliente, RUT u orden..." style="min-width: 200px;">
               <select v-model="crmStatusFilter" class="form-select form-select-sm admin-input text-white" style="min-width: 160px;">
                 <option value="all">Todos los estados</option>
                 <option value="pending">Pendientes</option>
                 <option value="confirmed">Confirmados</option>
                 <option value="cancelled">Cancelados</option>
               </select>
-              <button class="btn btn-outline-accent btn-sm px-3 fw-bold text-nowrap d-flex align-items-center" @click="exportCrmToCsv" title="Descargar todas las reservas en archivo CSV/Excel">
+              <button class="btn btn-outline-accent btn-sm px-3 fw-bold text-nowrap d-flex align-items-center" @click="exportCrmToCsv" title="Descargar todas las reservas con nómina de pasajeros en CSV">
                 <i class="bi bi-file-earmark-excel me-1"></i> Exportar CSV
               </button>
               <button class="btn btn-accent btn-sm px-3 fw-bold text-dark-mountain text-nowrap d-flex align-items-center" @click="openAddCrmModal">
@@ -1414,56 +1682,62 @@ const handleRestore = () => {
                   <th scope="col">Orden / Cliente</th>
                   <th scope="col">Experiencia / Tour</th>
                   <th scope="col" style="width: 120px;">Fecha</th>
-                  <th scope="col" style="width: 60px;" class="text-center">Pax</th>
+                  <th scope="col" style="width: 70px;" class="text-center">Pax</th>
                   <th scope="col" style="width: 130px;">Total</th>
-                  <th scope="col" style="width: 140px;">Método de Pago</th>
-                  <th scope="col" style="width: 150px;">Estado</th>
-                  <th scope="col" class="text-end" style="width: 80px;">Acción</th>
+                  <th scope="col" style="width: 150px;">Canal / Pago</th>
+                  <th scope="col" style="width: 140px;">Estado</th>
+                  <th scope="col" class="text-end" style="width: 110px;">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="b in filteredBookings" :key="b.id">
                   <td>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                      <span class="badge bg-dark text-accent border border-secondary border-opacity-25 font-monospace" style="font-size: 0.72rem;">{{ b.buy_order || b.id }}</span>
-                      <span v-if="b.customer_rut" class="badge bg-dark bg-opacity-50 text-white border border-secondary border-opacity-25" style="font-size: 0.7rem;">{{ b.customer_rut }}</span>
+                      <span class="badge bg-dark text-accent border border-secondary border-opacity-25 font-monospace" style="font-size: 0.72rem;">{{ b.buyOrder }}</span>
+                      <span v-if="b.customerRut && b.customerRut !== 'N/A'" class="badge bg-dark bg-opacity-50 text-white border border-secondary border-opacity-25" style="font-size: 0.7rem;">{{ b.customerRut }}</span>
                     </div>
-                    <div class="fw-bold text-white fs-6">{{ b.customer_name }}</div>
+                    <div class="fw-bold text-white fs-6">{{ b.customerName }}</div>
                     <div class="small text-white opacity-75" style="font-size: 0.78rem;">
-                      <i class="bi bi-envelope me-1 text-accent"></i>{{ b.customer_email }} | 
-                      <i class="bi bi-telephone ms-1 me-1 text-accent"></i>{{ b.customer_phone }}
+                      <i class="bi bi-envelope me-1 text-accent"></i>{{ b.customerEmail }} | 
+                      <i class="bi bi-telephone ms-1 me-1 text-accent"></i>{{ b.customerPhone }}
                     </div>
                     <div v-if="b.notes" class="small text-warning mt-1" style="font-size: 0.72rem;">
                       <i class="bi bi-chat-text-fill me-1"></i>{{ b.notes }}
                     </div>
                   </td>
                   <td>
-                    <span class="fw-semibold text-white">Orden Carrito MultiTour</span>
+                    <div class="fw-semibold text-white mb-1">{{ b.experienceTitle }}</div>
+                    <div v-if="b.passengers && b.passengers.length > 0" class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25" style="font-size: 0.68rem;">
+                      <i class="bi bi-people-fill me-1"></i>{{ b.passengers.length }} en nómina
+                    </div>
                   </td>
-                  <td class="text-white opacity-90 font-monospace">{{ b.created_at }}</td>
+                  <td class="text-white opacity-90 font-monospace">{{ b.bookingDate }}</td>
                   <td class="text-center font-monospace fw-bold text-white fs-6">{{ b.pax }}</td>
-                  <td class="fw-bold text-accent font-monospace fs-6">{{ formatPrice(b.total_price_clp) }}</td>
+                  <td class="fw-bold text-accent font-monospace fs-6">{{ formatPrice(b.totalPrice) }}</td>
                   <td>
-                    <div v-if="b.payment_method === 'webpay'" class="d-flex flex-column">
+                    <div v-if="b.paymentMethod === 'webpay'" class="d-flex flex-column">
                       <span class="badge bg-primary text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem;"><i class="bi bi-credit-card-2-front-fill me-1"></i>Webpay Plus</span>
                       <span v-if="b.authorizationCode" class="small text-accent font-monospace mt-1" style="font-size: 0.68rem;">Auth: {{ b.authorizationCode }}</span>
                     </div>
-                    <div v-else-if="b.payment_method === 'transfer'" class="d-flex flex-column">
+                    <div v-else-if="b.paymentMethod === 'whatsapp'" class="d-flex flex-column">
+                      <span class="badge text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem; background-color: #25D366;"><i class="bi bi-whatsapp me-1"></i>WhatsApp Lead</span>
+                    </div>
+                    <div v-else-if="b.paymentMethod === 'transfer'" class="d-flex flex-column">
                       <span class="badge bg-teal text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem; background-color: #0d9488;"><i class="bi bi-bank me-1"></i>Transferencia</span>
                     </div>
                     <div v-else class="d-flex flex-column">
-                      <span class="badge bg-secondary text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem;"><i class="bi bi-person-fill me-1"></i>Manual</span>
+                      <span class="badge bg-secondary text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem;"><i class="bi bi-person-fill me-1"></i>Venta Manual</span>
                     </div>
                   </td>
                   <td>
                     <select 
-                      v-model="b.payment_status" 
-                      @change="updateBookingStatus(b.id, b.payment_status)"
+                      v-model="b.status" 
+                      @change="updateBookingStatus(b.id, b.status)"
                       class="form-select form-select-sm fw-bold border-0 text-center" 
                       :class="{
-                        'bg-amber text-white': b.payment_status === 'pending',
-                        'bg-emerald text-white': b.payment_status === 'confirmed',
-                        'bg-rose text-white': b.payment_status === 'cancelled'
+                        'bg-amber text-white': b.status === 'pending',
+                        'bg-emerald text-white': b.status === 'confirmed',
+                        'bg-rose text-white': b.status === 'cancelled'
                       }"
                     >
                       <option value="pending">Pendiente</option>
@@ -1472,6 +1746,9 @@ const handleRestore = () => {
                     </select>
                   </td>
                   <td class="text-end">
+                    <button class="btn btn-sm btn-outline-accent px-2 py-1 me-1" @click="openBookingDetailsModal(b)" title="Ver Ficha y Nómina de Pasajeros">
+                      <i class="bi bi-card-checklist"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-danger px-2 py-1" @click="deleteBooking(b.id)" title="Eliminar Registro">
                       <i class="bi bi-trash"></i>
                     </button>
@@ -1480,7 +1757,7 @@ const handleRestore = () => {
                 <tr v-if="filteredBookings.length === 0">
                   <td colspan="8" class="text-center py-5 text-white opacity-75">
                     <i class="bi bi-inbox fs-2 d-block mb-2 text-accent"></i>
-                    No hay reservas registradas coincidentes.
+                    No hay reservas registradas coincidentes en el CRM.
                   </td>
                 </tr>
               </tbody>
@@ -1553,6 +1830,111 @@ const handleRestore = () => {
                   <td colspan="5" class="text-center py-5 text-white opacity-75">
                     <i class="bi bi-tags fs-2 d-block mb-2 text-accent"></i>
                     No hay códigos de descuento creados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB PANEL: GESTIÓN DE PAQUETES Y COMBOS DE TOURS -->
+      <div v-if="activeTab === 'packages'" class="tab-pane-content">
+        <div class="admin-module-card p-4 rounded-4 shadow-sm">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+              <h3 class="h5 fw-bold mb-1 text-white">
+                <i class="bi bi-box-seam me-2 text-accent"></i>
+                Paquetes de Tours & Combos Multitour ({{ contentStore.tourPackages.length }})
+              </h3>
+              <p class="small text-white opacity-85 mb-0">
+                Arma combos de 2 o más experiencias y asígnales descuentos porcentuales o montos fijos para el inicio.
+              </p>
+            </div>
+            <button class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain d-flex align-items-center gap-2" @click="openAddPackageModal">
+              <i class="bi bi-plus-lg"></i> Nuevo Paquete
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle admin-table mb-0">
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 80px;">Portada</th>
+                  <th scope="col">Título del Paquete</th>
+                  <th scope="col">Tours Incluidos</th>
+                  <th scope="col">Valor Normal</th>
+                  <th scope="col">Precio Combo</th>
+                  <th scope="col" style="width: 120px;" class="text-center">Estado</th>
+                  <th scope="col" class="text-end" style="width: 140px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="pkg in contentStore.tourPackages" :key="pkg.id">
+                  <td>
+                    <img 
+                      :src="pkg.imageUrl" 
+                      alt="Cover" 
+                      class="rounded-3 object-fit-cover shadow-sm border border-secondary border-opacity-25" 
+                      style="width: 65px; height: 50px;"
+                    >
+                  </td>
+                  <td>
+                    <div class="fw-bold text-white fs-6 mb-1">{{ pkg.title }}</div>
+                    <div class="d-flex align-items-center gap-2">
+                      <span v-if="pkg.badgeText" class="badge bg-accent text-dark-mountain fw-bold" style="font-size: 0.68rem;">
+                        {{ pkg.badgeText }}
+                      </span>
+                      <span class="small text-white opacity-75 text-truncate" style="max-width: 280px; font-size: 0.78rem;">
+                        {{ pkg.description }}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-column gap-1">
+                      <span class="badge bg-dark text-accent border border-secondary border-opacity-25 align-self-start" style="font-size: 0.72rem;">
+                        {{ pkg.includedTourIds.length }} experiencias
+                      </span>
+                      <div class="small text-white opacity-75" style="font-size: 0.75rem;">
+                        {{ pkg.includedTourIds.map(id => contentStore.experiences.find(e => e.id === id)?.title || id).join(' + ') }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="text-white opacity-50 text-decoration-line-through small">
+                      {{ formatPrice(pkg.originalPrice) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-accent fs-6">{{ formatPrice(pkg.bundlePrice) }}</div>
+                    <span v-if="pkg.originalPrice > pkg.bundlePrice" class="badge bg-success bg-opacity-25 text-success small" style="font-size: 0.68rem;">
+                      -{{ formatPrice(pkg.originalPrice - pkg.bundlePrice) }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button 
+                      class="btn btn-sm w-100 fw-bold border-0" 
+                      :class="pkg.isActive ? 'btn-outline-success text-success bg-success bg-opacity-10' : 'btn-outline-secondary text-secondary bg-secondary bg-opacity-10'"
+                      @click="togglePackageStatus(pkg.id, pkg.isActive)"
+                      :title="pkg.isActive ? 'Desactivar de la portada' : 'Publicar en la portada'"
+                    >
+                      <i class="bi me-1" :class="pkg.isActive ? 'bi-check-circle-fill' : 'bi-dash-circle-fill'"></i>
+                      {{ pkg.isActive ? 'Publicado' : 'Oculto' }}
+                    </button>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-accent me-1 px-2 py-1" @click="openEditPackageModal(pkg)" title="Editar Paquete">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger px-2 py-1" @click="deletePackage(pkg.id)" title="Eliminar Paquete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="contentStore.tourPackages.length === 0">
+                  <td colspan="7" class="text-center py-5 text-white opacity-75">
+                    <i class="bi bi-box-seam fs-2 d-block mb-2 text-accent"></i>
+                    No has creado ningún paquete promocional aún. Haz clic en "Nuevo Paquete" para armar el primero.
                   </td>
                 </tr>
               </tbody>
@@ -1794,7 +2176,7 @@ const handleRestore = () => {
           <div class="col-12">
             <h4 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
               <i class="bi bi-patch-check-fill text-accent fs-5"></i>
-              Acreditación SERNATUR & Pólizas de Seguro en Montaña (Ley N° 20.423)
+              Acreditación y Registro Oficial SERNATUR (Ley N° 20.423)
             </h4>
             <div class="p-3 rounded-4 admin-sub-card">
               <div class="row g-3">
@@ -1808,10 +2190,6 @@ const handleRestore = () => {
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">URL Oficial de Verificación Ciudadana SERNATUR</label>
                   <input v-model="legalForm.sernaturUrl" type="url" class="form-control admin-input text-white" required placeholder="https://serviciosturisticos.sernatur.cl/">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-bold text-white">Póliza Colectiva de Seguro de Accidentes *</label>
-                  <input v-model="legalForm.insurancePolicy" type="text" class="form-control admin-input text-white" required placeholder="Póliza de Turismo Aventura y Asistencia N° CH-884920">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Teléfono de Asistencia y Emergencias 24/7 *</label>
@@ -2204,6 +2582,452 @@ const handleRestore = () => {
             <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain">Guardar Código</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- MODAL GESTIONAR PAQUETE DE TOURS -->
+    <div v-if="showPackageModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" @click.self="showPackageModal = false">
+      <div class="modal-card p-4 p-md-5 shadow-lg overflow-y-auto text-white" style="width: 100%; max-width: 860px; max-height: 90vh; border-radius: 24px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <div>
+            <h3 class="h5 fw-bold text-white mb-1">
+              <i class="bi bi-box-seam me-2 text-accent"></i>
+              {{ packageMode === 'add' ? 'Crear Nuevo Paquete de Tours' : 'Editar Paquete' }}
+            </h3>
+            <p class="small text-white opacity-75 mb-0">Combina experiencias del catálogo con descuentos atractivos para tus clientes.</p>
+          </div>
+          <button class="btn-close btn-close-white" @click="showPackageModal = false" aria-label="Cerrar"></button>
+        </div>
+
+        <form @submit.prevent="savePackage" class="row g-4">
+          
+          <!-- DATOS GENERALES -->
+          <div class="col-md-8">
+            <label class="form-label small fw-bold text-white mb-1">Título del Paquete *</label>
+            <input v-model="packageForm.title" type="text" class="form-control admin-input text-white fw-bold" required placeholder="Ej: Pack Volcanes & Aguas Termales">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-white mb-1">Badge / Etiqueta Promocional</label>
+            <input v-model="packageForm.badgeText" type="text" class="form-control admin-input text-white" placeholder="Ej: Ahorra 15%, Más Vendido">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-1">Descripción Atractiva *</label>
+            <textarea v-model="packageForm.description" class="form-control admin-input text-white" rows="2" required placeholder="Describe las ventajas de reservar este combo multitour..."></textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-1">URL Foto de Portada *</label>
+            <div class="d-flex gap-3 align-items-center">
+              <input v-model="packageForm.imageUrl" type="url" class="form-control admin-input text-white flex-grow-1" required placeholder="https://images.unsplash.com/...">
+              <div v-if="packageForm.imageUrl" class="flex-shrink-0 rounded-3 overflow-hidden border border-secondary border-opacity-50" style="width: 70px; height: 50px;">
+                <img :src="packageForm.imageUrl" alt="Preview" class="w-100 h-100 object-fit-cover">
+              </div>
+            </div>
+          </div>
+
+          <!-- SELECTOR VISUAL DE TOURS DEL CATÁLOGO -->
+          <div class="col-12 border-top border-secondary border-opacity-25 pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label small fw-bold text-white mb-0">
+                <i class="bi bi-compass me-1 text-accent"></i>
+                Selecciona los Tours que Incluye este Paquete ({{ packageForm.includedTourIds.length }} seleccionados):
+              </label>
+              <span class="badge bg-accent text-dark-mountain fw-bold">
+                Mínimo 1 tour
+              </span>
+            </div>
+            <p class="small text-white opacity-75 mb-3" style="font-size: 0.8rem;">
+              Haz clic en cualquier tour para agregarlo o quitarlo del combo. El precio total se recalculará automáticamente.
+            </p>
+
+            <!-- Grid de selección de tours -->
+            <div class="row g-2 overflow-y-auto custom-scrollbar p-1" style="max-height: 280px; border-radius: 12px; background: rgba(2, 44, 42, 0.4); border: 1px solid rgba(45, 212, 191, 0.2);">
+              <div 
+                v-for="exp in contentStore.experiences" 
+                :key="exp.id" 
+                class="col-md-6"
+              >
+                <div 
+                  class="p-2 rounded-3 border d-flex align-items-center gap-2 cursor-pointer transition-all"
+                  :style="{
+                    background: packageForm.includedTourIds.includes(exp.id) ? 'rgba(45, 212, 191, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                    borderColor: packageForm.includedTourIds.includes(exp.id) ? '#2DD4BF' : 'rgba(255, 255, 255, 0.1)'
+                  }"
+                  @click="toggleTourSelection(exp.id)"
+                >
+                  <!-- Checkbox interactivo -->
+                  <div class="form-check m-0 ms-1">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      :checked="packageForm.includedTourIds.includes(exp.id)"
+                      @click.stop="toggleTourSelection(exp.id)"
+                    >
+                  </div>
+                  
+                  <!-- Thumbnail -->
+                  <img :src="exp.coverImage.url" alt="Thumb" class="rounded-2 object-fit-cover flex-shrink-0" style="width: 45px; height: 45px;">
+
+                  <!-- Datos -->
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-bold text-white small text-truncate">{{ exp.title }}</div>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      <span class="small text-white opacity-75" style="font-size: 0.72rem;">{{ exp.destinationId }}</span>
+                      <span class="small fw-bold text-accent" style="font-size: 0.75rem;">{{ formatPrice(exp.pricing.basePrice) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="packageForm.includedTourIds.length === 0" class="text-warning small mt-2">
+              <i class="bi bi-exclamation-circle me-1"></i> Debes marcar al menos un tour para calcular el precio del paquete.
+            </div>
+          </div>
+
+          <!-- ESTRATEGIA DE PRECIOS & DESCUENTOS -->
+          <div class="col-12 p-3 rounded-4" style="background: rgba(3, 62, 59, 0.9); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+              <h5 class="h6 fw-bold text-white mb-0">
+                <i class="bi bi-calculator me-1 text-accent"></i> Estrategia de Precio & Descuento
+              </h5>
+              
+              <!-- Selector de Modo de Descuento -->
+              <div class="btn-group btn-group-sm mt-2 mt-sm-0" role="group">
+                <button 
+                  type="button" 
+                  class="btn"
+                  :class="packageForm.pricingType === 'percentage' ? 'btn-accent fw-bold text-dark-mountain' : 'btn-outline-light'"
+                  @click="packageForm.pricingType = 'percentage'"
+                >
+                  % Porcentaje
+                </button>
+                <button 
+                  type="button" 
+                  class="btn"
+                  :class="packageForm.pricingType === 'fixed_discount' ? 'btn-accent fw-bold text-dark-mountain' : 'btn-outline-light'"
+                  @click="packageForm.pricingType = 'fixed_discount'"
+                >
+                  $ Monto Descuento
+                </button>
+                <button 
+                  type="button" 
+                  class="btn"
+                  :class="packageForm.pricingType === 'manual' ? 'btn-accent fw-bold text-dark-mountain' : 'btn-outline-light'"
+                  @click="packageForm.pricingType = 'manual'"
+                >
+                  Precio Manual
+                </button>
+              </div>
+            </div>
+
+            <!-- Inputs según el modo -->
+            <div class="row g-3 align-items-center mb-3">
+              <div v-if="packageForm.pricingType === 'percentage'" class="col-md-6">
+                <label class="form-label small text-white fw-bold mb-1">Porcentaje de Descuento al Combo (%)</label>
+                <div class="input-group">
+                  <input v-model.number="packageForm.discountPercentage" type="number" min="1" max="95" class="form-control admin-input text-white fw-bold" required>
+                  <span class="input-group-text admin-input text-white border-start-0">% OFF</span>
+                </div>
+              </div>
+
+              <div v-else-if="packageForm.pricingType === 'fixed_discount'" class="col-md-6">
+                <label class="form-label small text-white fw-bold mb-1">Monto de Descuento ($)</label>
+                <div class="input-group">
+                  <span class="input-group-text admin-input text-white border-end-0">$</span>
+                  <input v-model.number="packageForm.fixedDiscountAmount" type="number" min="1000" step="1000" class="form-control admin-input text-white fw-bold ps-0" required>
+                </div>
+              </div>
+
+              <div v-else class="col-md-6">
+                <label class="form-label small text-white fw-bold mb-1">Precio Final del Combo ($)</label>
+                <div class="input-group">
+                  <span class="input-group-text admin-input text-white border-end-0">$</span>
+                  <input v-model.number="packageForm.manualBundlePrice" type="number" min="1000" step="1000" class="form-control admin-input text-white fw-bold ps-0" required>
+                </div>
+              </div>
+
+              <!-- RESUMEN FINANCIERO EN VIVO -->
+              <div class="col-md-6">
+                <div class="p-3 rounded-3" style="background: rgba(2, 44, 42, 0.8); border: 1px solid rgba(45, 212, 191, 0.2);">
+                  <div class="d-flex justify-content-between text-white small opacity-75 mb-1">
+                    <span>Suma original ({{ packageForm.includedTourIds.length }} tours):</span>
+                    <span class="text-decoration-line-through">{{ formatPrice(calculatedOriginalPrice) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between text-success small mb-1">
+                    <span>Descuento aplicado:</span>
+                    <span class="fw-bold">-{{ formatPrice(calculatedSavings) }} ({{ calculatedEffectivePercentage }}%)</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-baseline pt-2 border-top border-secondary border-opacity-25">
+                    <span class="fw-bold text-white small">Precio Oferta:</span>
+                    <span class="fs-4 fw-bold text-accent">{{ formatPrice(calculatedBundlePrice) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SWITCH ESTADO -->
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input v-model="packageForm.isActive" class="form-check-input" type="checkbox" id="packageStatusSwitch">
+              <label class="form-check-label text-white ms-2" for="packageStatusSwitch">
+                <strong>Publicar Paquete:</strong> Mostrarlo inmediatamente en el carrusel de la página de inicio
+              </label>
+            </div>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN -->
+          <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3 mt-4">
+            <button type="button" class="btn btn-outline-light me-2 px-4" @click="showPackageModal = false">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-accent px-5 fw-bold text-dark-mountain shadow-sm"
+              :disabled="packageForm.includedTourIds.length === 0"
+            >
+              <i class="bi bi-check-lg me-1"></i>
+              {{ packageMode === 'add' ? 'Crear Paquete' : 'Guardar Cambios' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: FICHA DE RESERVA & NÓMINA DE PASAJEROS -->
+    <div v-if="showBookingDetailsModal && selectedBookingForDetails" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" @click.self="showBookingDetailsModal = false">
+      <div class="modal-card p-4 p-md-5 shadow-lg overflow-y-auto text-white" style="width: 100%; max-width: 900px; max-height: 90vh; border-radius: 24px;">
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3 gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 font-monospace">
+                {{ selectedBookingForDetails.buyOrder || selectedBookingForDetails.id }}
+              </span>
+              <span 
+                class="badge px-3 py-1 text-uppercase fw-bold"
+                :class="{
+                  'bg-warning text-dark': selectedBookingForDetails.status === 'pending',
+                  'bg-success text-white': selectedBookingForDetails.status === 'confirmed',
+                  'bg-danger text-white': selectedBookingForDetails.status === 'cancelled'
+                }"
+              >
+                {{ selectedBookingForDetails.status === 'confirmed' ? 'Confirmada / Pagada' : selectedBookingForDetails.status === 'pending' ? 'Pendiente' : 'Cancelada' }}
+              </span>
+            </div>
+            <h3 class="h4 fw-bold text-white mb-0 font-serif">
+              {{ selectedBookingForDetails.experienceTitle }}
+            </h3>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-accent" @click="copyManifestToClipboard" title="Copiar nómina al portapapeles">
+              <i class="bi bi-clipboard-check me-1"></i> Copiar Nómina
+            </button>
+            <button class="btn-close btn-close-white" @click="showBookingDetailsModal = false" aria-label="Cerrar"></button>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <!-- Tarjeta Titular / Contacto -->
+          <div class="col-md-6">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(2, 44, 42, 0.6); border: 1px solid rgba(45, 212, 191, 0.25);">
+              <h5 class="small fw-bold text-accent text-uppercase mb-3 tracking-wider">
+                <i class="bi bi-person-badge me-1"></i> Datos del Titular / Comprador
+              </h5>
+              <div class="mb-2">
+                <span class="text-white opacity-75 small d-block">Nombre Completo:</span>
+                <span class="fw-bold text-white">{{ selectedBookingForDetails.customerName }}</span>
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">RUT / Documento:</span>
+                  <span class="fw-semibold text-white">{{ selectedBookingForDetails.customerRut || 'N/A' }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">Teléfono / WhatsApp:</span>
+                  <a 
+                    v-if="selectedBookingForDetails.customerPhone" 
+                    :href="'https://wa.me/' + selectedBookingForDetails.customerPhone.replace(/[^0-9]/g, '')" 
+                    target="_blank" 
+                    class="text-accent text-decoration-none fw-semibold"
+                  >
+                    <i class="bi bi-whatsapp me-1 text-success"></i>{{ selectedBookingForDetails.customerPhone }}
+                  </a>
+                  <span v-else class="text-white">N/A</span>
+                </div>
+              </div>
+              <div>
+                <span class="text-white opacity-75 small d-block">Correo Electrónico:</span>
+                <a :href="'mailto:' + selectedBookingForDetails.customerEmail" class="text-white-50 text-decoration-none">
+                  {{ selectedBookingForDetails.customerEmail || 'N/A' }}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarjeta Detalles de Expedición & Pago -->
+          <div class="col-md-6">
+            <div class="p-3 rounded-4 h-100" style="background: rgba(2, 44, 42, 0.6); border: 1px solid rgba(45, 212, 191, 0.25);">
+              <h5 class="small fw-bold text-accent text-uppercase mb-3 tracking-wider">
+                <i class="bi bi-credit-card-2-front me-1"></i> Detalles de la Reserva & Pago
+              </h5>
+              <div class="row g-2 mb-2">
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">Fecha Salida:</span>
+                  <span class="fw-bold text-white">{{ selectedBookingForDetails.bookingDate }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">Pasajeros:</span>
+                  <span class="badge bg-dark text-accent border border-accent border-opacity-25 px-2 py-1">
+                    <i class="bi bi-people-fill me-1"></i>{{ selectedBookingForDetails.pax }} PAX
+                  </span>
+                </div>
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">Método de Pago:</span>
+                  <span v-if="selectedBookingForDetails.paymentMethod === 'webpay'" class="badge bg-danger text-white">
+                    <i class="bi bi-credit-card me-1"></i>Transbank Webpay
+                  </span>
+                  <span v-else-if="selectedBookingForDetails.paymentMethod === 'whatsapp' || selectedBookingForDetails.source === 'whatsapp'" class="badge bg-success text-white">
+                    <i class="bi bi-whatsapp me-1"></i>Venta WhatsApp
+                  </span>
+                  <span v-else-if="selectedBookingForDetails.paymentMethod === 'transfer'" class="badge bg-info text-dark">
+                    <i class="bi bi-bank me-1"></i>Transferencia
+                  </span>
+                  <span v-else class="badge bg-secondary text-white">
+                    <i class="bi bi-wallet2 me-1"></i>Manual
+                  </span>
+                </div>
+                <div class="col-6">
+                  <span class="text-white opacity-75 small d-block">Monto Total:</span>
+                  <span class="fs-5 fw-bold text-accent">{{ formatPrice(selectedBookingForDetails.totalPrice || 0) }}</span>
+                </div>
+              </div>
+              <div v-if="selectedBookingForDetails.authorizationCode" class="small text-white-50">
+                <i class="bi bi-shield-check text-accent me-1"></i>Cod. Autorización: <strong class="text-white">{{ selectedBookingForDetails.authorizationCode }}</strong>
+                <span v-if="selectedBookingForDetails.cardLast4"> (Tarjeta: **** {{ selectedBookingForDetails.cardLast4 }})</span>
+              </div>
+              <div v-if="selectedBookingForDetails.notes" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small">
+                <span class="text-white opacity-75 d-block">Notas:</span>
+                <span class="text-white fst-italic">{{ selectedBookingForDetails.notes }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nómina Completa de Pasajeros -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="h6 fw-bold text-white mb-0 text-uppercase tracking-wider">
+              <i class="bi bi-person-lines-fill text-accent me-2"></i>
+              Nómina Completa de Pasajeros ({{ (selectedBookingForDetails.passengers && selectedBookingForDetails.passengers.length > 0) ? selectedBookingForDetails.passengers.length : selectedBookingForDetails.pax }} viajeros)
+            </h5>
+            <span class="badge bg-emerald text-white px-2 py-1 small">
+              Registro Obligatorio SERNATUR / Guía
+            </span>
+          </div>
+
+          <!-- Si existen pasajeros registrados detallados -->
+          <div v-if="selectedBookingForDetails.passengers && selectedBookingForDetails.passengers.length > 0" class="table-responsive rounded-3 border border-secondary border-opacity-25">
+            <table class="table table-dark table-hover mb-0 align-middle small">
+              <thead style="background: rgba(4, 93, 86, 0.9);">
+                <tr>
+                  <th scope="col" style="width: 40px;" class="text-center">#</th>
+                  <th scope="col">Nombre Pasajero</th>
+                  <th scope="col">RUT / Pasaporte</th>
+                  <th scope="col">Edad</th>
+                  <th scope="col">Teléfono</th>
+                  <th scope="col">Contacto de Emergencia</th>
+                  <th scope="col">Ficha Médica / Alergias</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(pax, idx) in selectedBookingForDetails.passengers" :key="idx">
+                  <td class="text-center fw-bold text-accent">{{ idx + 1 }}</td>
+                  <td class="fw-bold text-white">
+                    {{ pax.fullName || 'No especificado' }}
+                    <span v-if="idx === 0" class="badge bg-primary text-white ms-1" style="font-size: 0.65rem;">Titular</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-dark text-white border border-secondary border-opacity-50 font-monospace">
+                      {{ pax.documentNumber || pax.documentId || selectedBookingForDetails.customerRut || 'N/A' }}
+                    </span>
+                  </td>
+                  <td>{{ pax.age ? `${pax.age} años` : '-' }}</td>
+                  <td>
+                    <span v-if="pax.phone">{{ pax.phone }}</span>
+                    <span v-else-if="idx === 0">{{ selectedBookingForDetails.customerPhone }}</span>
+                    <span v-else class="text-white-50">-</span>
+                  </td>
+                  <td>
+                    <div v-if="pax.emergencyContactName || pax.emergencyContactPhone">
+                      <span class="d-block fw-semibold text-white">{{ pax.emergencyContactName || 'Contacto' }}</span>
+                      <small class="text-accent">{{ pax.emergencyContactPhone }}</small>
+                    </div>
+                    <span v-else class="text-white-50">-</span>
+                  </td>
+                  <td>
+                    <span v-if="pax.medicalConditions" class="badge bg-warning text-dark text-wrap text-start">
+                      <i class="bi bi-heart-pulse-fill me-1"></i>{{ pax.medicalConditions }}
+                    </span>
+                    <span v-else class="text-success small"><i class="bi bi-check-circle me-1"></i>Ninguna</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Si es una venta rápida donde solo se tiene al titular -->
+          <div v-else class="p-4 rounded-3 text-center" style="background: rgba(2, 44, 42, 0.4); border: 1px dashed rgba(45, 212, 191, 0.3);">
+            <i class="bi bi-info-circle fs-3 text-accent mb-2 d-block"></i>
+            <p class="mb-2 text-white fw-semibold">
+              Esta reserva fue generada inicialmente con los datos del Titular principal:
+            </p>
+            <p class="mb-3 text-accent font-monospace">
+              {{ selectedBookingForDetails.customerName }} ({{ selectedBookingForDetails.customerRut || 'Sin RUT' }}) - {{ selectedBookingForDetails.customerPhone }}
+            </p>
+            <p class="small text-white opacity-75 mb-0">
+              Total de cupos reservados: <strong>{{ selectedBookingForDetails.pax }} PAX</strong>. Si necesitas completar la nómina de acompañantes para el seguro de turismo aventura, puedes solicitarla por WhatsApp al titular.
+            </p>
+          </div>
+        </div>
+
+        <!-- Acciones en el Modal -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25 gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="small text-white opacity-75">Cambiar estado rápido:</span>
+            <button 
+              class="btn btn-sm btn-outline-warning" 
+              :class="{ 'active fw-bold': selectedBookingForDetails.status === 'pending' }"
+              @click="updateBookingStatus(selectedBookingForDetails.id, 'pending'); selectedBookingForDetails.status = 'pending'"
+            >
+              Pendiente
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-success" 
+              :class="{ 'active fw-bold': selectedBookingForDetails.status === 'confirmed' }"
+              @click="updateBookingStatus(selectedBookingForDetails.id, 'confirmed'); selectedBookingForDetails.status = 'confirmed'"
+            >
+              Confirmado
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-danger" 
+              :class="{ 'active fw-bold': selectedBookingForDetails.status === 'cancelled' }"
+              @click="updateBookingStatus(selectedBookingForDetails.id, 'cancelled'); selectedBookingForDetails.status = 'cancelled'"
+            >
+              Cancelado
+            </button>
+          </div>
+          <div>
+            <button type="button" class="btn btn-accent px-4 fw-bold text-dark-mountain" @click="showBookingDetailsModal = false">
+              Cerrar Ficha
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
