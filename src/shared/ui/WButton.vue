@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<{
   block?: boolean;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  ariaLabel?: string;
 }>(), {
   variant: 'primary',
   size: 'md',
@@ -42,6 +43,7 @@ const handleClick = (event: MouseEvent) => {
     :type="type" 
     :class="classes" 
     :disabled="disabled"
+    :aria-label="ariaLabel"
     @click="handleClick"
   >
     <slot></slot>

@@ -78,6 +78,10 @@ const filteredExperiences = computed(() => {
 });
 
 const openModal = (exp: Experience) => {
+  if (window.innerWidth < 768) {
+    router.push({ path: `/experiencias/${exp.slug}` });
+    return;
+  }
   selectedExperience.value = exp;
   modalDate.value = searchDate.value || defaultNextDay;
   modalPax.value = searchPax.value || 1;
@@ -234,6 +238,7 @@ onMounted(() => {
                   type="search" 
                   class="form-control custom-search-input text-white fw-medium" 
                   placeholder="Tour, volcán o actividad..."
+                  aria-label="Buscar tour, volcán o actividad"
                 >
               </div>
             </div>
@@ -248,6 +253,7 @@ onMounted(() => {
                   :min="todayDate" 
                   class="form-control custom-select-input text-white fw-medium" 
                   title="Fecha estimada de excursión"
+                  aria-label="Seleccionar fecha"
                 >
               </div>
             </div>
@@ -256,7 +262,7 @@ onMounted(() => {
             <div class="col-12 col-sm-6 col-md-2">
               <div class="input-icon-wrapper position-relative">
                 <i class="bi bi-people-fill select-icon"></i>
-                <select v-model="searchPax" class="form-select custom-select-input text-white fw-medium">
+                <select v-model="searchPax" class="form-select custom-select-input text-white fw-medium" aria-label="Número de personas">
                   <option :value="1">1 Persona</option>
                   <option :value="2">2 Personas</option>
                   <option :value="3">3 Personas</option>
@@ -273,7 +279,7 @@ onMounted(() => {
             <div class="col-12 col-sm-6" :class="searchQuery || selectedCity || selectedDifficulty || searchDate ? 'col-md-2' : 'col-md-3'">
               <div class="input-icon-wrapper position-relative">
                 <i class="bi bi-geo-alt-fill select-icon"></i>
-                <select v-model="selectedCity" class="form-select custom-select-input text-white fw-medium">
+                <select v-model="selectedCity" class="form-select custom-select-input text-white fw-medium" aria-label="Seleccionar destino">
                   <option value="">Destinos</option>
                   <option v-for="city in cities" :key="city" :value="city">{{ getCityName(city) }}</option>
                 </select>
@@ -315,7 +321,7 @@ onMounted(() => {
           <div v-for="exp in filteredExperiences" :key="exp.id" class="col-md-6 col-lg-4">
             <WCard no-padding class="h-100 cursor-pointer catalog-card border-0" @click="openModal(exp)">
               <div class="position-relative overflow-hidden">
-                <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
+                <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" width="400" height="220" loading="lazy" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
                 <div class="card-image-overlay"></div>
                 <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
                   <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
@@ -363,10 +369,10 @@ onMounted(() => {
                 <div class="modal-gallery mb-4">
                   <div class="row g-2">
                     <div class="col-12">
-                      <img :src="selectedExperience.coverImage.url" class="w-100 rounded-4 object-fit-cover shadow-sm" style="height: 280px;" alt="Principal">
+                      <img :src="selectedExperience.coverImage.url" class="w-100 rounded-4 object-fit-cover shadow-sm" width="800" height="280" style="height: 280px;" alt="Principal">
                     </div>
                     <div class="col-6 col-sm-4" v-for="(img, idx) in selectedExperience.gallery" :key="idx">
-                      <img :src="img.url" class="w-100 rounded-3 object-fit-cover shadow-sm" style="height: 110px;" :alt="img.alt">
+                      <img :src="img.url" class="w-100 rounded-3 object-fit-cover shadow-sm" width="300" height="110" loading="lazy" style="height: 110px;" :alt="img.alt">
                     </div>
                   </div>
                 </div>
@@ -473,9 +479,10 @@ onMounted(() => {
                         <button 
                           type="button" 
                           class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 36px; height: 36px;"
+                          style="width: 44px; height: 44px;"
                           @click="decrementPax"
                           :disabled="modalPax <= 1"
+                          aria-label="Reducir pasajeros"
                         >
                           <i class="bi bi-dash"></i>
                         </button>
@@ -490,8 +497,9 @@ onMounted(() => {
                         <button 
                           type="button" 
                           class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 36px; height: 36px;"
+                          style="width: 44px; height: 44px;"
                           @click="incrementPax"
+                          aria-label="Aumentar pasajeros"
                         >
                           <i class="bi bi-plus"></i>
                         </button>

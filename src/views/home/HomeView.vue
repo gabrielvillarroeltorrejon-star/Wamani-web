@@ -24,6 +24,10 @@ const modalDate = ref(defaultNextDay);
 const modalPax = ref(1);
 
 const openModal = (exp: Experience) => {
+  if (window.innerWidth < 768) {
+    router.push({ path: `/experiencias/${exp.slug}` });
+    return;
+  }
   selectedExperience.value = exp;
   modalDate.value = defaultNextDay;
   modalPax.value = 1;
@@ -170,10 +174,10 @@ onMounted(() => {
                 <div class="modal-gallery mb-4">
                   <div class="row g-2">
                     <div class="col-12">
-                      <img :src="selectedExperience.coverImage.url" class="w-100 rounded-4 object-fit-cover shadow-sm" style="height: 280px;" alt="Principal">
+                      <img :src="selectedExperience.coverImage.url" class="w-100 rounded-4 object-fit-cover shadow-sm" width="800" height="280" style="height: 280px;" alt="Principal">
                     </div>
                     <div class="col-6 col-sm-4" v-for="(img, idx) in selectedExperience.gallery" :key="idx">
-                      <img :src="img.url" class="w-100 rounded-3 object-fit-cover shadow-sm" style="height: 110px;" :alt="img.alt">
+                      <img :src="img.url" class="w-100 rounded-3 object-fit-cover shadow-sm" width="300" height="110" loading="lazy" style="height: 110px;" :alt="img.alt">
                     </div>
                   </div>
                 </div>
@@ -280,9 +284,10 @@ onMounted(() => {
                         <button 
                           type="button" 
                           class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 36px; height: 36px;"
+                          style="width: 44px; height: 44px;"
                           @click="decrementPax"
                           :disabled="modalPax <= 1"
+                          aria-label="Reducir pasajeros"
                         >
                           <i class="bi bi-dash"></i>
                         </button>
@@ -297,8 +302,9 @@ onMounted(() => {
                         <button 
                           type="button" 
                           class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 36px; height: 36px;"
+                          style="width: 44px; height: 44px;"
                           @click="incrementPax"
+                          aria-label="Aumentar pasajeros"
                         >
                           <i class="bi bi-plus"></i>
                         </button>

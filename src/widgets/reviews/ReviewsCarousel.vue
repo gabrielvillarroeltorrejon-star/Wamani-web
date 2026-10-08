@@ -2,62 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import WCard from '@/shared/ui/WCard.vue';
 
-const mockReviews = ref([
-  {
-    id: 1,
-    name: "Natalia H",
-    date: "3 de febrero en",
-    title: "Fue una experiencia maravillosa desde que nos recogieron, la parada a desayunar, recorrer tantos bellos lugares,impagabl",
-    text: "Fue un tour maravilloso desde el inicio, hasta el fin,se nota la organización de cada...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80"
-  },
-  {
-    id: 2,
-    name: "Karen N",
-    date: "3 de febrero en",
-    title: "Excelente y recomendable ( cercanía y conocimiento )",
-    text: "Fue una experiencia maravillosa,Les puedo comentar que yo he hecho...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80"
-  },
-  {
-    id: 3,
-    name: "Gianna R",
-    date: "3 de febrero en",
-    title: "Excelente Tour en Pucón 🙌🏻",
-    text: "Muy buen tour el de Pucón + Termas Indómito, se disfrutó al máximo, súper atentos,...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
-  },
-  {
-    id: 4,
-    name: "Marcela Noelia ... R",
-    date: "1 de febrero en",
-    title: "MARAVILLOSA EXPERIENCIA! 👌",
-    text: "Experiencia 100% recomendada, se preocupan de cada detalle, información...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80"
-  },
-  {
-    id: 5,
-    name: "Carolina M.",
-    date: "Marzo 2026",
-    title: "Una experiencia absolutamente inolvidable",
-    text: "Desde el primer momento la atención fue de primer nivel. Hicimos el ascenso al volcán y los guías fueron...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&h=150&q=80"
-  },
-  {
-    id: 6,
-    name: "Felipe T.",
-    date: "Febrero 2026",
-    title: "Excelente servicio personalizado",
-    text: "Tomamos un tour a la medida por los siete lagos. Fue increíble no tener que preocuparnos de nada...",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80"
-  }
-]);
+const mockReviews = ref<any[]>([]);
 
 // Auto-scroll logic for carousel
 const carouselRef = ref<HTMLElement | null>(null);
@@ -109,39 +54,46 @@ onUnmounted(() => {
     </button>
     
     <div class="reviews-carousel pb-4 px-2" ref="carouselRef" @mouseenter="pauseAutoScroll" @mouseleave="startAutoScroll" @touchstart="pauseAutoScroll" @touchend="startAutoScroll">
-      <div v-for="review in mockReviews" :key="review.id" class="review-item">
-        <WCard class="h-100 border-0 shadow-sm review-card d-flex flex-column align-items-center text-center p-4">
-          <!-- Estrellas Amarillas -->
-          <div class="stars d-flex gap-1 justify-content-center mb-3">
-            <i v-for="n in review.rating" :key="n" class="bi bi-star-fill text-warning" style="font-size: 1.1rem;"></i>
-          </div>
-          
-          <!-- Título del review (Negrita en Blanco Puro) -->
-          <h4 class="h6 fw-bold mb-2 text-white px-1" style="color: #FFFFFF !important; font-size: 1.05rem;">"{{ review.title }}"</h4>
-          
-          <!-- Extracto del review (Blanco Puro) -->
-          <p class="text-white small lh-lg flex-grow-1 mb-2 text-center fw-medium" style="color: #FFFFFF !important; font-size: 0.88rem; max-height: 120px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;">
-            {{ review.text }}
-          </p>
-          
-          <!-- Enlace Leer Más en Turquesa -->
-          <a href="https://www.tripadvisor.cl/Attraction_Review-g294305-d33952297-Reviews-Wamani_experience-Santiago_Santiago_Metropolitan_Region.html" target="_blank" class="text-accent text-decoration-none small fw-bold d-block mb-3" style="color: #2DD4BF !important;">Leer más en TripAdvisor <i class="bi bi-arrow-up-right-square ms-1"></i></a>
-          
-          <!-- Autor y Avatar -->
-          <div class="d-flex flex-column align-items-center mt-auto pt-3 border-top border-light border-opacity-25 w-100">
-            <img :src="review.avatar" :alt="review.name" class="rounded-circle object-fit-cover shadow-sm mb-2" style="width: 48px; height: 48px; border: 2px solid #2DD4BF;" />
-            <h5 class="fw-bold mb-0 text-white" style="font-size: 0.95rem; color: #FFFFFF !important;">{{ review.name }}</h5>
-            <span class="small text-white opacity-75 mt-1" style="font-size: 0.75rem;">{{ review.date }}</span>
-            
-            <!-- Loguito TripAdvisor -->
-            <div class="d-flex align-items-center justify-content-center gap-1 mt-2 text-white fw-semibold" style="font-size: 0.78rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="#2DD4BF" xmlns="http://www.w3.org/2000/svg" class="d-inline-block align-middle me-1">
-                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.5 17c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm7 4c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm.5-4h-8v-2h8v2z"/>
-              </svg>
-              <span style="color: #2DD4BF;">Tripadvisor Verificado</span>
+      <template v-if="mockReviews.length > 0">
+        <div v-for="review in mockReviews" :key="review.id" class="review-item">
+          <WCard class="h-100 border-0 shadow-sm review-card d-flex flex-column align-items-center text-center p-4">
+            <!-- Estrellas Amarillas -->
+            <div class="stars d-flex gap-1 justify-content-center mb-3">
+              <i v-for="n in review.rating" :key="n" class="bi bi-star-fill text-warning" style="font-size: 1.1rem;"></i>
             </div>
-          </div>
-        </WCard>
+            
+            <!-- Título del review (Negrita en Blanco Puro) -->
+            <h4 class="h6 fw-bold mb-2 text-white px-1" style="color: #FFFFFF !important; font-size: 1.05rem;">"{{ review.title }}"</h4>
+            
+            <!-- Extracto del review (Blanco Puro) -->
+            <p class="text-white small lh-lg flex-grow-1 mb-2 text-center fw-medium" style="color: #FFFFFF !important; font-size: 0.88rem; max-height: 120px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;">
+              {{ review.text }}
+            </p>
+            
+            <!-- Enlace Leer Más en Turquesa -->
+            <a href="https://www.tripadvisor.cl/Attraction_Review-g294305-d33952297-Reviews-Wamani_experience-Santiago_Santiago_Metropolitan_Region.html" target="_blank" class="text-accent text-decoration-none small fw-bold d-block mb-3" style="color: #2DD4BF !important;" aria-label="Leer más opiniones reales en TripAdvisor">Leer más en TripAdvisor <i class="bi bi-arrow-up-right-square ms-1"></i></a>
+            
+            <!-- Autor y Avatar -->
+            <div class="d-flex flex-column align-items-center mt-auto pt-3 border-top border-light border-opacity-25 w-100">
+              <img :src="review.avatar" :alt="review.name" class="rounded-circle object-fit-cover shadow-sm mb-2" style="width: 48px; height: 48px; border: 2px solid #2DD4BF;" />
+              <h5 class="fw-bold mb-0 text-white" style="font-size: 0.95rem; color: #FFFFFF !important;">{{ review.name }}</h5>
+              <span class="small text-white opacity-75 mt-1" style="font-size: 0.75rem;">{{ review.date }}</span>
+              
+              <!-- Loguito TripAdvisor -->
+              <div class="d-flex align-items-center justify-content-center gap-1 mt-2 text-white fw-semibold" style="font-size: 0.78rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#2DD4BF" xmlns="http://www.w3.org/2000/svg" class="d-inline-block align-middle me-1" aria-hidden="true">
+                  <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.5 17c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm7 4c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm.5-4h-8v-2h8v2z"/>
+                </svg>
+                <span style="color: #2DD4BF;">Tripadvisor Verificado</span>
+              </div>
+            </div>
+          </WCard>
+        </div>
+      </template>
+      <div v-else class="w-100 text-center py-5 text-white">
+        <i class="bi bi-chat-square-quote fs-1 text-accent mb-3 d-block"></i>
+        <p class="mb-0 fw-medium">Las reseñas están siendo validadas y se sincronizarán pronto.</p>
+        <a href="https://www.tripadvisor.cl/" target="_blank" class="text-accent text-decoration-underline small mt-2 d-inline-block">Ver opiniones directamente en TripAdvisor</a>
       </div>
     </div>
 

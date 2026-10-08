@@ -45,7 +45,7 @@ const acceptEssential = () => {
               </p>
               <p class="mb-0 small text-white opacity-85 lh-base" style="font-size: 0.85rem;">
                 Utilizamos cookies técnicas y analíticas para optimizar tu experiencia de reserva, garantizar la seguridad de tus transacciones y recordar tus preferencias. Conoce más en nuestra 
-                <router-link to="/politica-de-privacidad" class="text-accent text-decoration-underline ms-1">Política de Privacidad</router-link>.
+                <router-link to="/politica-de-cookies" class="text-accent text-decoration-underline ms-1">Política de Cookies</router-link>.
               </p>
             </div>
           </div>
@@ -56,14 +56,16 @@ const acceptEssential = () => {
               class="btn btn-outline-light btn-sm px-3 py-2 fw-medium rounded-3" 
               style="font-size: 0.82rem;" 
               @click="acceptEssential"
+              aria-label="Aceptar solo cookies esenciales"
             >
               Solo Esenciales
             </button>
             <button 
               type="button" 
               class="btn btn-sm px-4 py-2 fw-bold text-dark rounded-3 shadow-sm" 
-              style="background-color: #2DD4BF; color: #033E3B !important; font-size: 0.82rem;" 
+              style="background-color: #2DD4BF; color: #022927 !important; font-size: 0.82rem;" 
               @click="acceptAll"
+              aria-label="Aceptar todas las cookies"
             >
               Aceptar Todo
             </button>

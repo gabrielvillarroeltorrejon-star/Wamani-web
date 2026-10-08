@@ -39,6 +39,16 @@ const router = createRouter({
       component: () => import('@/views/legal/PrivacyView.vue')
     },
     {
+      path: '/politica-de-cookies',
+      name: 'cookies',
+      component: () => import('@/views/legal/CookiesPolicyView.vue')
+    },
+    {
+      path: '/politica-de-reembolsos',
+      name: 'refunds',
+      component: () => import('@/views/legal/RefundPolicyView.vue')
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/admin/AdminView.vue')

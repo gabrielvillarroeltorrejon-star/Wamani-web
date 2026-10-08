@@ -45,6 +45,7 @@ onMounted(() => {
       preload="metadata"
       poster="/hero-poster.jpg"
       class="hero-video position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
+      aria-label="Video de fondo de experiencias en la naturaleza"
     >
       <source :src="videoSrc" type="video/mp4">
     </video>
