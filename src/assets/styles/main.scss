@@ -15,12 +15,13 @@ html, body {
 }
 
 body {
-  background-color: $light-cream;
-  color: #FFFFFF;
+  background-color: $body-bg;
+  color: $body-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: $font-family-sans-serif;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  line-height: $line-height-base;
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Evitar zoom automático indeseado en iPhones al tocar campos de texto */
@@ -30,8 +31,9 @@ body {
   }
 }
 
-p, .lead, .text-muted {
-  color: #FFFFFF;
+p, .lead {
+  color: $text-dark;
+  opacity: 0.9;
 }
 
 .text-muted {
@@ -82,16 +84,22 @@ input[type=number] {
 .btn-cyan-gradient {
   background: linear-gradient(135deg, #0FA095 0%, #077A73 100%) !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(45, 212, 191, 0.4) !important;
+  border: none !important;
   font-weight: 600;
-  border-radius: 20px !important;
-  transition: all 0.3s ease;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 12px rgba(15, 160, 149, 0.2);
 
   &:hover {
-    background: linear-gradient(135deg, #2DD4BF 0%, #0FA095 100%) !important;
-    color: #033E3B !important;
-    box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+    background: linear-gradient(135deg, #11B8AC 0%, #088C84 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 8px 24px rgba(15, 160, 149, 0.35);
     transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: scale(0.96) translateY(0);
+    box-shadow: 0 2px 8px rgba(15, 160, 149, 0.2);
   }
 }
 

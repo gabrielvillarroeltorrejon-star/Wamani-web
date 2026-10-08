@@ -66,11 +66,17 @@ onMounted(() => {
         {{ contentStore.content.home.hero.subtitle }}
       </p>
 
-      <!-- Indicador sutil de scroll hacia el catálogo de expediciones -->
-      <a href="#destinos" class="hero-scroll-cue text-white text-decoration-none mt-4 slide-up delay-3 d-inline-flex flex-column align-items-center gap-1" aria-label="Explorar expediciones de Chile">
-        <span class="font-sans text-uppercase fw-semibold scroll-cue-label">EXPLORAR EXPEDICIONES</span>
-        <i class="bi bi-chevron-down fs-5 scroll-bounce text-accent"></i>
-      </a>
+      <!-- CTA Button Principal con interacciones Kowalski -->
+      <div class="mt-4 slide-up delay-3 d-flex flex-column align-items-center gap-3">
+        <a href="#destinos" class="btn btn-cyan-gradient px-5 py-3 fs-6 font-sans text-uppercase rounded-pill text-decoration-none shadow-sm fw-bold">
+          Ver Expediciones
+        </a>
+        
+        <!-- Indicador sutil de scroll -->
+        <a href="#destinos" class="hero-scroll-cue text-white text-decoration-none mt-2 d-inline-flex flex-column align-items-center gap-1" aria-label="Explorar expediciones de Chile">
+          <i class="bi bi-chevron-down fs-5 scroll-bounce text-white opacity-75"></i>
+        </a>
+      </div>
     </div>
 
     <!-- Cumbres de la Cordillera pegadas exactamente al final sin bordes negros -->
@@ -114,8 +120,12 @@ onMounted(() => {
 }
 
 .hero-brand-logo:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
   filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.85));
+}
+
+.hero-brand-logo:active {
+  transform: scale(0.96);
 }
 
 @media (max-width: 991px) {
@@ -167,16 +177,16 @@ onMounted(() => {
   line-height: 0;
 }
 
-/* Animaciones */
+/* Animaciones Emil Kowalski Style */
 .slide-up {
   opacity: 0;
-  transform: translateY(40px);
-  animation: slideUp 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  transform: translateY(30px);
+  animation: slideUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.delay-1 { animation-delay: 0.2s; }
-.delay-2 { animation-delay: 0.4s; }
-.delay-3 { animation-delay: 0.6s; }
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.45s; }
 
 .hero-scroll-cue {
   opacity: 0.85;
@@ -196,7 +206,7 @@ onMounted(() => {
 }
 
 .scroll-bounce {
-  animation: scrollBounce 2s infinite ease-in-out;
+  animation: scrollBounce 2.5s infinite cubic-bezier(0.45, 0, 0.55, 1);
 }
 
 @keyframes scrollBounce {

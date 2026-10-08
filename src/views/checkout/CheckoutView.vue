@@ -2,9 +2,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
+import { useCartStore } from '@/shared/stores/cartStore';
 
 const route = useRoute();
 const contentStore = useContentStore();
+const cartStore = useCartStore();
 
 // Parámetros de Reserva desde la URL
 const expSlug = computed(() => (route.query.slug as string) || '');
@@ -149,11 +151,12 @@ onMounted(async () => {
           customerEmail: email.value || 'cliente@wamani.cl',
           customerPhone: phone.value || '+56985673376',
           customerRut: rut.value || 'N/A',
-          experienceTitle: experience.value?.title || 'Servicio Turístico',
-          experienceSlug: experience.value?.slug,
+          experienceTitle: 'Itinerario Wamani Multitour',
+          experienceSlug: 'cart',
           bookingDate: travelDate.value,
-          pax: paxCount.value,
-          totalPrice: data.amount || totalPrice.value,
+          pax: cartStore.totalItems,
+          totalPrice: data.amount || cartStore.totalToPay,
+            cartItems: JSON.parse(JSON.stringify(cartStore.items)),
           status: 'confirmed',
           source: 'automatic',
           paymentMethod: 'webpay',
@@ -163,6 +166,7 @@ onMounted(async () => {
           notes: fullNotes.value
         });
         completedBooking.value = newBooking;
+        cartStore.clearCart();
         purchaseCompleted.value = true;
         triggerVoucherEmail(newBooking);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -222,7 +226,7 @@ const handleInitiatePayment = async () => {
         body: JSON.stringify({
           buyOrder,
           sessionId: `SES-${Date.now()}`,
-          amount: totalPrice.value,
+          amount: cartStore.totalToPay,
           returnUrl
         })
       });
@@ -271,11 +275,13 @@ const handleInitiatePayment = async () => {
         activity: billingActivity.value,
         address: billingAddress.value
       } : undefined,
-      experienceTitle: experience.value?.title || 'Servicio Turístico',
-      experienceSlug: experience.value?.slug,
+      experienceTitle: 'Itinerario Wamani Multitour',
+      experienceSlug: 'cart',
       bookingDate: travelDate.value,
-      pax: paxCount.value,
-      totalPrice: totalPrice.value,
+      pax: cartStore.totalItems,
+      totalPrice: cartStore.totalToPay,
+        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
+        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
       status: 'pending',
       source: 'automatic',
       paymentMethod: 'transfer',
@@ -284,6 +290,7 @@ const handleInitiatePayment = async () => {
     });
 
     completedBooking.value = newBooking;
+        cartStore.clearCart();
     purchaseCompleted.value = true;
     triggerVoucherEmail(newBooking);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -313,11 +320,13 @@ const confirmWebpayPayment = (success: boolean) => {
         activity: billingActivity.value,
         address: billingAddress.value
       } : undefined,
-      experienceTitle: experience.value?.title || 'Servicio Turístico',
-      experienceSlug: experience.value?.slug,
+      experienceTitle: 'Itinerario Wamani Multitour',
+      experienceSlug: 'cart',
       bookingDate: travelDate.value,
-      pax: paxCount.value,
-      totalPrice: totalPrice.value,
+      pax: cartStore.totalItems,
+      totalPrice: cartStore.totalToPay,
+        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
+        cartItems: JSON.parse(JSON.stringify(cartStore.items)),
       status: 'confirmed',
       source: 'automatic',
       paymentMethod: 'webpay',
@@ -328,6 +337,7 @@ const confirmWebpayPayment = (success: boolean) => {
     });
 
     completedBooking.value = newBooking;
+        cartStore.clearCart();
     purchaseCompleted.value = true;
     triggerVoucherEmail(newBooking);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -466,7 +476,7 @@ const printVoucher = () => {
 
         <!-- STEPPER VISUAL EN 2 PASOS (CRO) -->
         <div class="col-12 mb-2">
-          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm text-dark bg-white" >
             <div class="d-flex align-items-center justify-content-center gap-3 gap-md-5">
               <!-- Paso 1 Tab -->
               <div 
@@ -506,14 +516,14 @@ const printVoucher = () => {
 
         <!-- RESUMEN COMPACTO MÓVIL (d-lg-none) -->
         <div class="col-12 d-lg-none mb-2">
-          <div class="p-3 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.4);">
+          <div class="p-3 rounded-4 shadow-sm text-white" >
             <div class="d-flex align-items-center gap-3">
               <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(45, 212, 191, 0.3);">
               <div class="flex-grow-1">
                 <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ experience?.title }}</h4>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                   <span class="small text-white opacity-85" style="font-size: 0.78rem;"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} • {{ paxCount }} {{ paxCount === 1 ? 'viajero' : 'viajeros' }}</span>
-                  <strong class="text-accent fs-6 font-monospace">{{ formatPrice(totalPrice) }}</strong>
+                  <strong class="text-accent fs-6 font-monospace">{{ formatPrice(cartStore.totalToPay) }}</strong>
                 </div>
               </div>
             </div>
@@ -525,7 +535,7 @@ const printVoucher = () => {
           <form @submit.prevent="handleInitiatePayment" class="d-flex flex-column gap-4">
             
             <!-- PASO 1: DATOS DEL PASAJERO TITULAR -->
-            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
               <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
                 <i class="bi bi-person-circle fs-4"></i> 1. Datos del Pasajero Titular
               </h3>
@@ -533,11 +543,11 @@ const printVoucher = () => {
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Nombre *</label>
-                  <input v-model="name" type="text" class="form-control admin-input text-white" placeholder="Ej: Juan" required autocomplete="given-name">
+                  <input v-model="name" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: Juan" required autocomplete="given-name">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Apellidos *</label>
-                  <input v-model="lastname" type="text" class="form-control admin-input text-white" placeholder="Ej: Pérez González" required autocomplete="family-name">
+                  <input v-model="lastname" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: Pérez González" required autocomplete="family-name">
                 </div>
 
                 <!-- Selector de Documento de Identidad (RUT vs Pasaporte) -->
@@ -569,7 +579,7 @@ const printVoucher = () => {
                       v-model="rut" 
                       @input="handleRutInput"
                       type="text" 
-                      class="form-control admin-input text-white" 
+                      class="form-control admin-input text-dark fw-medium" 
                       :class="{ 'is-invalid': docError, 'is-valid': rut.length >= 8 && !docError }"
                       placeholder="Ej: 12.345.678-9" 
                       required
@@ -585,7 +595,7 @@ const printVoucher = () => {
                     <input 
                       v-model="passport" 
                       type="text" 
-                      class="form-control admin-input text-white" 
+                      class="form-control admin-input text-dark fw-medium" 
                       placeholder="N° de Pasaporte o Documento de Identidad del país de origen" 
                       required
                     >
@@ -597,11 +607,11 @@ const printVoucher = () => {
 
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Teléfono / WhatsApp *</label>
-                  <input v-model="phone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 1234 5678" required autocomplete="tel">
+                  <input v-model="phone" type="tel" class="form-control admin-input text-dark fw-medium" placeholder="+56 9 1234 5678" required autocomplete="tel">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-bold text-white">Correo Electrónico (Para envío del voucher) *</label>
-                  <input v-model="email" type="email" class="form-control admin-input text-white" placeholder="juan@ejemplo.com" required autocomplete="email">
+                  <input v-model="email" type="email" class="form-control admin-input text-dark fw-medium" placeholder="juan@ejemplo.com" required autocomplete="email">
                 </div>
 
                 <div v-if="companions.length > 0" class="col-12 mt-3 pt-3 border-top border-secondary border-opacity-25">
@@ -613,7 +623,7 @@ const printVoucher = () => {
                       <input 
                         v-model="companions[idx]" 
                         type="text" 
-                        class="form-control form-control-sm admin-input text-white" 
+                        class="form-control form-control-sm admin-input text-dark fw-medium" 
                         :placeholder="`Acompañante ${idx + 2}: Nombre y RUT/Pasaporte`"
                       >
                     </div>
@@ -622,7 +632,7 @@ const printVoucher = () => {
 
                 <div class="col-12">
                   <label class="form-label small fw-bold text-white">Observaciones / Requerimientos Especiales (Opcional)</label>
-                  <textarea v-model="notes" class="form-control admin-input text-white" rows="2" placeholder="Talla de calzado para trekking, nivel de experiencia previa, preferencias particulares..."></textarea>
+                  <textarea v-model="notes" class="form-control admin-input text-dark fw-medium" rows="2" placeholder="Talla de calzado para trekking, nivel de experiencia previa, preferencias particulares..."></textarea>
                 </div>
 
                 <!-- Botón de Transición a Paso 2 -->
@@ -650,7 +660,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
                 <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
                   <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
                 </h3>
@@ -661,21 +671,21 @@ const printVoucher = () => {
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Nombre de Contacto de Emergencia</label>
-                    <input v-model="emergencyName" type="text" class="form-control admin-input text-white" placeholder="Ej: María Pérez (Familiar / Pareja)">
+                    <input v-model="emergencyName" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: María Pérez (Familiar / Pareja)">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Teléfono de Contacto de Emergencia</label>
-                    <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-white" placeholder="+56 9 8765 4321">
+                    <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-dark fw-medium" placeholder="+56 9 8765 4321">
                   </div>
                   <div class="col-12">
                     <label class="form-label small fw-bold text-white">Declaración de Salud / Condiciones Médicas Relevantes</label>
-                    <textarea v-model="medicalConditions" class="form-control admin-input text-white" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
+                    <textarea v-model="medicalConditions" class="form-control admin-input text-dark fw-medium" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
                   </div>
                 </div>
               </div>
 
               <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
                     <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
@@ -707,7 +717,7 @@ const printVoucher = () => {
                 <div v-else class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Razón Social de la Empresa *</label>
-                    <input v-model="billingBusinessName" type="text" class="form-control admin-input text-white" placeholder="Ej: Servicios Profesionales SpA" required>
+                    <input v-model="billingBusinessName" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: Servicios Profesionales SpA" required>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">RUT de la Empresa *</label>
@@ -715,7 +725,7 @@ const printVoucher = () => {
                       v-model="billingRut" 
                       @input="handleBillingRutInput" 
                       type="text" 
-                      class="form-control admin-input text-white" 
+                      class="form-control admin-input text-dark fw-medium" 
                       :class="{ 'is-invalid': billingRutError }" 
                       placeholder="76.123.456-7" 
                       required
@@ -724,17 +734,17 @@ const printVoucher = () => {
                   </div>
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Giro Comercial *</label>
-                    <input v-model="billingActivity" type="text" class="form-control admin-input text-white" placeholder="Ej: Actividades de Consultoría" required>
+                    <input v-model="billingActivity" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: Actividades de Consultoría" required>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Dirección Tributaria / Comuna *</label>
-                    <input v-model="billingAddress" type="text" class="form-control admin-input text-white" placeholder="Ej: Av. Apoquindo 1234, Las Condes" required>
+                    <input v-model="billingAddress" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: Av. Apoquindo 1234, Las Condes" required>
                   </div>
                 </div>
               </div>
 
               <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-dark bg-white border border-secondary border-opacity-10" >
                 <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
                   <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
                 </h3>
@@ -808,24 +818,26 @@ const printVoucher = () => {
               <i class="bi bi-bag-check-fill"></i> Resumen de la Orden
             </h3>
 
-            <div class="d-flex gap-3 mb-4 align-items-center">
-              <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 85px; height: 85px; border: 1px solid rgba(45, 212, 191, 0.3);">
+            ﻿<div v-for="item in cartStore.items" :key="item.id" class="d-flex gap-3 mb-3 align-items-center border-bottom border-secondary border-opacity-25 pb-3">
               <div>
-                <h4 class="h6 fw-bold text-white mb-1">{{ experience?.title }}</h4>
-                <span class="badge bg-dark text-accent border border-secondary border-opacity-25 small mb-1">{{ experience?.destinationId }}</span>
-                <p class="small text-white opacity-75 mb-0"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }}</p>
+                <h4 class="h6 fw-bold text-white mb-1">{{ item.tourTitle }}</h4>
+                <p class="small text-white opacity-75 mb-0">
+                  <i class="bi bi-calendar3 me-1 text-accent"></i>{{ item.scheduleDate }} &nbsp; 
+                  <i class="bi bi-people me-1 text-accent"></i> {{ item.tickets.reduce((sum, t) => sum + t.quantity, 0) }} pax
+                </p>
               </div>
             </div>
 
             <div class="summary-breakdown p-3 rounded-3 mb-4" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
               <div class="d-flex justify-content-between mb-2 small">
-                <span class="text-white opacity-75">Tarifa por persona:</span>
-                <span class="fw-bold text-white">{{ formatPrice(experience?.pricing.basePrice || 50000) }}</span>
+                <span class="text-white opacity-75">Subtotal:</span>
+                <span class="fw-bold text-white">{{ formatPrice(cartStore.subtotal) }}</span>
               </div>
-              <div class="d-flex justify-content-between mb-2 small">
-                <span class="text-white opacity-75">Número de viajeros:</span>
-                <span class="fw-bold text-accent">× {{ paxCount }}</span>
+              <div v-if="cartStore.discountAmount > 0" class="d-flex justify-content-between mb-2 small">
+                <span class="text-white opacity-75">Descuento aplicado:</span>
+                <span class="fw-bold text-success">- {{ formatPrice(cartStore.discountAmount) }}</span>
               </div>
+
               <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-white opacity-75">Impuestos e IVA (19%):</span>
                 <span class="text-success fw-bold">Incluido</span>
@@ -843,7 +855,7 @@ const printVoucher = () => {
             <div class="d-flex justify-content-between align-items-end mb-4 pt-2">
               <div>
                 <span class="small text-white opacity-75 d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.08em;">Monto Total Final</span>
-                <span class="fs-3 fw-bold text-accent font-monospace">{{ formatPrice(totalPrice) }}</span>
+                <span class="fs-3 fw-bold text-accent font-monospace">{{ formatPrice(cartStore.totalToPay) }}</span>
               </div>
               <div class="text-end small text-white opacity-75">
                 <span>CLP</span>
@@ -997,7 +1009,7 @@ const printVoucher = () => {
             </div>
             <div class="d-flex justify-content-between small">
               <span class="text-white opacity-75">Total a Cobrar:</span>
-              <strong class="text-accent fs-5 font-monospace">{{ formatPrice(totalPrice) }}</strong>
+              <strong class="text-accent fs-5 font-monospace">{{ formatPrice(cartStore.totalToPay) }}</strong>
             </div>
           </div>
 
@@ -1005,19 +1017,19 @@ const printVoucher = () => {
           <div class="row g-3 mb-4">
             <div class="col-12">
               <label class="form-label small fw-bold text-white">Número de Tarjeta</label>
-              <input v-model="webpayCardNumber" type="text" class="form-control admin-input text-white font-monospace" placeholder="•••• •••• •••• ••••">
+              <input v-model="webpayCardNumber" type="text" class="form-control admin-input text-dark fw-medium font-monospace" placeholder="•••• •••• •••• ••••">
             </div>
             <div class="col-6">
               <label class="form-label small fw-bold text-white">Vencimiento</label>
-              <input v-model="webpayExp" type="text" class="form-control admin-input text-white text-center font-monospace" placeholder="MM/AA">
+              <input v-model="webpayExp" type="text" class="form-control admin-input text-dark fw-medium text-center font-monospace" placeholder="MM/AA">
             </div>
             <div class="col-6">
               <label class="form-label small fw-bold text-white">CVV</label>
-              <input v-model="webpayCvv" type="password" class="form-control admin-input text-white text-center font-monospace" placeholder="•••">
+              <input v-model="webpayCvv" type="password" class="form-control admin-input text-dark fw-medium text-center font-monospace" placeholder="•••">
             </div>
             <div class="col-12">
               <label class="form-label small fw-bold text-white">Banco Emisor</label>
-              <input v-model="webpayBank" type="text" class="form-control admin-input text-white">
+              <input v-model="webpayBank" type="text" class="form-control admin-input text-dark fw-medium">
             </div>
           </div>
 
@@ -1046,19 +1058,19 @@ const printVoucher = () => {
 @import '@/assets/styles/variables';
 
 .checkout-page {
-  background-color: #83AAA8;
+  background-color: $body-bg;
 }
 
 .text-dark-mountain {
-  color: #033E3B !important;
+  color: #1C1C1E !important;
 }
 
 .text-accent {
-  color: #2DD4BF !important;
+  color: #0FA095 !important;
 }
 
 .bg-accent {
-  background-color: #2DD4BF !important;
+  background-color: #0FA095 !important;
 }
 
 .bg-emerald {
@@ -1070,8 +1082,8 @@ const printVoucher = () => {
 }
 
 .btn-accent {
-  background-color: #2DD4BF !important;
-  color: #033E3B !important;
+  background-color: #0FA095 !important;
+  color: #1C1C1E !important;
   border: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -1105,9 +1117,9 @@ const printVoucher = () => {
 }
 
 .admin-input {
-  background-color: #022C2A !important;
-  border: 1px solid rgba(45, 212, 191, 0.35) !important;
-  color: #FFFFFF !important;
+  background-color: #F8FAFC !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #1C1C1E !important;
 
   &::placeholder {
     color: rgba(255, 255, 255, 0.4) !important;
@@ -1115,7 +1127,7 @@ const printVoucher = () => {
 
   &:focus {
     background-color: #011E1C !important;
-    border-color: #2DD4BF !important;
+    border-color: #0FA095 !important;
     box-shadow: 0 0 0 0.25rem rgba(45, 212, 191, 0.25) !important;
   }
 }
@@ -1152,3 +1164,6 @@ const printVoucher = () => {
   z-index: 1200;
 }
 </style>
+
+
+

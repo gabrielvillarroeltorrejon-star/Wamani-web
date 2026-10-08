@@ -237,7 +237,7 @@ onUnmounted(() => {
     <MountainDivider v-if="route.name !== 'admin'" />
     
     <!-- Mega Footer Corporativo -->
-    <footer v-if="route.name !== 'admin'" class="bg-dark text-white pt-5 pb-4 font-sans">
+    <footer v-if="route.name !== 'admin'" class="premium-footer text-white pt-5 pb-4 font-sans">
       <div class="container py-4">
         <div class="row g-4 justify-content-between">
           <!-- Columna 1: Brand -->
@@ -383,6 +383,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.premium-footer { background-color: #1C1C1E; }
 .app-layout {
   min-height: 100vh;
   display: flex;
@@ -401,20 +402,20 @@ main {
 }
 
 .navbar-sticky-wrapper {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .navbar-scrolled {
-  background: rgba(3, 62, 59, 0.95) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  padding-top: 0.65rem !important;
-  padding-bottom: 0.65rem !important;
-  border-bottom: 1px solid rgba(45, 212, 191, 0.25) !important;
+  background: rgba(28, 28, 30, 0.92) !important; /* Taste: Premium carbon dark */
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .navbar-scrolled-logo {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pointer-events-none {
@@ -422,30 +423,36 @@ main {
 }
 
 .btn-accent-navbar {
-  background-color: #2DD4BF;
-  color: #022927 !important;
+  background-color: #0FA095;
+  color: #FFFFFF !important;
   border-radius: 999px;
-  padding: 0.45rem 1.15rem;
+  padding: 0.5rem 1.25rem;
   font-size: 0.78rem;
   letter-spacing: 0.08em;
-  transition: all 0.25s ease;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   border: none;
-  box-shadow: 0 4px 15px rgba(45, 212, 191, 0.25);
+  box-shadow: 0 4px 15px rgba(15, 160, 149, 0.2);
 }
 
 .btn-accent-navbar:hover {
-  background-color: #5EEAD4;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(45, 212, 191, 0.4);
+  background-color: lighten(#0FA095, 5%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 160, 149, 0.3);
 }
+
+.btn-accent-navbar:active {
+  transform: scale(0.96) translateY(0); /* Kowalski */
+  box-shadow: 0 2px 8px rgba(15, 160, 149, 0.2);
+}
+
 .nav-link-custom {
   position: relative;
-  transition: color 0.3s ease;
-  opacity: 0.9;
+  transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0.85;
 }
 .nav-link-custom:hover {
   opacity: 1;
-  color: var(--bs-accent) !important;
+  color: #0FA095 !important;
 }
 
 .social-link-item {
@@ -453,7 +460,7 @@ main {
   align-items: center !important;
   gap: 0.5rem !important;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .social-link-item span:not(.social-icon-wrapper) {
@@ -512,10 +519,11 @@ main {
   width: 85%;
   max-width: 380px;
   height: 100%;
-  background: linear-gradient(180deg, #045D56 0%, #033E3B 100%);
-  border-left: 1px solid rgba(45, 212, 191, 0.3);
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-  animation: slideInRight 0.3s ease forwards;
+  background: rgba(28, 28, 30, 0.98); /* Premium dark */
+  backdrop-filter: blur(16px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+  animation: slideInRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes slideInRight {
@@ -534,29 +542,29 @@ main {
   font-weight: 500;
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  transition: all 0.25s ease;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
   align-items: center;
 
   &:hover, &:focus, &.router-link-active {
-    background-color: rgba(45, 212, 191, 0.15);
-    color: #2DD4BF !important;
-    transform: translateX(6px);
+    background-color: rgba(15, 160, 149, 0.15);
+    color: #0FA095 !important;
+    transform: translateX(8px);
   }
 }
 
 /* Barra inferior de acción rápida móvil */
 .mobile-bottom-cta-bar {
-  background: rgba(3, 62, 59, 0.96) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border-top: 1px solid rgba(45, 212, 191, 0.35) !important;
+  background: rgba(28, 28, 30, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   z-index: 1035 !important;
 }
 
 .slide-up-bottom-enter-active,
 .slide-up-bottom-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
 }
 
 .slide-up-bottom-enter-from,
@@ -599,3 +607,5 @@ body {
   display: none;
 }
 </style>
+
+

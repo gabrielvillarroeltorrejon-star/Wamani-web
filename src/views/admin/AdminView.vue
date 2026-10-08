@@ -48,7 +48,18 @@ const handleLogin = () => {
 };
 
 // Tabs State
-const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal'>('services');
+const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal' | 'promotions'>('services');
+import { supabase } from '@/shared/api/supabaseClient';
+const supabaseOrders = ref([]);
+const fetchOrders = async () => {
+  if (!supabase) return;
+  const { data, error } = await supabase.from('orders_v2').select('*, order_items_v2(*)').order('created_at', { ascending: false });
+  if (!error && data) supabaseOrders.value = data;
+};
+onMounted(() => {
+  fetchOrders();
+});
+
 
 // Notification State
 const toastMessage = ref('');
@@ -486,30 +497,30 @@ const crmForm = ref({
 });
 
 const totalRevenue = computed(() => {
-  return contentStore.bookings
-    .filter(b => b.status === 'confirmed')
-    .reduce((sum, b) => sum + b.totalPrice, 0);
+  return supabaseOrders
+    .filter(b => b.payment_status === 'confirmed')
+    .reduce((sum, b) => sum + b.total_price_clp, 0);
 });
 
 const pendingBookingsCount = computed(() => {
-  return contentStore.bookings.filter(b => b.status === 'pending').length;
+  return supabaseOrders.filter(b => b.payment_status === 'pending').length;
 });
 
 const totalPax = computed(() => {
-  return contentStore.bookings
-    .filter(b => b.status !== 'cancelled')
+  return supabaseOrders
+    .filter(b => b.payment_status !== 'cancelled')
     .reduce((sum, b) => sum + b.pax, 0);
 });
 
 const filteredBookings = computed(() => {
-  return contentStore.bookings.filter(b => {
+  return supabaseOrders.filter(b => {
     const q = crmSearchQuery.value.toLowerCase();
-    const matchesSearch = b.customerName.toLowerCase().includes(q) || 
-                          b.customerEmail.toLowerCase().includes(q) ||
-                          (b.customerRut && b.customerRut.toLowerCase().includes(q)) ||
-                          (b.buyOrder && b.buyOrder.toLowerCase().includes(q)) ||
+    const matchesSearch = b.customer_name.toLowerCase().includes(q) || 
+                          b.customer_email.toLowerCase().includes(q) ||
+                          (b.customer_rut && b.customer_rut.toLowerCase().includes(q)) ||
+                          (b.buy_order && b.buy_order.toLowerCase().includes(q)) ||
                           b.experienceTitle.toLowerCase().includes(q);
-    const matchesStatus = crmStatusFilter.value === 'all' || b.status === crmStatusFilter.value;
+    const matchesStatus = crmStatusFilter.value === 'all' || b.payment_status === crmStatusFilter.value;
     return matchesSearch && matchesStatus;
   });
 });
@@ -566,21 +577,21 @@ const deleteBooking = (id: string) => {
 
 const exportCrmToCsv = () => {
   const headers = ['ID', 'Orden Compra', 'Cliente', 'RUT/Pasaporte', 'Email', 'Telefono', 'Experiencia', 'Fecha', 'Pasajeros', 'Total CLP', 'Metodo Pago', 'Cod Autorizacion', 'Origen', 'Estado', 'Notas'];
-  const rows = contentStore.bookings.map(b => [
+  const rows = supabaseOrders.map(b => [
     `"${b.id}"`,
-    `"${b.buyOrder || ''}"`,
-    `"${(b.customerName || '').replace(/"/g, '""')}"`,
-    `"${b.customerRut || ''}"`,
-    `"${(b.customerEmail || '').replace(/"/g, '""')}"`,
-    `"${(b.customerPhone || '').replace(/"/g, '""')}"`,
+    `"${b.buy_order || ''}"`,
+    `"${(b.customer_name || '').replace(/"/g, '""')}"`,
+    `"${b.customer_rut || ''}"`,
+    `"${(b.customer_email || '').replace(/"/g, '""')}"`,
+    `"${(b.customer_phone || '').replace(/"/g, '""')}"`,
     `"${(b.experienceTitle || '').replace(/"/g, '""')}"`,
-    `"${b.bookingDate || ''}"`,
+    `"${b.created_at || ''}"`,
     b.pax,
-    b.totalPrice,
-    `"${b.paymentMethod || 'manual'}"`,
+    b.total_price_clp,
+    `"${b.payment_method || 'manual'}"`,
     `"${b.authorizationCode || ''}"`,
     `"${b.source || 'manual'}"`,
-    `"${b.status}"`,
+    `"${b.payment_status}"`,
     `"${(b.notes || '').replace(/"/g, '""')}"`
   ]);
 
@@ -813,15 +824,7 @@ const handleRestore = () => {
                   <i class="bi bi-telephone-fill me-2"></i>Contacto & Redes
                 </button>
               </li>
-              <li class="nav-item">
-                <button 
-                  class="nav-link py-3 fw-bold rounded-3 transition-all" 
-                  :class="{ active: activeTab === 'crm' }"
-                  @click="activeTab = 'crm'"
-                >
-                  <i class="bi bi-graph-up-arrow me-2"></i>CRM Reservas
-                </button>
-              </li>
+              <li class="nav-item">  <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'crm' }" @click="activeTab = 'crm'">    <i class="bi bi-graph-up-arrow me-2"></i>CRM Reservas  </button></li><li class="nav-item">  <button class="nav-link py-3 fw-bold rounded-3 transition-all" :class="{ active: activeTab === 'promotions' }" @click="activeTab = 'promotions'">    <i class="bi bi-ticket-perforated me-2"></i>Promociones  </button></li>
               <li class="nav-item">
                 <button 
                   class="nav-link py-3 fw-bold rounded-3 transition-all" 
@@ -1314,7 +1317,7 @@ const handleRestore = () => {
         <div class="admin-module-card p-4 rounded-4 shadow-sm">
           <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
             <div>
-              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ contentStore.bookings.length }})</h3>
+              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ supabaseOrders.length }})</h3>
               <p class="small text-white opacity-85 mb-0">Gestión de leads automáticos y ventas directas con opción de exportar datos.</p>
             </div>
             
@@ -1353,30 +1356,30 @@ const handleRestore = () => {
                 <tr v-for="b in filteredBookings" :key="b.id">
                   <td>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                      <span class="badge bg-dark text-accent border border-secondary border-opacity-25 font-monospace" style="font-size: 0.72rem;">{{ b.buyOrder || b.id }}</span>
-                      <span v-if="b.customerRut" class="badge bg-dark bg-opacity-50 text-white border border-secondary border-opacity-25" style="font-size: 0.7rem;">{{ b.customerRut }}</span>
+                      <span class="badge bg-dark text-accent border border-secondary border-opacity-25 font-monospace" style="font-size: 0.72rem;">{{ b.buy_order || b.id }}</span>
+                      <span v-if="b.customer_rut" class="badge bg-dark bg-opacity-50 text-white border border-secondary border-opacity-25" style="font-size: 0.7rem;">{{ b.customer_rut }}</span>
                     </div>
-                    <div class="fw-bold text-white fs-6">{{ b.customerName }}</div>
+                    <div class="fw-bold text-white fs-6">{{ b.customer_name }}</div>
                     <div class="small text-white opacity-75" style="font-size: 0.78rem;">
-                      <i class="bi bi-envelope me-1 text-accent"></i>{{ b.customerEmail }} | 
-                      <i class="bi bi-telephone ms-1 me-1 text-accent"></i>{{ b.customerPhone }}
+                      <i class="bi bi-envelope me-1 text-accent"></i>{{ b.customer_email }} | 
+                      <i class="bi bi-telephone ms-1 me-1 text-accent"></i>{{ b.customer_phone }}
                     </div>
                     <div v-if="b.notes" class="small text-warning mt-1" style="font-size: 0.72rem;">
                       <i class="bi bi-chat-text-fill me-1"></i>{{ b.notes }}
                     </div>
                   </td>
                   <td>
-                    <span class="fw-semibold text-white">{{ b.experienceTitle }}</span>
+                    <span class="fw-semibold text-white">Orden Carrito MultiTour</span>
                   </td>
-                  <td class="text-white opacity-90 font-monospace">{{ b.bookingDate }}</td>
+                  <td class="text-white opacity-90 font-monospace">{{ b.created_at }}</td>
                   <td class="text-center font-monospace fw-bold text-white fs-6">{{ b.pax }}</td>
-                  <td class="fw-bold text-accent font-monospace fs-6">{{ formatPrice(b.totalPrice) }}</td>
+                  <td class="fw-bold text-accent font-monospace fs-6">{{ formatPrice(b.total_price_clp) }}</td>
                   <td>
-                    <div v-if="b.paymentMethod === 'webpay'" class="d-flex flex-column">
+                    <div v-if="b.payment_method === 'webpay'" class="d-flex flex-column">
                       <span class="badge bg-primary text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem;"><i class="bi bi-credit-card-2-front-fill me-1"></i>Webpay Plus</span>
                       <span v-if="b.authorizationCode" class="small text-accent font-monospace mt-1" style="font-size: 0.68rem;">Auth: {{ b.authorizationCode }}</span>
                     </div>
-                    <div v-else-if="b.paymentMethod === 'transfer'" class="d-flex flex-column">
+                    <div v-else-if="b.payment_method === 'transfer'" class="d-flex flex-column">
                       <span class="badge bg-teal text-white p-1 fw-bold text-uppercase" style="font-size: 0.7rem; background-color: #0d9488;"><i class="bi bi-bank me-1"></i>Transferencia</span>
                     </div>
                     <div v-else class="d-flex flex-column">
@@ -1385,13 +1388,13 @@ const handleRestore = () => {
                   </td>
                   <td>
                     <select 
-                      v-model="b.status" 
-                      @change="updateBookingStatus(b.id, b.status)"
+                      v-model="b.payment_status" 
+                      @change="updateBookingStatus(b.id, b.payment_status)"
                       class="form-select form-select-sm fw-bold border-0 text-center" 
                       :class="{
-                        'bg-amber text-white': b.status === 'pending',
-                        'bg-emerald text-white': b.status === 'confirmed',
-                        'bg-rose text-white': b.status === 'cancelled'
+                        'bg-amber text-white': b.payment_status === 'pending',
+                        'bg-emerald text-white': b.payment_status === 'confirmed',
+                        'bg-rose text-white': b.payment_status === 'cancelled'
                       }"
                     >
                       <option value="pending">Pendiente</option>

@@ -243,9 +243,9 @@ const goToWebpay = () => {
       </div>
 
       <div class="row g-4">
-        <div v-for="exp in displayedDestinations" :key="exp.id" class="col-12 col-md-6 col-lg-4">
+        <div v-for="(exp, index) in displayedDestinations" :key="exp.id" class="col-12 col-md-6 col-lg-4 fade-in-up" :style="{ animationDelay: `${0.1 * index}s` }">
           <WCard no-padding class="h-100 cursor-pointer catalog-card border-0" @click="openModal(exp)">
-            <div class="position-relative overflow-hidden">
+            <div class="position-relative overflow-hidden card-img-wrapper">
               <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
               <div class="card-image-overlay"></div>
               <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
@@ -254,15 +254,15 @@ const goToWebpay = () => {
             </div>
             <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
               <div>
-                <p class="small text-accent mb-1 text-uppercase fw-bold" style="color: #2DD4BF !important; font-size: 0.78rem; letter-spacing: 0.08em;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
-                <h3 class="h5 font-brush fw-bold mb-2 text-white" style="font-size: 1.65rem; color: #FFFFFF !important; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">{{ exp.title }}</h3>
-                <p class="small mb-3 text-truncate fw-medium" style="color: #FFFFFF !important; font-size: 0.88rem; opacity: 1;">{{ exp.summary }}</p>
+                <p class="small text-accent mb-1 text-uppercase fw-bold" style="font-size: 0.78rem; letter-spacing: 0.08em;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
+                <h3 class="h5 fw-bold mb-2">{{ exp.title }}</h3>
+                <p class="small mb-3 text-truncate fw-medium">{{ exp.summary }}</p>
               </div>
               
-              <div class="mt-auto pt-3 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
+              <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                 <div>
-                  <span class="small d-block fw-semibold" style="font-size: 0.8rem; color: #FFFFFF !important;">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
-                  <span class="fw-bold text-accent fs-5" style="color: #2DD4BF !important;">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
+                  <span class="small d-block fw-semibold">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
+                  <span class="fw-bold text-accent fs-5">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
                 </div>
                 <WButton variant="primary" size="sm" class="px-3 py-2 btn-cyan-gradient fw-bold">Ver y Reservar</WButton>
               </div>
@@ -499,49 +499,72 @@ const goToWebpay = () => {
   z-index: 1;
 }
 
-// Grid Tarjetas Catalog
+// Grid Tarjetas Catalog (Taste & Emil Kowalski)
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .catalog-card {
-  background-color: #045D56 !important; /* Verde bosque profundo Wamani */
-  border-radius: $border-radius-lg !important; /* Usar border-radius unificado de 20px */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: #ffffff;
+  background-color: #FFFFFF !important; /* Taste: Off-white/White premium background */
+  border-radius: 20px !important; 
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.03); /* Taste: Soft diffuse shadow */
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--bs-body-color);
   
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.08); /* Lift shadow */
     
     .transition-transform {
-      transform: scale(1.05);
+      transform: scale(1.04); /* Kowalski subtle zoom */
     }
-    
-    .card-image-overlay {
-      background: linear-gradient(to bottom, rgba(26, 26, 26, 0.1) 0%, rgba($primary, 0.75) 100%);
-    }
+  }
+  
+  &:active {
+    transform: scale(0.97) translateY(0); /* Kowalski micro-interaction */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
   
   .transition-transform {
-    transition: transform 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
   
-  /* Ajustar textos internos para alto contraste en fondo oscuro */
+  .card-img-wrapper {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  
+  /* Ajustar textos internos para alto contraste en fondo claro (Impeccable) */
   h3, .h5 {
-    color: #ffffff !important;
+    color: #1C1C1E !important; 
+    font-family: var(--bs-font-sans-serif) !important; /* Sans-serif modern */
+    font-weight: 800 !important;
   }
   
   .text-muted, p:not(.text-accent) {
-    color: #BCE2E0 !important; /* Verde agua claro, súper legible */
+    color: #64748B !important; 
   }
   
   .text-accent {
-    color: #2DD4BF !important; /* Acento verde agua brillante */
+    color: #0FA095 !important; /* Verde agua principal */
   }
   
   .border-top {
-    border-top-color: rgba(255, 255, 255, 0.1) !important;
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
   }
   
   .text-dark {
-    color: #ffffff !important; /* El precio cambia a blanco */
+    color: #1C1C1E !important; 
   }
 }
 

@@ -41,19 +41,19 @@ const closeModal = () => {
       </div>
 
       <div class="services-grid">
-        <div v-for="service in contentStore.content.home.services.items" :key="service.id" class="service-grid-item">
-          <div class="service-card position-relative overflow-hidden cursor-pointer shadow-lg rounded-custom card-border h-100" @click="openModal(service)">
+        <div v-for="(service, index) in contentStore.content.home.services.items" :key="service.id" class="service-grid-item fade-in-up" :style="{ animationDelay: `${0.1 * index}s` }">
+          <div class="service-card position-relative overflow-hidden cursor-pointer shadow-sm rounded-custom card-border h-100" @click="openModal(service)">
             <div class="card-image-wrapper position-absolute top-0 start-0 w-100 h-100">
               <img :src="service.coverImage" :alt="service.title" class="w-100 h-100 object-fit-cover transition-all duration-700">
               <div class="card-overlay position-absolute top-0 start-0 w-100 h-100 transition-all duration-500"></div>
             </div>
             <div class="card-content position-relative z-2 d-flex flex-column justify-content-end align-items-center text-center h-100 p-4">
               <!-- Subtítulo en Blanco Puro de Alto Contraste -->
-              <span class="font-sans text-uppercase text-white tracking-wide small mb-2 d-block subtitle-anim fw-bold" style="letter-spacing: 0.12em; font-size: 0.8rem; text-shadow: 0 2px 6px rgba(0,0,0,0.85);">
+              <span class="font-sans text-uppercase text-white tracking-wide small mb-2 d-block subtitle-anim fw-bold" style="letter-spacing: 0.12em; font-size: 0.8rem; text-shadow: 0 2px 6px rgba(0,0,0,0.5);">
                 {{ service.subtitle }}
               </span>
               <!-- Título en Blanco Puro de Alto Contraste -->
-              <h3 class="font-brush h3 text-white mb-0 title-anim" style="font-size: 1.85rem; text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-family: 'Caveat', cursive !important;">
+              <h3 class="font-sans h3 text-white mb-0 title-anim fw-bold" style="font-size: 1.85rem; text-shadow: 0 2px 10px rgba(0,0,0,0.6);">
                 {{ service.title }}
               </h3>
               
@@ -203,25 +203,39 @@ const closeModal = () => {
   }
 }
 
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .service-card {
   min-height: 290px;
-  background-color: #045D56;
+  background-color: #045D56; /* Keep background image behind it */
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .rounded-custom {
-  border-radius: 22px;
+  border-radius: 24px; /* More premium radius */
 }
 
 .card-border {
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-overlay {
-  background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.55) 45%, rgba(0, 0, 0, 0.25) 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.1) 100%);
 }
 
 .transition-all {
-  transition: all 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .duration-500 {
@@ -233,22 +247,27 @@ const closeModal = () => {
 }
 
 .service-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(45, 212, 191, 0.65);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+  transform: translateY(-8px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.15) !important;
   
   .card-image-wrapper img {
-    transform: scale(1.08);
+    transform: scale(1.05); /* Softer zoom */
   }
   
   .card-overlay {
-    background: linear-gradient(to top, rgba(4, 93, 86, 0.98) 0%, rgba(4, 93, 86, 0.7) 50%, rgba(3, 62, 59, 0.4) 100%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.15) 100%);
   }
   
   .btn-anim {
     opacity: 1 !important;
     transform: translateY(0);
   }
+}
+
+.service-card:active {
+  transform: scale(0.97) translateY(0); /* Kowalski micro-interaction */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .btn-anim {
