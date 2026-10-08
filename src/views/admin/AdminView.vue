@@ -54,7 +54,7 @@ const supabaseOrders = ref([]);
 const fetchOrders = async () => {
   if (!supabase) return;
   const { data, error } = await supabase.from('orders_v2').select('*, order_items_v2(*)').order('created_at', { ascending: false });
-  if (!error && data) supabaseOrders.value = data;
+  if (!error && data) supabaseOrders.value.value = data;
 };
 onMounted(() => {
   fetchOrders();
@@ -503,7 +503,7 @@ const totalRevenue = computed(() => {
 });
 
 const pendingBookingsCount = computed(() => {
-  return supabaseOrders.filter(b => b.payment_status === 'pending').length;
+  return supabaseOrders.value.filter(b => b.payment_status === 'pending').length;
 });
 
 const totalPax = computed(() => {
@@ -513,12 +513,12 @@ const totalPax = computed(() => {
 });
 
 const filteredBookings = computed(() => {
-  return supabaseOrders.filter(b => {
+  return supabaseOrders.value.filter(b => {
     const q = crmSearchQuery.value.toLowerCase();
-    const matchesSearch = b.customer_name.toLowerCase().includes(q) || 
-                          b.customer_email.toLowerCase().includes(q) ||
-                          (b.customer_rut && b.customer_rut.toLowerCase().includes(q)) ||
-                          (b.buy_order && b.buy_order.toLowerCase().includes(q)) ||
+    const matchesSearch = b.customer_name?.toLowerCase().includes(q) || 
+                          b.customer_email?.toLowerCase().includes(q) ||
+                          (b.customer_rut && b.customer_rut?.toLowerCase().includes(q)) ||
+                          (b.buy_order && b.buy_order?.toLowerCase().includes(q)) ||
                           b.experienceTitle.toLowerCase().includes(q);
     const matchesStatus = crmStatusFilter.value === 'all' || b.payment_status === crmStatusFilter.value;
     return matchesSearch && matchesStatus;
@@ -577,7 +577,7 @@ const deleteBooking = (id: string) => {
 
 const exportCrmToCsv = () => {
   const headers = ['ID', 'Orden Compra', 'Cliente', 'RUT/Pasaporte', 'Email', 'Telefono', 'Experiencia', 'Fecha', 'Pasajeros', 'Total CLP', 'Metodo Pago', 'Cod Autorizacion', 'Origen', 'Estado', 'Notas'];
-  const rows = supabaseOrders.map(b => [
+  const rows = supabaseOrders.value.map(b => [
     `"${b.id}"`,
     `"${b.buy_order || ''}"`,
     `"${(b.customer_name || '').replace(/"/g, '""')}"`,
@@ -1317,7 +1317,7 @@ const handleRestore = () => {
         <div class="admin-module-card p-4 rounded-4 shadow-sm">
           <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
             <div>
-              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ supabaseOrders.length }})</h3>
+              <h3 class="h5 fw-bold mb-1 text-white">CRM / Control de Reservas ({{ supabaseOrders.value.length }})</h3>
               <p class="small text-white opacity-85 mb-0">Gestión de leads automáticos y ventas directas con opción de exportar datos.</p>
             </div>
             

@@ -1,0 +1,18 @@
+﻿<div class="d-flex gap-3 mb-4 align-items-center">
+              <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 85px; height: 85px; border: 1px solid rgba(45, 212, 191, 0.3);">
+              <div>
+                <h4 class="h6 fw-bold text-white mb-1">{{ experience?.title }}</h4>
+                <span class="badge bg-dark text-accent border border-secondary border-opacity-25 small mb-1">{{ experience?.destinationId }}</span>
+                <p class="small text-white opacity-75 mb-0"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }}</p>
+              </div>
+            </div>
+
+            <div class="summary-breakdown p-3 rounded-3 mb-4" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+              <div class="d-flex justify-content-between mb-2 small">
+                <span class="text-white opacity-75">Tarifa por persona:</span>
+                <span class="fw-bold text-white">{{ formatPrice(experience?.pricing.basePrice || 50000) }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2 small">
+                <span class="text-white opacity-75">Nǧmero de viajeros:</span>
+                <span class="fw-bold text-accent">- {{ paxCount }}</span>
+              </div>
