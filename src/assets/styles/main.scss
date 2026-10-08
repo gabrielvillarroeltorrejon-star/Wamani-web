@@ -584,3 +584,53 @@ h1, h2, h3, .font-serif, .font-brush {
     }
   }
 }
+
+/* ==========================================================================
+   OPTIMIZACIÓN TÁCTIL MÓVIL Y ACCESIBILIDAD (WCAG 2.5.5 - 48px Touch Targets)
+   ========================================================================== */
+@media (max-width: 767.98px) {
+  /* Botones principales y controles de formulario con área táctil ergonómica */
+  .btn:not(.btn-sm):not(.dropdown-toggle), 
+  .form-select, 
+  .custom-search-input,
+  .custom-select-input {
+    min-height: 48px !important;
+  }
+
+  .btn-sm {
+    min-height: 40px !important;
+  }
+
+  /* Controles incrementales de pasajeros (+ / -) */
+  .custom-modal-sidebar button,
+  .pax-control-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Botón hamburguesa y botones de cierre modal */
+  .navbar-toggler,
+  .btn-close-custom,
+  .modal-close-btn {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Iconos de redes sociales en footer con objetivo táctil seguro */
+  .social-icon-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Refuerzo de contraste en textos atenuados para lectura bajo luz solar */
+  .text-white-50, 
+  .text-muted {
+    opacity: 0.9 !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+  }
+}
+

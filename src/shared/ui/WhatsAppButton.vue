@@ -41,6 +41,9 @@ const whatsappUrl = `https://api.whatsapp.com/send/?phone=${phoneNumber}&text=${
 }
 
 @media (max-width: 991px) {
+  .whatsapp-btn {
+    bottom: 74px !important;
+  }
   .whatsapp-lifted-mobile {
     bottom: 86px !important;
   }

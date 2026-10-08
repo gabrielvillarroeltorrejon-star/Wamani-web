@@ -42,8 +42,8 @@ onMounted(() => {
       playsinline 
       webkit-playsinline
       x5-playsinline
-      preload="auto"
-      poster="/961c6329-cc6b-4e0d-bff5-df7f6ce1f26b.jpg"
+      preload="metadata"
+      poster="/hero-poster.jpg"
       class="hero-video position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
     >
       <source :src="videoSrc" type="video/mp4">
@@ -127,6 +127,22 @@ onMounted(() => {
 @media (max-width: 768px) {
   .hero-brand-logo {
     height: 105px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-brand-logo {
+    height: 88px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.8rem, 10vw, 4.2rem) !important;
+    transform: rotate(-2deg);
+  }
+
+  .hero-subtitle {
+    letter-spacing: 0.16em !important;
+    font-size: 0.72rem !important;
   }
 }
 

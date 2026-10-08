@@ -341,6 +341,40 @@ onUnmounted(() => {
       </div>
     </footer>
 
+    <!-- BARRA INFERIOR DE ACCIÓN MÓVIL (THUMB ZONE CRO) -->
+    <Transition name="slide-up-bottom">
+      <div 
+        v-if="isScrolled && route.name !== 'checkout' && route.name !== 'admin'" 
+        class="mobile-bottom-cta-bar d-lg-none fixed-bottom p-2 px-3 shadow-lg"
+      >
+        <div class="d-flex align-items-center justify-content-between gap-2">
+          <div class="d-flex flex-column text-white text-truncate me-2">
+            <span class="small opacity-90 fw-bold text-truncate" style="font-size: 0.68rem; letter-spacing: 0.08em;">WAMANI EXPERIENCE</span>
+            <span class="fw-semibold text-accent text-truncate" style="font-size: 0.8rem; color: #2DD4BF !important;">Expediciones en Chile</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <router-link 
+              to="/experiencias" 
+              class="btn btn-accent-navbar py-2 px-3 fw-bold text-uppercase d-flex align-items-center gap-1 shadow-sm"
+              style="font-size: 0.74rem; border-radius: 12px; min-height: 42px;"
+            >
+              <i class="bi bi-compass"></i>
+              <span>Ver Tours</span>
+            </router-link>
+            <a 
+              :href="`https://wa.me/${contentStore.content.contact.whatsappNumber}?text=${encodeURIComponent(contentStore.content.contact.whatsappMessage)}`" 
+              target="_blank" 
+              class="btn btn-whatsapp-custom py-2 px-3 fw-bold d-flex align-items-center justify-content-center shadow-sm"
+              style="border-radius: 12px; font-size: 0.95rem; min-height: 42px; min-width: 44px;"
+              aria-label="WhatsApp directo"
+            >
+              <i class="bi bi-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <WhatsAppButton v-if="route.name !== 'admin'" />
     <CookieConsentBanner v-if="route.name !== 'admin'" />
   </div>
@@ -507,6 +541,26 @@ main {
     color: #2DD4BF !important;
     transform: translateX(6px);
   }
+}
+
+/* Barra inferior de acción rápida móvil */
+.mobile-bottom-cta-bar {
+  background: rgba(3, 62, 59, 0.96) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-top: 1px solid rgba(45, 212, 191, 0.35) !important;
+  z-index: 1035 !important;
+}
+
+.slide-up-bottom-enter-active,
+.slide-up-bottom-leave-active {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.slide-up-bottom-enter-from,
+.slide-up-bottom-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>
 
