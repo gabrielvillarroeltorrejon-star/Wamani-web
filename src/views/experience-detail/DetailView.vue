@@ -2,10 +2,12 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
+import { useCartStore } from '@/shared/stores/cartStore';
 
 const route = useRoute();
 const router = useRouter();
 const contentStore = useContentStore();
+const cartStore = useCartStore();
 
 const todayDate = new Date().toISOString().split('T')[0];
 const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -48,16 +50,22 @@ const formatDifficulty = (diff: string) => {
   return map[diff.toLowerCase()] || diff;
 };
 
-const handleBookWebpay = () => {
+const handleAddToCart = () => {
   if (!experience.value) return;
-  router.push({
-    path: '/checkout',
-    query: {
-      slug: experience.value.slug,
-      date: selectedDate.value,
-      pax: paxCount.value.toString(),
-      method: 'webpay'
-    }
+  
+  cartStore.addToCart({
+    tourId: experience.value.slug, // Temporal: asumiendo slug como ID por ahora
+    tourTitle: experience.value.title,
+    scheduleId: `sched-${selectedDate.value}`, // Mock schedule ID
+    scheduleDate: selectedDate.value,
+    scheduleTime: '08:00', // Mock time
+    tickets: [
+      {
+        type: 'adult',
+        quantity: paxCount.value,
+        unitPrice: experience.value.price
+      }
+    ]
   });
 };
 
@@ -340,8 +348,8 @@ const handleBookWhatsApp = () => {
 
               <!-- Acciones de Pago -->
               <div class="d-flex flex-column gap-3">
-                <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="handleBookWebpay">
-                  <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
+                <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="handleAddToCart">
+                  <i class="bi bi-cart-plus-fill fs-5"></i> Añadir al Carrito
                 </button>
                 <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="handleBookWhatsApp">
                   <i class="bi bi-whatsapp fs-5"></i> Reservar vía WhatsApp / Transferencia

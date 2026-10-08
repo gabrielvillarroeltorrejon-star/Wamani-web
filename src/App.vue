@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
+import CartDrawer from '@/widgets/cart-drawer/CartDrawer.vue'
 import WhatsAppButton from '@/shared/ui/WhatsAppButton.vue'
 import MountainDivider from '@/shared/ui/MountainDivider.vue'
 import CookieConsentBanner from '@/shared/ui/CookieConsentBanner.vue'
@@ -377,6 +378,7 @@ onUnmounted(() => {
 
     <WhatsAppButton v-if="route.name !== 'admin'" />
     <CookieConsentBanner v-if="route.name !== 'admin'" />
+    <CartDrawer v-if="route.name !== 'admin'" />
   </div>
 </template>
 

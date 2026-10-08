@@ -11,6 +11,7 @@
   "dependencies": {
     "@babel/parser": "^7.29.9",
     "@supabase/supabase-js": "^2.112.3",
+    "@vueuse/core": "^15.0.0",
     "bootstrap": "^5.3.8",
     "nodemailer": "^9.0.5",
     "pinia": "^4.0.2",
