@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useContentStore, type ServiceItem, type Advisor } from '@/shared/stores/contentStore';
 import type { Experience } from '@/entities/experience/model/schemas';
 
@@ -54,7 +54,7 @@ const supabaseOrders = ref([]);
 const fetchOrders = async () => {
   if (!supabase) return;
   const { data, error } = await supabase.from('orders_v2').select('*, order_items_v2(*)').order('created_at', { ascending: false });
-  if (!error && data) supabaseOrders.value.value = data;
+  if (!error && data) supabaseOrders.value = data;
 };
 onMounted(() => {
   fetchOrders();
@@ -497,7 +497,7 @@ const crmForm = ref({
 });
 
 const totalRevenue = computed(() => {
-  return supabaseOrders
+  return supabaseOrders.value
     .filter(b => b.payment_status === 'confirmed')
     .reduce((sum, b) => sum + b.total_price_clp, 0);
 });
@@ -507,7 +507,7 @@ const pendingBookingsCount = computed(() => {
 });
 
 const totalPax = computed(() => {
-  return supabaseOrders
+  return supabaseOrders.value
     .filter(b => b.payment_status !== 'cancelled')
     .reduce((sum, b) => sum + b.pax, 0);
 });
