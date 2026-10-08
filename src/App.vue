@@ -6,9 +6,11 @@ import WhatsAppButton from '@/shared/ui/WhatsAppButton.vue'
 import MountainDivider from '@/shared/ui/MountainDivider.vue'
 import CookieConsentBanner from '@/shared/ui/CookieConsentBanner.vue'
 import { useContentStore } from '@/shared/stores/contentStore'
+import { useCartStore } from '@/shared/stores/cartStore'
 
 const route = useRoute()
 const contentStore = useContentStore()
+const cartStore = useCartStore()
 
 const isMobileMenuOpen = ref(false)
 const isScrolled = ref(false)
@@ -112,8 +114,16 @@ onUnmounted(() => {
           <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
         </nav>
 
-        <!-- Controles Desktop (CTA + Idiomas) -->
+        <!-- Controles Desktop (CTA + Idiomas + Carrito) -->
         <div class="d-none d-lg-flex align-items-center gap-3">
+          <!-- Carrito de Compras -->
+          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative me-1" @click="cartStore.toggleCart" title="Ver carrito">
+            <i class="bi bi-cart3"></i>
+            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
+              {{ cartStore.totalItems }}
+            </span>
+          </button>
+
           <!-- CTA Directo de Reserva -->
           <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase d-inline-flex align-items-center gap-2 text-decoration-none shadow-sm">
             <span>Ver Expediciones</span>
@@ -138,6 +148,15 @@ onUnmounted(() => {
 
         <!-- Controles Mobile / Tablet (d-flex d-lg-none) -->
         <div class="d-flex d-lg-none w-100 justify-content-end align-items-center gap-3">
+          
+          <!-- Carrito de Compras Móvil -->
+          <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative" @click="cartStore.toggleCart" aria-label="Ver carrito">
+            <i class="bi bi-cart3"></i>
+            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
+              {{ cartStore.totalItems }}
+            </span>
+          </button>
+
           <router-link to="/experiencias" class="btn btn-sm btn-accent-navbar fw-bold text-uppercase px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none" style="font-size: 0.72rem;">
             <span>Tours</span>
             <i class="bi bi-compass"></i>
