@@ -324,8 +324,8 @@ const DEFAULT_CONTENT: SectionContent = {
         imageUrl: '/Logo_MarcaChile_Caja Roja.webp'
       }
     },
-    advisorsTitle: 'Nuestro Equipo & Asesores',
-    advisorsSubtitle: 'Profesionales apasionados por el ecoturismo, la seguridad en la montaña y el desarrollo local',
+    advisorsTitle: 'Nuestros Guías & Equipo',
+    advisorsSubtitle: 'Profesionales y guías certificados por SERNATUR, apasionados por el ecoturismo y la seguridad en montaña',
     advisors: [
       {
         id: 'adv-1',
@@ -573,10 +573,10 @@ export const useContentStore = defineStore('content', () => {
           about: {
             ...DEFAULT_CONTENT.about,
             ...parsed.about,
-            historyImage: DEFAULT_CONTENT.about.historyImage,
-            heroImage: DEFAULT_CONTENT.about.heroImage,
+            historyImage: parsed.about?.historyImage || DEFAULT_CONTENT.about.historyImage,
+            heroImage: parsed.about?.heroImage || DEFAULT_CONTENT.about.heroImage,
             accreditations: { ...DEFAULT_CONTENT.about.accreditations, ...parsed.about?.accreditations },
-            advisors: (parsed.about?.advisors && parsed.about.advisors.length === 3 && parsed.about.advisors[0].name === 'Camilo Tamayo' && parsed.about.advisors[0].image.includes('1551632811'))
+            advisors: (Array.isArray(parsed.about?.advisors) && parsed.about.advisors.length > 0)
               ? parsed.about.advisors
               : DEFAULT_CONTENT.about.advisors
           },
@@ -709,6 +709,37 @@ export const useContentStore = defineStore('content', () => {
           createdAt: b.created_at
         }));
       }
+
+      // 3. Cargar contenidos generales del sitio (incluyendo guías y equipo) desde Supabase
+      const { data: scData, error: scError } = await supabase.from('site_content').select('data').eq('key', 'main_content').single();
+      if (!scError && scData?.data) {
+        const cloud = scData.data;
+        content.value = {
+          home: { ...DEFAULT_CONTENT.home, ...cloud.home },
+          about: {
+            ...DEFAULT_CONTENT.about,
+            ...cloud.about,
+            historyImage: cloud.about?.historyImage || DEFAULT_CONTENT.about.historyImage,
+            heroImage: cloud.about?.heroImage || DEFAULT_CONTENT.about.heroImage,
+            accreditations: { ...DEFAULT_CONTENT.about.accreditations, ...cloud.about?.accreditations },
+            advisors: (Array.isArray(cloud.about?.advisors) && cloud.about.advisors.length > 0)
+              ? cloud.about.advisors
+              : (content.value.about?.advisors || DEFAULT_CONTENT.about.advisors)
+          },
+          contact: { ...DEFAULT_CONTENT.contact, ...cloud.contact },
+          legal: { ...DEFAULT_CONTENT.legal, ...cloud.legal },
+          gateway: {
+            transbank: { ...DEFAULT_CONTENT.gateway.transbank, ...cloud.gateway?.transbank },
+            bankTransfer: { ...DEFAULT_CONTENT.gateway.bankTransfer, ...cloud.gateway?.bankTransfer },
+            emailNotifications: { ...DEFAULT_CONTENT.gateway.emailNotifications, ...cloud.gateway?.emailNotifications }
+          }
+        };
+        try {
+          localStorage.setItem('wamani_content', JSON.stringify(content.value));
+        } catch (storageErr) {
+          console.warn('Aviso: Capacidad de localStorage alcanzada, manteniendo estado en memoria y nube:', storageErr);
+        }
+      }
     } catch (e) {
       console.warn('Nota: Supabase offline o no alcanzable, usando caché local:', e);
     }
@@ -719,11 +750,15 @@ export const useContentStore = defineStore('content', () => {
 
   // Guardar en Storage y Nube
   const persist = async () => {
-    localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
-    localStorage.setItem('wamani_content', JSON.stringify(content.value));
-    localStorage.setItem('wamani_bookings', JSON.stringify(bookings.value));
-    localStorage.setItem('wamani_discounts', JSON.stringify(discountCodes.value));
-    localStorage.setItem('wamani_packages', JSON.stringify(tourPackages.value));
+    try {
+      localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
+      localStorage.setItem('wamani_content', JSON.stringify(content.value));
+      localStorage.setItem('wamani_bookings', JSON.stringify(bookings.value));
+      localStorage.setItem('wamani_discounts', JSON.stringify(discountCodes.value));
+      localStorage.setItem('wamani_packages', JSON.stringify(tourPackages.value));
+    } catch (storageErr) {
+      console.warn('Aviso: Cuota de localStorage excedida al guardar imágenes, sincronizando directamente con Supabase:', storageErr);
+    }
 
     // Si Supabase está configurado, guardar también en la nube de forma asíncrona
     if (isSupabaseConfigured && supabase) {

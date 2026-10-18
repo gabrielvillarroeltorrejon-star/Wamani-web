@@ -54,16 +54,16 @@ const handleAddToCart = () => {
   if (!experience.value) return;
   
   cartStore.addToCart({
-    tourId: experience.value.slug, // Temporal: asumiendo slug como ID por ahora
+    tourId: experience.value.id,
     tourTitle: experience.value.title,
-    scheduleId: `sched-${selectedDate.value}`, // Mock schedule ID
+    scheduleId: `sched-${selectedDate.value}`,
     scheduleDate: selectedDate.value,
-    scheduleTime: '08:00', // Mock time
+    scheduleTime: experience.value.schedule || '08:00',
     tickets: [
       {
         type: 'adult',
         quantity: paxCount.value,
-        unitPrice: experience.value.price
+        unitPrice: experience.value.pricing.basePrice
       }
     ]
   });

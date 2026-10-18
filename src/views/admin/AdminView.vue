@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useContentStore, type ServiceItem, type Advisor } from '@/shared/stores/contentStore';
 import type { Experience } from '@/entities/experience/model/schemas';
 
@@ -438,21 +438,51 @@ const openEditAdvisorModal = (adv: Advisor) => {
   showAdvisorModal.value = true;
 };
 
-const handleAdvisorImageUpload = (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (file) {
-    if (file.size > 2000000) {
-      alert('La imagen supera los 2MB.');
-      return;
-    }
+// Compresor inteligente de fotografías para evitar saturar localStorage (5MB) y acelerar la carga
+const compressImageFile = (file: File, maxWidth = 900, quality = 0.82): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      if (e.target?.result) {
-        advisorForm.value.image = e.target.result as string;
-        triggerToast('Imagen de integrante subida.');
-      }
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+          resolve(e.target?.result as string);
+        }
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
     };
+    reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+};
+
+const handleAdvisorImageUpload = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    if (file.size > 10000000) {
+      alert('La imagen supera los 10MB.');
+      return;
+    }
+    try {
+      advisorForm.value.image = await compressImageFile(file, 800, 0.85);
+      triggerToast('Fotografía de guía optimizada y cargada.');
+    } catch {
+      alert('No se pudo procesar la fotografía.');
+    }
   }
 };
 
@@ -466,15 +496,38 @@ const saveAdvisorForm = () => {
   };
 
   contentStore.saveAdvisor(advData);
-  triggerToast('¡Ficha de Integrante guardada!');
+  if (!aboutForm.value.advisors) {
+    aboutForm.value.advisors = [];
+  }
+  const idx = aboutForm.value.advisors.findIndex(a => a.id === advData.id);
+  if (idx !== -1) {
+    aboutForm.value.advisors[idx] = { ...advData };
+  } else {
+    aboutForm.value.advisors.push({ ...advData });
+  }
+  triggerToast('¡Ficha y fotografía de Guía guardada!');
   showAdvisorModal.value = false;
 };
 
 const deleteAdvisor = (id: string) => {
-  if (confirm('¿Eliminar a este integrante del equipo/advisors?')) {
+  if (confirm('¿Eliminar a este guía / integrante del equipo?')) {
     contentStore.deleteAdvisor(id);
-    triggerToast('Integrante eliminado.');
+    if (aboutForm.value.advisors) {
+      aboutForm.value.advisors = aboutForm.value.advisors.filter(a => a.id !== id);
+    }
+    triggerToast('Guía / Integrante eliminado.');
   }
+};
+
+const saveAdvisorsSectionHeader = () => {
+  contentStore.updateContent({
+    about: {
+      ...contentStore.content.about,
+      advisorsTitle: aboutForm.value.advisorsTitle,
+      advisorsSubtitle: aboutForm.value.advisorsSubtitle
+    }
+  });
+  triggerToast('¡Títulos de la sección de Guías guardados!');
 };
 
 // --- 4. CRM & BOOKINGS ---
@@ -721,39 +774,41 @@ const gatewayForm = ref({
   emailNotifications: { ...contentStore.content.gateway.emailNotifications }
 });
 
-const handleAboutHeroUpload = (event: Event) => {
+watch(() => contentStore.content.about, (newAbout) => {
+  if (newAbout) {
+    aboutForm.value = { ...newAbout, advisors: [...(newAbout.advisors || [])] };
+  }
+}, { deep: true });
+
+const handleAboutHeroUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    if (file.size > 2000000) {
-      alert('La imagen supera los 2MB.');
+    if (file.size > 10000000) {
+      alert('La imagen supera los 10MB.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        aboutForm.value.heroImage = e.target.result as string;
-        triggerToast('Imagen de cabecera de Nosotros cargada.');
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      aboutForm.value.heroImage = await compressImageFile(file, 1200, 0.85);
+      triggerToast('Imagen de cabecera de Nosotros optimizada y cargada.');
+    } catch {
+      alert('No se pudo procesar la imagen.');
+    }
   }
 };
 
-const handleAboutHistoryUpload = (event: Event) => {
+const handleAboutHistoryUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    if (file.size > 2000000) {
-      alert('La imagen supera los 2MB.');
+    if (file.size > 10000000) {
+      alert('La imagen supera los 10MB.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        aboutForm.value.historyImage = e.target.result as string;
-        triggerToast('Imagen de historia cargada.');
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      aboutForm.value.historyImage = await compressImageFile(file, 1000, 0.85);
+      triggerToast('Imagen de historia optimizada y cargada.');
+    } catch {
+      alert('No se pudo procesar la imagen.');
+    }
   }
 };
 
@@ -763,7 +818,12 @@ const saveHomeContent = () => {
 };
 
 const saveAboutContent = () => {
-  contentStore.updateContent({ about: aboutForm.value });
+  contentStore.updateContent({
+    about: {
+      ...aboutForm.value,
+      advisors: contentStore.content.about.advisors
+    }
+  });
   triggerToast('¡Contenidos de la Página Nosotros guardados!');
 };
 
@@ -1135,7 +1195,7 @@ const handleRestore = () => {
                   :class="{ active: activeTab === 'advisors' }"
                   @click="activeTab = 'advisors'"
                 >
-                  <i class="bi bi-people-fill me-2"></i>Equipo & Asesores
+                  <i class="bi bi-person-badge-fill me-2"></i>Equipo & Guías
                 </button>
               </li>
               <li class="nav-item">
@@ -1508,28 +1568,33 @@ const handleRestore = () => {
         </form>
       </div>
 
-      <!-- TAB PANEL 5: ADVISORS / EQUIPO -->
+      <!-- TAB PANEL 5: ADVISORS / EQUIPO & GUÍAS -->
       <div v-if="activeTab === 'advisors'" class="tab-pane-content">
         <div class="admin-module-card p-4 rounded-4 shadow-sm">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div>
-              <h3 class="h5 fw-bold mb-1 text-white">Gestor de Equipo & Asesores ({{ contentStore.content.about.advisors.length }})</h3>
-              <p class="small text-white opacity-85 mb-0">Administra los profesionales que componen el equipo y consejo asesor de Wamani.</p>
+              <h3 class="h5 fw-bold mb-1 text-white">Gestor de Equipo & Guías Registrados ({{ contentStore.content.about.advisors.length }})</h3>
+              <p class="small text-white opacity-85 mb-0">Administra los guías certificados y profesionales que componen el equipo oficial de Wamani.</p>
             </div>
             <button class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain" @click="openAddAdvisorModal">
-              <i class="bi bi-plus-lg me-2"></i>Añadir Integrante
+              <i class="bi bi-plus-lg me-2"></i>Añadir Guía / Integrante
             </button>
           </div>
 
-          <!-- Título y subtítulo de la sección Advisors -->
-          <div class="row g-3 mb-4 p-4 admin-sub-card rounded-4">
-            <div class="col-md-6">
-              <label class="form-label small fw-bold text-white">Título de la Sección Advisors</label>
-              <input v-model="aboutForm.advisorsTitle" type="text" class="form-control admin-input text-white" placeholder="Nuestro Equipo & Asesores">
+          <!-- Título y subtítulo de la sección Guías -->
+          <div class="row g-3 mb-4 p-4 admin-sub-card rounded-4 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label small fw-bold text-white">Título de la Sección de Guías</label>
+              <input v-model="aboutForm.advisorsTitle" type="text" class="form-control admin-input text-white" placeholder="Nuestros Guías & Equipo">
             </div>
-            <div class="col-md-6">
-              <label class="form-label small fw-bold text-white">Subtítulo de la Sección Advisors</label>
-              <input v-model="aboutForm.advisorsSubtitle" type="text" class="form-control admin-input text-white" placeholder="Profesionales apasionados...">
+            <div class="col-md-5">
+              <label class="form-label small fw-bold text-white">Subtítulo de la Sección de Guías</label>
+              <input v-model="aboutForm.advisorsSubtitle" type="text" class="form-control admin-input text-white" placeholder="Profesionales y guías certificados...">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-accent w-100 py-2 fw-bold text-dark-mountain" @click="saveAdvisorsSectionHeader">
+                <i class="bi bi-save me-1"></i>Guardar
+              </button>
             </div>
           </div>
 
@@ -1538,7 +1603,13 @@ const handleRestore = () => {
               <div class="card admin-sub-card rounded-4 shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
                 <div>
                   <div class="d-flex gap-3 align-items-center mb-3">
-                    <img :src="adv.image" :alt="adv.name" class="rounded-circle object-fit-cover flex-shrink-0 shadow" style="width: 75px; height: 75px; border: 2px solid #2DD4BF;">
+                    <img 
+                      :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
+                      :alt="adv.name" 
+                      class="rounded-circle object-fit-cover flex-shrink-0 shadow" 
+                      style="width: 75px; height: 75px; border: 2px solid #2DD4BF;"
+                      @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
+                    >
                     <div>
                       <h4 class="h5 fw-bold text-white mb-1">{{ adv.name }}</h4>
                       <span class="badge bg-accent text-dark-mountain fw-bold px-2 py-1" style="font-size: 0.72rem;">{{ adv.role }}</span>
@@ -1548,9 +1619,9 @@ const handleRestore = () => {
                 </div>
                 <div class="d-flex gap-2 pt-3 border-top border-secondary border-opacity-25">
                   <button class="btn btn-sm btn-outline-accent w-100 fw-bold" @click="openEditAdvisorModal(adv)">
-                    <i class="bi bi-pencil-square me-1"></i> Editar
+                    <i class="bi bi-pencil-square me-1"></i> Editar Ficha / Foto
                   </button>
-                  <button class="btn btn-sm btn-outline-danger px-3" @click="deleteAdvisor(adv.id)" title="Eliminar Integrante">
+                  <button class="btn btn-sm btn-outline-danger px-3" @click="deleteAdvisor(adv.id)" title="Eliminar Guía">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>

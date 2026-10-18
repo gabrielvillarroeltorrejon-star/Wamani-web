@@ -170,6 +170,51 @@ onMounted(() => {
     <!-- 4.5. Paquetes Promocionales -->
     <HomePackages />
 
+    <!-- 4.8. Nuestros Guías Certificados -->
+    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="py-5">
+      <div class="container py-4">
+        <div class="text-center mb-5">
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(4, 93, 86, 0.45); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <i class="bi bi-patch-check-fill text-accent"></i>
+            <span class="small text-white text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem;">Equipo & Guías SERNATUR</span>
+          </div>
+          <h2 class="display-4 font-brush fw-bold mb-2 text-white" style="font-family: 'Caveat', cursive !important;">
+            {{ contentStore.content.about.advisorsTitle || 'Nuestros Guías & Equipo' }}
+          </h2>
+          <p class="lead text-white fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
+            {{ contentStore.content.about.advisorsSubtitle }}
+          </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+          <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
+            <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
+                <img 
+                  :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
+                  :alt="adv.name" 
+                  class="w-100 h-100 object-fit-cover transition-all hover-scale"
+                  @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
+                />
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
+                <div class="position-absolute bottom-0 start-0 p-4 w-100">
+                  <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
+                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
+                    <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
+                  </span>
+                </div>
+              </div>
+              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
+                <p class="font-sans text-white fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">
+                  {{ adv.bio }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 5. Opiniones y Social Proof -->
     <section id="opiniones" class="py-5">
       <div class="container py-5" style="max-width: 1100px;">
@@ -397,8 +442,26 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 .max-w-700 {
   max-width: 700px;
+}
+
+.advisor-card {
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.advisor-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(45, 212, 191, 0.7);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.hover-scale {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.advisor-card:hover .hover-scale {
+  transform: scale(1.08);
 }
 </style>

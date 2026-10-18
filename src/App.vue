@@ -110,6 +110,7 @@ onUnmounted(() => {
           <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Expediciones</router-link>
           <router-link :to="{ path: '/', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
           <router-link :to="{ path: '/', hash: '#destinos' }" class="text-white text-decoration-none nav-link-custom">Destinos</router-link>
+          <router-link :to="{ path: '/', hash: '#guias' }" class="text-white text-decoration-none nav-link-custom">Guías</router-link>
           <router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white text-decoration-none nav-link-custom">Reseñas</router-link>
           <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
         </nav>
@@ -208,6 +209,9 @@ onUnmounted(() => {
                 <router-link :to="{ path: '/', hash: '#destinos' }" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-geo-alt me-2 text-accent"></i>Destinos & Catálogo
                 </router-link>
+                <router-link :to="{ path: '/', hash: '#guias' }" class="mobile-nav-link" @click="closeMobileMenu">
+                  <i class="bi bi-person-badge me-2 text-accent"></i>Nuestros Guías
+                </router-link>
                 <router-link :to="{ path: '/', hash: '#opiniones' }" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-chat-heart me-2 text-accent"></i>Reseñas de Clientes
                 </router-link>
@@ -273,6 +277,7 @@ onUnmounted(() => {
               <li><router-link to="/" class="text-white-50 text-decoration-none nav-link-custom">Inicio</router-link></li>
               <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Portafolio</router-link></li>
               <li><router-link :to="{ path: '/', hash: '#servicios' }" class="text-white-50 text-decoration-none nav-link-custom">Servicios</router-link></li>
+              <li><router-link :to="{ path: '/', hash: '#guias' }" class="text-white-50 text-decoration-none nav-link-custom">Guías</router-link></li>
               <li><router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white-50 text-decoration-none nav-link-custom">Reseñas</router-link></li>
               <li><router-link to="/nosotros" class="text-white-50 text-decoration-none nav-link-custom">Nosotros</router-link></li>
             </ul>

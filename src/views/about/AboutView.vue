@@ -85,11 +85,11 @@ const contentStore = useContentStore();
       </div>
     </section>
 
-    <!-- Equipo & Advisors (Asesores) -->
-    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" class="advisors-section py-5 my-0">
+    <!-- Equipo & Guías Certificados -->
+    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="advisors-section py-5 my-0">
       <div class="container py-4">
         <div class="text-center mb-5">
-          <h2 class="font-brush display-3 mb-2 text-white" style="font-family: 'Caveat', cursive !important;">{{ contentStore.content.about.advisorsTitle || 'Nuestro Equipo & Asesores' }}</h2>
+          <h2 class="font-brush display-3 mb-2 text-white" style="font-family: 'Caveat', cursive !important;">{{ contentStore.content.about.advisorsTitle || 'Nuestros Guías & Equipo' }}</h2>
           <p class="font-sans lead text-white fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
             {{ contentStore.content.about.advisorsSubtitle }}
           </p>
@@ -98,12 +98,19 @@ const contentStore = useContentStore();
         <div class="row g-4 justify-content-center">
           <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
             <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
-              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px;">
-                <img :src="adv.image" :alt="adv.name" class="w-100 h-100 object-fit-cover transition-all hover-scale" />
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
+                <img 
+                  :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
+                  :alt="adv.name" 
+                  class="w-100 h-100 object-fit-cover transition-all hover-scale"
+                  @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
+                />
                 <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
                 <div class="position-absolute bottom-0 start-0 p-4 w-100">
                   <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
-                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">{{ adv.role }}</span>
+                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
+                    <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
+                  </span>
                 </div>
               </div>
               <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
