@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-import { WebpayPlus, Options, Environment, IntegrationCommerceCodes, IntegrationApiKeys } from 'transbank-sdk';
 
 dotenv.config();
 
@@ -45,26 +44,31 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// 2. Configuración de Transbank Webpay Plus
-const tbEnvironment = (process.env.TRANSBANK_ENVIRONMENT || 'INTEGRATION').toUpperCase();
-let txOptions;
+// 2. Configuración de Transbank Webpay Plus REST API v1.2
+const INTEGRATION_COMMERCE_CODE = '597055555532';
+const INTEGRATION_API_KEY = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
 
-if (tbEnvironment === 'PRODUCTION') {
-  const commerceCode = process.env.TRANSBANK_COMMERCE_CODE;
-  const apiKey = process.env.TRANSBANK_API_KEY;
-  if (!commerceCode || !apiKey) {
-    console.warn('⚠️ ADVERTENCIA: Credenciales de Producción de Transbank no encontradas en .env. Se usará modo Integración de prueba.');
-    txOptions = new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration);
-  } else {
-    txOptions = new Options(commerceCode, apiKey, Environment.Production);
-    console.log('🔒 Transbank Webpay Plus configurado en MODO PRODUCCIÓN.');
+function getTransbankConfig() {
+  const tbEnvironment = (process.env.TRANSBANK_ENVIRONMENT || 'INTEGRATION').trim().toUpperCase();
+  const commerceCode = (process.env.TRANSBANK_COMMERCE_CODE || '').trim();
+  const apiKey = (process.env.TRANSBANK_API_KEY || '').trim();
+
+  if (tbEnvironment === 'PRODUCTION' && commerceCode && apiKey) {
+    return {
+      env: 'PRODUCTION',
+      baseUrl: 'https://webpay3g.transbank.cl',
+      commerceCode,
+      apiKey
+    };
   }
-} else {
-  txOptions = new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration);
-  console.log('🧪 Transbank Webpay Plus configurado en MODO INTEGRACIÓN (SANDBOX DE PRUEBA).');
-}
 
-const wpTransaction = new WebpayPlus.Transaction(txOptions);
+  return {
+    env: 'INTEGRATION',
+    baseUrl: 'https://webpay3gint.transbank.cl',
+    commerceCode: INTEGRATION_COMMERCE_CODE,
+    apiKey: INTEGRATION_API_KEY
+  };
+}
 
 // 3. Configuración de Correo Transaccional (Nodemailer)
 const createMailTransporter = () => {
@@ -205,16 +209,18 @@ const generateVoucherHTML = (booking) => {
 
 // 1. Healthcheck & Config Status
 app.get('/api/health', (req, res) => {
+  const cfg = getTransbankConfig();
   res.json({
     status: 'ok',
     service: 'Wamani Experience Backend API',
-    environment: tbEnvironment,
+    environment: cfg.env,
+    commerceCode: cfg.commerceCode,
     timestamp: new Date().toISOString()
   });
 });
 
 // 2. Crear Transacción Webpay Plus
-app.post('/api/webpay/create', async (req, res) => {
+app.post(['/api/webpay-create', '/api/webpay/create'], async (req, res) => {
   try {
     const { buyOrder, sessionId, amount, returnUrl } = req.body;
 
@@ -223,13 +229,37 @@ app.post('/api/webpay/create', async (req, res) => {
     }
 
     const roundedAmount = Math.round(Number(amount));
-    const createResponse = await wpTransaction.create(buyOrder, sessionId, roundedAmount, returnUrl);
+    const cfg = getTransbankConfig();
+
+    const tbkRes = await fetch(`${cfg.baseUrl}/rswebpaytransaction/api/webpay/v1.2/transactions`, {
+      method: 'POST',
+      headers: {
+        'Tbk-Api-Key-Id': cfg.commerceCode,
+        'Tbk-Api-Key-Secret': cfg.apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        buy_order: String(buyOrder).slice(0, 26),
+        session_id: String(sessionId).slice(0, 61),
+        amount: roundedAmount,
+        return_url: returnUrl
+      })
+    });
+
+    const createResponse = await tbkRes.json();
+    if (!tbkRes.ok || !createResponse.token) {
+      return res.status(tbkRes.status || 500).json({
+        error: 'No se pudo iniciar la transacción con Transbank Webpay Plus',
+        details: createResponse.error_message || JSON.stringify(createResponse)
+      });
+    }
 
     return res.json({
       token: createResponse.token,
       url: createResponse.url,
       buyOrder,
-      amount: roundedAmount
+      amount: roundedAmount,
+      environment: cfg.env
     });
   } catch (error) {
     console.error('Error al crear transacción Webpay:', error);
@@ -241,7 +271,7 @@ app.post('/api/webpay/create', async (req, res) => {
 });
 
 // 3. Confirmar / Validar Transacción Webpay Plus (Commit)
-app.post('/api/webpay/commit', async (req, res) => {
+app.post(['/api/webpay-commit', '/api/webpay/commit'], async (req, res) => {
   try {
     const { token_ws } = req.body;
 
@@ -249,10 +279,25 @@ app.post('/api/webpay/commit', async (req, res) => {
       return res.status(400).json({ error: 'Se requiere token_ws para confirmar la transacción' });
     }
 
-    const commitResponse = await wpTransaction.commit(token_ws);
+    const cfg = getTransbankConfig();
+    const tbkRes = await fetch(`${cfg.baseUrl}/rswebpaytransaction/api/webpay/v1.2/transactions/${encodeURIComponent(token_ws)}`, {
+      method: 'PUT',
+      headers: {
+        'Tbk-Api-Key-Id': cfg.commerceCode,
+        'Tbk-Api-Key-Secret': cfg.apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
 
-    // response_code 0 indica aprobación exitosa
-    const isApproved = commitResponse.response_code === 0;
+    const commitResponse = await tbkRes.json();
+    if (!tbkRes.ok) {
+      return res.status(tbkRes.status || 500).json({
+        error: 'Error al validar la transacción con Transbank',
+        details: commitResponse.error_message || JSON.stringify(commitResponse)
+      });
+    }
+
+    const isApproved = commitResponse.response_code === 0 && commitResponse.status === 'AUTHORIZED';
 
     return res.json({
       success: isApproved,
@@ -266,7 +311,9 @@ app.post('/api/webpay/commit', async (req, res) => {
       accountingDate: commitResponse.accounting_date,
       transactionDate: commitResponse.transaction_date,
       paymentTypeCode: commitResponse.payment_type_code,
-      installmentsNumber: commitResponse.installments_number
+      installmentsNumber: commitResponse.installments_number,
+      token: token_ws,
+      environment: cfg.env
     });
   } catch (error) {
     console.error('Error al confirmar transacción Webpay:', error);
@@ -278,7 +325,7 @@ app.post('/api/webpay/commit', async (req, res) => {
 });
 
 // 4. Enviar Comprobante / Voucher por Correo Electrónico
-app.post('/api/email/send-voucher', async (req, res) => {
+app.post(['/api/send-voucher', '/api/email/send-voucher'], async (req, res) => {
   try {
     const { booking } = req.body;
 
@@ -322,9 +369,10 @@ app.post('/api/email/send-voucher', async (req, res) => {
 
 // Inicio del Servidor
 app.listen(PORT, () => {
+  const cfg = getTransbankConfig();
   console.log(`\n======================================================`);
   console.log(`🏔️  WAMANI EXPERIENCE BACKEND API INICIADO`);
   console.log(`📡 Puerto: http://localhost:${PORT}`);
-  console.log(`💳 Pasarela: Transbank Webpay Plus (${tbEnvironment})`);
+  console.log(`💳 Pasarela: Transbank Webpay Plus (${cfg.env} - ${cfg.commerceCode})`);
   console.log(`======================================================\n`);
 });

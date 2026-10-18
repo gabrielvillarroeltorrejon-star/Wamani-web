@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useContentStore, type Passenger } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
 import { formatRut, validateRut } from '@/shared/lib/rutUtils';
 
 const route = useRoute();
+const router = useRouter();
 const contentStore = useContentStore();
 const cartStore = useCartStore();
 
@@ -14,6 +15,22 @@ const expSlug = computed(() => (route.query.slug as string) || '');
 const paxCount = computed(() => Math.max(1, Number(route.query.pax) || 1));
 const travelDate = computed(() => (route.query.date as string) || new Date(Date.now() + 86400000).toISOString().split('T')[0]);
 const initialMethod = computed(() => (route.query.method as string) || 'webpay');
+
+// Modo Prueba Verídica Transbank ($50 CLP) vía ?test50=1 o código TBK50
+const promoCodeInput = ref((route.query.test50 === '1' || route.query.monto === '50') ? 'TBK50' : '');
+const isTest50Active = ref(route.query.test50 === '1' || route.query.monto === '50');
+
+const applyTestPromo = () => {
+  const clean = promoCodeInput.value.trim().toUpperCase();
+  if (clean === 'TBK50' || clean === 'PRUEBA50' || clean === 'WAMANI50') {
+    isTest50Active.value = true;
+  } else {
+    isTest50Active.value = false;
+    if (clean) {
+      alert('Código no reconocido. Para pruebas reales de Transbank por $50 CLP usa el código: TBK50');
+    }
+  }
+};
 
 const experience = computed(() => {
   return contentStore.experiences.find(e => e.slug === expSlug.value) || contentStore.experiences[0];
@@ -38,15 +55,35 @@ const resolvedExperienceTitle = computed(() => {
   return experience.value?.title || 'Expedición Wamani';
 });
 
-const totalPrice = computed(() => {
+const baseTotalPrice = computed(() => {
   if (cartStore.items.length > 0) {
     return cartStore.totalToPay;
   }
   return (experience.value?.pricing.basePrice || 50000) * paxCount.value;
 });
 
+const totalPrice = computed(() => {
+  if (isTest50Active.value) {
+    return 50;
+  }
+  return baseTotalPrice.value;
+});
+
 const formatPrice = (val: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val);
+};
+
+const formatPaymentType = (code?: string) => {
+  const map: Record<string, string> = {
+    VD: 'Venta Débito (Redcompra)',
+    VN: 'Venta Normal Crédito (Sin Cuotas)',
+    VC: 'Venta en Cuotas Normales',
+    SI: '3 Cuotas Sin Interés',
+    S2: '2 Cuotas Sin Interés',
+    NC: 'N Cuotas Sin Interés',
+    VP: 'Venta Prepago'
+  };
+  return code ? (map[code] || `Tarjeta Bancaria (${code})`) : 'Webpay Plus';
 };
 
 // Formulario de Pasajero Principal (Titular)
@@ -138,6 +175,82 @@ const isProcessing = ref(false);
 const completedBooking = ref<any | null>(null);
 const purchaseCompleted = ref(false);
 
+// Estado de Rechazo / Anulación Transbank + Token de Evidencia
+const paymentRejected = ref(false);
+const rejectedDetails = ref<{
+  reason: string;
+  buyOrder: string;
+  token: string;
+  responseCode?: number;
+  status?: string;
+} | null>(null);
+const lastTransbankToken = ref('');
+const tokenCopied = ref(false);
+
+const copyTokenToClipboard = async (tokenStr: string) => {
+  if (!tokenStr) return;
+  try {
+    await navigator.clipboard.writeText(tokenStr);
+    tokenCopied.value = true;
+    setTimeout(() => { tokenCopied.value = false; }, 2500);
+  } catch {
+    // Fallback
+  }
+};
+
+const retryAfterRejection = () => {
+  paymentRejected.value = false;
+  rejectedDetails.value = null;
+  purchaseCompleted.value = false;
+  completedBooking.value = null;
+  termsAccepted.value = true;
+  currentStep.value = 2;
+  router.replace({
+    path: '/checkout',
+    query: {
+      ...(expSlug.value ? { slug: expSlug.value } : {}),
+      ...(travelDate.value ? { date: travelDate.value } : {}),
+      pax: String(effectivePaxCount.value),
+      method: 'webpay',
+      ...(isTest50Active.value ? { test50: '1' } : {})
+    }
+  });
+};
+
+const fillDefaultPassengerIfEmpty = () => {
+  if (!name.value.trim()) name.value = 'Camilo';
+  if (!lastname.value.trim()) lastname.value = 'Wamani';
+  if (docType.value === 'rut' && (!rut.value.trim() || !validateRut(rut.value))) {
+    rut.value = '11.111.111-1';
+    docError.value = false;
+  }
+  if (!titularAge.value) titularAge.value = 30;
+  if (!phone.value.trim()) phone.value = '+56 9 8567 3376';
+  if (!email.value.trim()) email.value = 'contacto@wamani.cl';
+  accompanyingPassengers.value.forEach((comp, idx) => {
+    if (!comp.fullName.trim()) comp.fullName = `Pasajero Acompañante ${idx + 2}`;
+    if (!comp.documentNumber.trim() || (comp.documentType === 'rut' && !validateRut(comp.documentNumber))) {
+      comp.documentType = 'rut';
+      comp.documentNumber = '11.111.111-1';
+    }
+    if (!comp.age) comp.age = 28;
+  });
+  termsAccepted.value = true;
+  paymentMethod.value = 'webpay';
+  currentStep.value = 2;
+};
+
+const quickFillTransbankTest = async () => {
+  fillDefaultPassengerIfEmpty();
+  await handleInitiatePayment();
+};
+
+const startNextWebpayTest = async () => {
+  retryAfterRejection();
+  fillDefaultPassengerIfEmpty();
+  await handleInitiatePayment();
+};
+
 // Simulador Transbank Webpay Plus
 const showWebpaySimulation = ref(false);
 const webpayCardNumber = ref('•••• •••• •••• 4242');
@@ -165,9 +278,9 @@ const fullNotes = computed(() => {
 const buildPassengersManifest = (): Passenger[] => {
   const manifest: Passenger[] = [
     {
-      fullName: `${name.value.trim()} ${lastname.value.trim()}`,
+      fullName: `${name.value.trim()} ${lastname.value.trim()}`.trim() || 'Cliente Titular',
       documentType: docType.value,
-      documentNumber: currentDocumentNumber.value,
+      documentNumber: currentDocumentNumber.value || 'N/A',
       age: titularAge.value ? Number(titularAge.value) : undefined,
       phone: phone.value.trim(),
       emergencyContactName: emergencyName.value.trim() || undefined,
@@ -190,6 +303,78 @@ const buildPassengersManifest = (): Passenger[] => {
   });
 
   return manifest;
+};
+
+// Persistencia temporal en sessionStorage antes de redirigir a Transbank
+const WEBPAY_STORAGE_KEY = 'wamani_pending_webpay_tx';
+
+const savePendingCheckoutToSession = (buyOrder: string, token: string) => {
+  try {
+    const payload = {
+      buyOrder,
+      token,
+      name: name.value,
+      lastname: lastname.value,
+      titularAge: titularAge.value,
+      docType: docType.value,
+      rut: rut.value,
+      passport: passport.value,
+      email: email.value,
+      phone: phone.value,
+      notes: notes.value,
+      emergencyName: emergencyName.value,
+      emergencyPhone: emergencyPhone.value,
+      medicalConditions: medicalConditions.value,
+      invoiceType: invoiceType.value,
+      billingBusinessName: billingBusinessName.value,
+      billingRut: billingRut.value,
+      billingActivity: billingActivity.value,
+      billingAddress: billingAddress.value,
+      accompanyingPassengers: accompanyingPassengers.value,
+      experienceTitle: resolvedExperienceTitle.value,
+      experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
+      bookingDate: travelDate.value,
+      pax: effectivePaxCount.value,
+      totalPrice: totalPrice.value,
+      isTest50Active: isTest50Active.value
+    };
+    sessionStorage.setItem(WEBPAY_STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn('No se pudo respaldar el formulario en sessionStorage:', e);
+  }
+};
+
+const restorePendingCheckoutFromSession = () => {
+  try {
+    const raw = sessionStorage.getItem(WEBPAY_STORAGE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (saved.name) name.value = saved.name;
+    if (saved.lastname) lastname.value = saved.lastname;
+    if (saved.titularAge !== undefined) titularAge.value = saved.titularAge;
+    if (saved.docType) docType.value = saved.docType;
+    if (saved.rut) rut.value = saved.rut;
+    if (saved.passport) passport.value = saved.passport;
+    if (saved.email) email.value = saved.email;
+    if (saved.phone) phone.value = saved.phone;
+    if (saved.notes) notes.value = saved.notes;
+    if (saved.emergencyName) emergencyName.value = saved.emergencyName;
+    if (saved.emergencyPhone) emergencyPhone.value = saved.emergencyPhone;
+    if (saved.medicalConditions) medicalConditions.value = saved.medicalConditions;
+    if (saved.invoiceType) invoiceType.value = saved.invoiceType;
+    if (saved.billingBusinessName) billingBusinessName.value = saved.billingBusinessName;
+    if (saved.billingRut) billingRut.value = saved.billingRut;
+    if (saved.billingActivity) billingActivity.value = saved.billingActivity;
+    if (saved.billingAddress) billingAddress.value = saved.billingAddress;
+    if (Array.isArray(saved.accompanyingPassengers)) {
+      accompanyingPassengers.value = saved.accompanyingPassengers;
+    }
+    if (saved.isTest50Active) isTest50Active.value = true;
+    return saved;
+  } catch (e) {
+    console.warn('Error al restaurar datos de sessionStorage:', e);
+    return null;
+  }
 };
 
 const goToStep2 = () => {
@@ -266,17 +451,45 @@ const triggerVoucherEmail = async (booking: any) => {
   }
 };
 
-// Manejo del Retorno de Transbank Webpay Plus (token_ws)
+// Manejo del Retorno de Transbank Webpay Plus (token_ws / TBK_TOKEN / Timeout)
 onMounted(async () => {
   const tokenWs = route.query.token_ws as string;
   const tbkToken = route.query.TBK_TOKEN as string;
+  const tbkBuyOrder = route.query.TBK_ORDEN_COMPRA as string;
 
+  // Caso 1: Usuario presionó "Anular compra y volver al comercio" en Webpay (o error de formulario)
   if (tbkToken) {
-    alert('Transacción cancelada en el portal de Transbank.');
+    const saved = restorePendingCheckoutFromSession();
+    lastTransbankToken.value = tbkToken;
+    paymentRejected.value = true;
+    rejectedDetails.value = {
+      reason: 'Transacción anulada voluntariamente en el formulario de pago de Webpay.',
+      buyOrder: tbkBuyOrder || saved?.buyOrder || generateBuyOrder(),
+      token: tbkToken,
+      status: 'ABORTED'
+    };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
+  // Caso 2: Timeout en el formulario de Webpay (>5 min sin actividad, llega TBK_ORDEN_COMPRA sin token)
+  if (!tokenWs && tbkBuyOrder) {
+    const saved = restorePendingCheckoutFromSession();
+    paymentRejected.value = true;
+    rejectedDetails.value = {
+      reason: 'Tiempo de espera agotado en el formulario de Webpay (máximo 5 minutos).',
+      buyOrder: tbkBuyOrder || saved?.buyOrder || generateBuyOrder(),
+      token: '',
+      status: 'TIMEOUT'
+    };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // Caso 3: Flujo normal con token_ws -> confirmar (commit) en el servidor
   if (tokenWs) {
+    const saved = restorePendingCheckoutFromSession();
+    lastTransbankToken.value = tokenWs;
     isProcessing.value = true;
     try {
       const res = await fetch('/api/webpay-commit', {
@@ -286,36 +499,74 @@ onMounted(async () => {
       });
       const data = await res.json();
       if (data.success && data.responseCode === 0) {
+        const customerFullName = `${name.value} ${lastname.value}`.trim() || 'Cliente Webpay';
         const newBooking = contentStore.addBooking({
-          customerName: name.value || 'Cliente Webpay',
-          customerEmail: email.value || 'cliente@wamani.cl',
+          customerName: customerFullName,
+          customerEmail: email.value || 'contacto@wamani.cl',
           customerPhone: phone.value || '+56985673376',
-          customerRut: rut.value || 'N/A',
-          experienceTitle: resolvedExperienceTitle.value,
-          experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
-          bookingDate: travelDate.value,
-          pax: effectivePaxCount.value,
-          totalPrice: data.amount || (cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value),
+          customerRut: currentDocumentNumber.value || 'N/A',
+          customerDocumentType: docType.value,
+          emergencyContactName: emergencyName.value || undefined,
+          emergencyContactPhone: emergencyPhone.value || undefined,
+          medicalConditions: medicalConditions.value || undefined,
+          invoiceType: invoiceType.value,
+          billingDetails: invoiceType.value === 'factura' ? {
+            businessName: billingBusinessName.value,
+            rut: billingRut.value,
+            activity: billingActivity.value,
+            address: billingAddress.value
+          } : undefined,
+          experienceTitle: saved?.experienceTitle || resolvedExperienceTitle.value,
+          experienceSlug: saved?.experienceSlug || (cartStore.items.length > 0 ? 'cart' : expSlug.value),
+          bookingDate: saved?.bookingDate || travelDate.value,
+          pax: saved?.pax || effectivePaxCount.value,
+          totalPrice: data.amount || saved?.totalPrice || totalPrice.value,
           cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
           status: 'confirmed',
           source: 'automatic',
           paymentMethod: 'webpay',
-          buyOrder: data.buyOrder || generateBuyOrder(),
+          buyOrder: data.buyOrder || saved?.buyOrder || generateBuyOrder(),
           authorizationCode: data.authorizationCode,
           cardLast4: data.cardDetail?.card_number || '****',
+          paymentTypeCode: data.paymentTypeCode || 'VN',
+          installmentsNumber: data.installmentsNumber ?? 0,
+          transactionDate: data.transactionDate || new Date().toISOString(),
+          transbankToken: tokenWs,
           notes: fullNotes.value,
           passengers: buildPassengersManifest()
         });
-        completedBooking.value = newBooking;
+        completedBooking.value = {
+          ...newBooking,
+          paymentTypeCode: data.paymentTypeCode || 'VN',
+          installmentsNumber: data.installmentsNumber ?? 0,
+          transactionDate: data.transactionDate || new Date().toISOString(),
+          transbankToken: tokenWs
+        };
+        sessionStorage.removeItem(WEBPAY_STORAGE_KEY);
         cartStore.clearCart();
         purchaseCompleted.value = true;
-        triggerVoucherEmail(newBooking);
+        triggerVoucherEmail(completedBooking.value);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert('Pago no aprobado por el emisor bancario de Transbank.');
+        paymentRejected.value = true;
+        rejectedDetails.value = {
+          reason: 'Pago rechazado por el banco emisor o tarjeta sin autorización.',
+          buyOrder: data.buyOrder || saved?.buyOrder || generateBuyOrder(),
+          token: tokenWs,
+          responseCode: data.responseCode,
+          status: data.status || 'FAILED'
+        };
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (e) {
       console.error('Error al confirmar transacción Webpay:', e);
+      paymentRejected.value = true;
+      rejectedDetails.value = {
+        reason: 'Error de comunicación al validar la transacción con Transbank.',
+        buyOrder: saved?.buyOrder || generateBuyOrder(),
+        token: tokenWs,
+        status: 'ERROR'
+      };
     } finally {
       isProcessing.value = false;
     }
@@ -324,17 +575,20 @@ onMounted(async () => {
 
 const handleInitiatePayment = async () => {
   if (!name.value.trim() || !lastname.value.trim() || !email.value.trim() || !phone.value.trim()) {
+    currentStep.value = 1;
     alert('Por favor, completa los nombres, apellidos, correo y teléfono del pasajero titular.');
     return;
   }
 
   if (docType.value === 'rut') {
     if (!rut.value.trim() || !validateRut(rut.value)) {
+      currentStep.value = 1;
       alert('Por favor, ingresa un RUT chileno válido (verifica el dígito verificador).');
       return;
     }
   } else {
     if (!passport.value.trim()) {
+      currentStep.value = 1;
       alert('Por favor, ingresa tu número de Pasaporte o DNI extranjero.');
       return;
     }
@@ -360,20 +614,21 @@ const handleInitiatePayment = async () => {
 
     // Iniciar transacción oficial con Transbank
     try {
-      const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${effectivePaxCount.value}&method=webpay`;
+      const returnUrl = `${window.location.origin}/checkout?slug=${expSlug.value}&date=${travelDate.value}&pax=${effectivePaxCount.value}&method=webpay${isTest50Active.value ? '&test50=1' : ''}`;
       const res = await fetch('/api/webpay-create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           buyOrder,
           sessionId: `SES-${Date.now()}`,
-          amount: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
+          amount: totalPrice.value,
           returnUrl
         })
       });
       const data = await res.json();
       if (data.token && data.url) {
         redirectedToRealWebpay = true;
+        savePendingCheckoutToSession(buyOrder, data.token);
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = data.url;
@@ -418,7 +673,7 @@ const handleInitiatePayment = async () => {
       experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
       bookingDate: travelDate.value,
       pax: effectivePaxCount.value,
-      totalPrice: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
+      totalPrice: totalPrice.value,
       cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
       status: 'pending',
       source: 'automatic',
@@ -542,7 +797,15 @@ const printVoucher = () => {
                 <div class="col-12 border-top border-secondary border-opacity-25 pt-3">
                   <div class="row g-2">
                     <div class="col-6">
-                      <span class="small text-white opacity-75 d-block">Tour / Experiencia</span>
+                      <span class="small text-white opacity-75 d-block">Comercio Oficial</span>
+                      <strong class="text-white">{{ contentStore.content.legal.businessName || 'Wamani Experience SpA' }}</strong>
+                    </div>
+                    <div class="col-6 text-end">
+                      <span class="small text-white opacity-75 d-block">Moneda</span>
+                      <strong class="text-white">Pesos Chilenos (CLP)</strong>
+                    </div>
+                    <div class="col-6">
+                      <span class="small text-white opacity-75 d-block">Tour / Descripción del Servicio</span>
                       <strong class="text-white">{{ completedBooking.experienceTitle }}</strong>
                     </div>
                     <div class="col-6 text-end">
@@ -554,13 +817,48 @@ const printVoucher = () => {
                       <span class="text-white">{{ completedBooking.customerName }} ({{ completedBooking.customerRut }})</span>
                     </div>
                     <div class="col-6 text-end">
-                      <span class="small text-white opacity-75 d-block">Total Pagado / Pactado</span>
-                      <strong class="text-accent fs-5">{{ formatPrice(completedBooking.totalPrice) }}</strong>
+                      <span class="small text-white opacity-75 d-block">Total Pagado / Pactado (CLP)</span>
+                      <strong class="text-accent fs-5">{{ formatPrice(completedBooking.totalPrice) }} CLP</strong>
                     </div>
-                    <div v-if="completedBooking.authorizationCode" class="col-12 border-top border-secondary border-opacity-25 pt-2 mt-2">
-                      <span class="small text-white opacity-75">Código de Autorización Transbank: </span>
-                      <strong class="text-accent font-monospace">{{ completedBooking.authorizationCode }}</strong>
-                      <span class="small text-white opacity-75 ms-3">Tarjeta: **** {{ completedBooking.cardLast4 }}</span>
+                    <div v-if="completedBooking.authorizationCode" class="col-12 border-top border-secondary border-opacity-25 pt-3 mt-2">
+                      <div class="row g-2 small">
+                        <div class="col-sm-6">
+                          <span class="text-white opacity-75 d-block">Código de Autorización:</span>
+                          <strong class="text-accent font-monospace fs-6">{{ completedBooking.authorizationCode }}</strong>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                          <span class="text-white opacity-75 d-block">Tarjeta Bancaria (Últimos 4 dígitos):</span>
+                          <strong class="text-white font-monospace">**** {{ completedBooking.cardLast4 }}</strong>
+                        </div>
+                        <div class="col-sm-6">
+                          <span class="text-white opacity-75 d-block">Tipo de Pago:</span>
+                          <strong class="text-white">{{ formatPaymentType(completedBooking.paymentTypeCode) }}</strong>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                          <span class="text-white opacity-75 d-block">Cantidad de Cuotas:</span>
+                          <strong class="text-white">{{ completedBooking.installmentsNumber || 0 }} {{ (completedBooking.installmentsNumber || 0) === 0 ? '(Sin cuotas)' : 'cuotas' }}</strong>
+                        </div>
+                        <div class="col-12">
+                          <span class="text-white opacity-75">Fecha y Hora de Transacción: </span>
+                          <strong class="text-white font-monospace">{{ completedBooking.transactionDate || new Date().toLocaleString('es-CL') }}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Token de Transacción Transbank (Para Validación Técnica / Comprobante) -->
+                    <div v-if="completedBooking.transbankToken || lastTransbankToken" class="col-12 border-top border-secondary border-opacity-25 pt-3 mt-2">
+                      <div class="p-3 rounded-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(15, 160, 149, 0.15); border: 1px dashed #2DD4BF;">
+                        <div class="overflow-hidden">
+                          <span class="badge bg-accent text-dark-mountain fw-bold mb-1" style="font-size: 0.68rem;">TOKEN WEBPAY (token_ws)</span>
+                          <div class="font-monospace small text-white text-truncate" style="font-size: 0.78rem;">
+                            {{ completedBooking.transbankToken || lastTransbankToken }}
+                          </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-accent fw-bold text-dark flex-shrink-0" @click="copyTokenToClipboard(completedBooking.transbankToken || lastTransbankToken)">
+                          <i class="bi" :class="tokenCopied ? 'bi-check2-all' : 'bi-clipboard-check'"></i>
+                          {{ tokenCopied ? '¡Token Copiado!' : 'Copiar Token' }}
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Nómina Completa de Pasajeros Registrados en el Voucher -->
@@ -627,6 +925,9 @@ const printVoucher = () => {
 
             <!-- Botones de Acción Posterior -->
             <div class="d-flex flex-wrap gap-3 justify-content-center pt-2">
+              <button type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain d-flex align-items-center gap-2 shadow" @click="startNextWebpayTest">
+                <i class="bi bi-lightning-charge-fill fs-5"></i> Iniciar Siguiente Prueba Webpay
+              </button>
               <button class="btn btn-whatsapp-custom px-4 py-3 fw-bold d-flex align-items-center gap-2 shadow" @click="sendWhatsAppConfirmation">
                 <i class="bi bi-whatsapp fs-5"></i> Enviar Comprobante a WhatsApp
               </button>
@@ -638,6 +939,65 @@ const printVoucher = () => {
               </router-link>
             </div>
 
+          </div>
+        </div>
+      </div>
+
+      <!-- PANTALLA OFICIAL DE TRANSACCIÓN RECHAZADA O ANULADA (NORMATIVA TRANSBANK) -->
+      <div v-else-if="paymentRejected && rejectedDetails" class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+          <div class="voucher-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 2px solid #EF4444;">
+            <div class="text-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger text-white p-3 mb-3 shadow" style="width: 70px; height: 70px;">
+                <i class="bi bi-x-octagon-fill fs-1"></i>
+              </div>
+              <h2 class="h3 fw-bold text-white mb-1">
+                Orden de Compra {{ rejectedDetails.buyOrder }} {{ rejectedDetails.status === 'ABORTED' ? 'Anulada' : 'Rechazada' }}
+              </h2>
+              <p class="text-white opacity-85 mb-0">
+                {{ rejectedDetails.reason }}
+              </p>
+            </div>
+
+            <div class="p-4 rounded-4 mb-4" style="background-color: #022C2A; border: 1px solid rgba(239, 68, 68, 0.4);">
+              <h4 class="h6 fw-bold text-warning mb-2">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Las posibles causas de este rechazo son:
+              </h4>
+              <ul class="small text-white opacity-90 lh-lg mb-0">
+                <li>Error en el ingreso de los datos de su tarjeta de crédito o débito (fecha y/o código de seguridad).</li>
+                <li>Su tarjeta de crédito o débito no cuenta con saldo suficiente.</li>
+                <li>Tarjeta aún no habilitada en el sistema financiero.</li>
+                <li>Transacción anulada voluntariamente por el titular en el formulario de Webpay.</li>
+              </ul>
+            </div>
+
+            <!-- Token de Transacción para Formulario de Validación de Transbank -->
+            <div v-if="rejectedDetails.token" class="p-3 rounded-3 mb-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(15, 160, 149, 0.15); border: 1px dashed #2DD4BF;">
+              <div class="overflow-hidden">
+                <span class="badge bg-accent text-dark-mountain fw-bold mb-1" style="font-size: 0.68rem;">
+                  TOKEN TRANSBANK ({{ rejectedDetails.status === 'ABORTED' ? 'TBK_TOKEN - Cancelada' : 'token_ws - Rechazada' }})
+                </span>
+                <div class="font-monospace small text-white text-truncate" style="font-size: 0.78rem;">
+                  {{ rejectedDetails.token }}
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-accent fw-bold text-dark flex-shrink-0" @click="copyTokenToClipboard(rejectedDetails.token)">
+                <i class="bi" :class="tokenCopied ? 'bi-check2-all' : 'bi-clipboard-check'"></i>
+                {{ tokenCopied ? '¡Token Copiado!' : 'Copiar Token' }}
+              </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+              <button type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain" @click="startNextWebpayTest">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Iniciar Siguiente Prueba Webpay (Directo)
+              </button>
+              <button type="button" class="btn btn-outline-accent px-4 py-3 fw-bold" @click="retryAfterRejection">
+                <i class="bi bi-arrow-repeat me-1"></i> Volver al Checkout
+              </button>
+              <router-link to="/" class="btn btn-outline-light px-4 py-3 fw-bold">
+                Volver al Inicio
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -700,10 +1060,10 @@ const printVoucher = () => {
             <div class="d-flex align-items-center gap-3">
               <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(45, 212, 191, 0.3);">
               <div class="flex-grow-1">
-                <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ experience?.title }}</h4>
+                <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ resolvedExperienceTitle }}</h4>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                   <span class="small text-white opacity-85" style="font-size: 0.78rem;"><i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} • {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'viajero' : 'viajeros' }}</span>
-                  <strong class="text-accent fs-6 font-monospace">{{ formatPrice(cartStore.totalToPay) }}</strong>
+                  <strong class="text-accent fs-6 font-monospace">{{ formatPrice(totalPrice) }}</strong>
                 </div>
               </div>
             </div>
@@ -712,7 +1072,7 @@ const printVoucher = () => {
 
         <!-- COLUMNA IZQUIERDA: FORMULARIO DEL CLIENTE -->
         <div class="col-12 col-lg-8">
-          <form @submit.prevent="handleInitiatePayment" class="d-flex flex-column gap-4">
+          <form @submit.prevent="handleInitiatePayment" novalidate class="d-flex flex-column gap-4">
             
             <!-- PASO 1: DATOS DE LOS PASAJEROS -->
             <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
@@ -720,9 +1080,15 @@ const printVoucher = () => {
                 <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
                   <i class="bi bi-person-circle fs-4"></i> 1. Pasajero Titular (Responsable de la Reserva)
                 </h3>
-                <span class="badge bg-dark text-accent border border-accent border-opacity-25 px-3 py-2 font-monospace">
-                  <i class="bi bi-people-fill me-1"></i> Total: {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'PAX' : 'PAX' }}
-                </span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <button type="button" class="btn btn-sm btn-accent fw-bold text-dark-mountain d-flex align-items-center gap-1 shadow-sm" @click="quickFillTransbankTest" :disabled="isProcessing">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>{{ isProcessing ? 'Redirigiendo a Webpay...' : 'Autocompletar e Ir a Webpay Plus' }}</span>
+                  </button>
+                  <span class="badge bg-dark text-accent border border-accent border-opacity-25 px-3 py-2 font-monospace">
+                    <i class="bi bi-people-fill me-1"></i> Total: {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'PAX' : 'PAX' }}
+                  </span>
+                </div>
               </div>
               
               <div class="row g-3">
@@ -1088,7 +1454,7 @@ const printVoucher = () => {
               </div>
 
               <!-- BOTÓN DE ACCIÓN PRINCIPAL -->
-              <button type="submit" class="btn btn-accent w-100 py-3 fw-bold fs-5 text-dark-mountain shadow-lg d-flex align-items-center justify-content-center gap-2" :disabled="isProcessing">
+              <button type="button" @click="handleInitiatePayment" class="btn btn-accent w-100 py-3 fw-bold fs-5 text-dark-mountain shadow-lg d-flex align-items-center justify-content-center gap-2" :disabled="isProcessing">
                 <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
                 <i v-else class="bi" :class="paymentMethod === 'webpay' ? 'bi-credit-card-2-front-fill' : 'bi-check-circle-fill'"></i>
                 {{ isProcessing ? 'Conectando con Transbank...' : (paymentMethod === 'webpay' ? `Pagar con Webpay Plus (${formatPrice(totalPrice)})` : `Confirmar Reserva por Transferencia (${formatPrice(totalPrice)})`) }}
@@ -1107,24 +1473,39 @@ const printVoucher = () => {
               <i class="bi bi-bag-check-fill"></i> Resumen de la Orden
             </h3>
 
-            ﻿<div v-for="item in cartStore.items" :key="item.id" class="d-flex gap-3 mb-3 align-items-center border-bottom border-secondary border-opacity-25 pb-3">
+            <template v-if="cartStore.items.length > 0">
+              <div v-for="item in cartStore.items" :key="item.id" class="d-flex gap-3 mb-3 align-items-center border-bottom border-secondary border-opacity-25 pb-3">
+                <div>
+                  <h4 class="h6 fw-bold text-white mb-1">{{ item.tourTitle }}</h4>
+                  <p class="small text-white opacity-75 mb-0">
+                    <i class="bi bi-calendar3 me-1 text-accent"></i>{{ item.scheduleDate }} &nbsp; 
+                    <i class="bi bi-people me-1 text-accent"></i> {{ item.tickets.reduce((sum, t) => sum + t.quantity, 0) }} pax
+                  </p>
+                </div>
+              </div>
+            </template>
+            <div v-else class="d-flex gap-3 mb-3 align-items-center border-bottom border-secondary border-opacity-25 pb-3">
               <div>
-                <h4 class="h6 fw-bold text-white mb-1">{{ item.tourTitle }}</h4>
+                <h4 class="h6 fw-bold text-white mb-1">{{ resolvedExperienceTitle }}</h4>
                 <p class="small text-white opacity-75 mb-0">
-                  <i class="bi bi-calendar3 me-1 text-accent"></i>{{ item.scheduleDate }} &nbsp; 
-                  <i class="bi bi-people me-1 text-accent"></i> {{ item.tickets.reduce((sum, t) => sum + t.quantity, 0) }} pax
+                  <i class="bi bi-calendar3 me-1 text-accent"></i>{{ travelDate }} &nbsp; 
+                  <i class="bi bi-people me-1 text-accent"></i> {{ effectivePaxCount }} pax
                 </p>
               </div>
             </div>
 
-            <div class="summary-breakdown p-3 rounded-3 mb-4" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+            <div class="summary-breakdown p-3 rounded-3 mb-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
               <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-white opacity-75">Subtotal:</span>
-                <span class="fw-bold text-white">{{ formatPrice(cartStore.subtotal) }}</span>
+                <span class="fw-bold text-white">{{ formatPrice(baseTotalPrice) }}</span>
               </div>
-              <div v-if="cartStore.discountAmount > 0" class="d-flex justify-content-between mb-2 small">
+              <div v-if="cartStore.discountAmount > 0 && !isTest50Active" class="d-flex justify-content-between mb-2 small">
                 <span class="text-white opacity-75">Descuento aplicado:</span>
                 <span class="fw-bold text-success">- {{ formatPrice(cartStore.discountAmount) }}</span>
+              </div>
+              <div v-if="isTest50Active" class="d-flex justify-content-between mb-2 small">
+                <span class="text-accent fw-bold"><i class="bi bi-lightning-charge-fill me-1"></i>Modo Prueba Real Transbank:</span>
+                <span class="fw-bold text-accent">$50 CLP</span>
               </div>
 
               <div class="d-flex justify-content-between mb-2 small">
@@ -1141,15 +1522,45 @@ const printVoucher = () => {
               </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-end mb-4 pt-2">
+            <!-- Código de Convenio / Prueba Transbank ($50 CLP) -->
+            <div class="mb-3">
+              <div class="input-group input-group-sm">
+                <input 
+                  v-model="promoCodeInput" 
+                  type="text" 
+                  class="form-control bg-dark text-white border-secondary font-monospace" 
+                  placeholder="Código convenio o prueba (ej: TBK50)"
+                  @keyup.enter="applyTestPromo"
+                >
+                <button type="button" class="btn btn-outline-accent fw-bold px-3" @click="applyTestPromo">
+                  Aplicar
+                </button>
+              </div>
+              <span v-if="isTest50Active" class="small text-accent d-block mt-1" style="font-size: 0.74rem;">
+                <i class="bi bi-check-circle-fill me-1"></i> Tarifa de prueba real de $50 CLP activada.
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-end mb-3 pt-2">
               <div>
                 <span class="small text-white opacity-75 d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.08em;">Monto Total Final</span>
-                <span class="fs-3 fw-bold text-accent font-monospace">{{ formatPrice(cartStore.totalToPay) }}</span>
+                <span class="fs-3 fw-bold text-accent font-monospace">{{ formatPrice(totalPrice) }}</span>
               </div>
               <div class="text-end small text-white opacity-75">
                 <span>CLP</span>
               </div>
             </div>
+
+            <button 
+              type="button" 
+              class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow mb-3 d-flex align-items-center justify-content-center gap-2" 
+              @click="quickFillTransbankTest"
+              :disabled="isProcessing"
+            >
+              <span v-if="isProcessing" class="spinner-border spinner-border-sm"></span>
+              <i v-else class="bi bi-credit-card-2-front-fill fs-5"></i>
+              <span>{{ isProcessing ? 'Conectando con Webpay...' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})` }}</span>
+            </button>
 
             <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #033E3B;">
               <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg" style="font-size: 0.78rem;">

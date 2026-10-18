@@ -122,13 +122,16 @@ const addToCartAction = () => {
 
 const goToWebpay = () => {
   if (!selectedExperience.value) return;
+  const slug = selectedExperience.value.slug;
+  const date = modalDate.value;
+  const pax = modalPax.value.toString();
   closeModal();
   router.push({
     path: '/checkout',
     query: {
-      slug: selectedExperience.value.slug,
-      date: modalDate.value,
-      pax: modalPax.value.toString(),
+      slug,
+      date,
+      pax,
       method: 'webpay'
     }
   });

@@ -69,6 +69,19 @@ const handleAddToCart = () => {
   });
 };
 
+const handleGoToWebpay = () => {
+  if (!experience.value) return;
+  router.push({
+    path: '/checkout',
+    query: {
+      slug: experience.value.slug,
+      date: selectedDate.value,
+      pax: paxCount.value.toString(),
+      method: 'webpay'
+    }
+  });
+};
+
 const handleBookWhatsApp = () => {
   if (!experience.value) return;
 
@@ -364,7 +377,10 @@ const handleBookWhatsApp = () => {
 
               <!-- Acciones de Pago -->
               <div class="d-flex flex-column gap-3">
-                <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all kowalski-btn" @click="handleAddToCart">
+                <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all kowalski-btn" @click="handleGoToWebpay">
+                  <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
+                </button>
+                <button class="btn btn-outline-secondary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all kowalski-btn" @click="handleAddToCart">
                   <i class="bi bi-cart-plus-fill fs-5"></i> Añadir al Carrito
                 </button>
                 <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all kowalski-btn" @click="handleBookWhatsApp">

@@ -136,8 +136,12 @@ const verTours = () => {
 
 const goToCheckout = () => {
   cartStore.isCartOpen = false;
-  // TODO: Navigate to the unified checkout page when Sprint 3 is ready
-  alert('Redirigiendo al checkout unificado...');
+  router.push({
+    path: '/checkout',
+    query: {
+      method: 'webpay'
+    }
+  });
 };
 </script>
 
