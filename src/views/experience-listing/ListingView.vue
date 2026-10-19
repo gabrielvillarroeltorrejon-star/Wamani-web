@@ -26,13 +26,12 @@ const selectedDifficulty = ref('');
 const selectedCity = ref('');
 const selectedZone = ref('all');
 
-// Macrozonas de Chile
+// Macrozonas de Chile (Zona Norte desactivada y ocultada según Manual de Marca)
 const macrozones = [
   { id: 'all', label: 'Todo Chile', icon: 'bi-globe-americas' },
   { id: 'sur', label: 'Lagos & Volcanes (Sur)', icon: 'bi-tree-fill' },
-  { id: 'norte', label: 'Norte & Atacama', icon: 'bi-sun-fill' },
-  { id: 'patagonia', label: 'Patagonia & Glaciares', icon: 'bi-snow2' },
-  { id: 'centro', label: 'Zona Central & Cordillera', icon: 'bi-compass-fill' }
+  { id: 'centro', label: 'Zona Central & Cordillera', icon: 'bi-compass-fill' },
+  { id: 'patagonia', label: 'Patagonia & Glaciares', icon: 'bi-snow2' }
 ];
 
 // Modal Detalle y Reserva
@@ -40,25 +39,35 @@ const selectedExperience = ref<Experience | null>(null);
 const modalDate = ref(defaultNextDay);
 const modalPax = ref(1);
 
-// Ciudades únicas
+// Ciudades únicas (excluyendo Zona Norte)
 const cities = computed(() => {
-  const allDestinations = contentStore.experiences.map(e => e.destinationId);
+  const allDestinations = contentStore.experiences
+    .filter(e => e.macroZone !== 'norte' && e.destinationId !== 'dest-atacama')
+    .map(e => e.destinationId);
   return [...new Set(allDestinations)];
 });
 
 const getCityName = (id: string) => {
   if (id === 'dest-pucon') return 'Pucón';
   if (id === 'dest-panguipulli') return 'Panguipulli';
-  if (id === 'dest-atacama') return 'San Pedro de Atacama';
   if (id === 'dest-patagonia') return 'Torres del Paine';
   if (id === 'dest-cajon-maipo') return 'Cajón del Maipo (Santiago)';
   return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
-const featuredExperiences = computed(() => contentStore.experiences.slice(0, 9));
+const featuredExperiences = computed(() => 
+  contentStore.experiences
+    .filter(e => e.macroZone !== 'norte' && e.destinationId !== 'dest-atacama')
+    .slice(0, 9)
+);
 
 const filteredExperiences = computed(() => {
   return contentStore.experiences.filter(exp => {
+    // REGLA: Ocultar y desactivar visualmente la Zona Norte
+    if (exp.macroZone === 'norte' || exp.destinationId === 'dest-atacama') {
+      return false;
+    }
+
     const matchesSearch = searchQuery.value ? (
       exp.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
       exp.tags.some(t => t.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
@@ -70,7 +79,6 @@ const filteredExperiences = computed(() => {
     // Filtro por macrozona de Chile
     const matchesZone = selectedZone.value === 'all' || exp.macroZone === selectedZone.value || (
       selectedZone.value === 'sur' && ['dest-pucon', 'dest-panguipulli'].includes(exp.destinationId) ||
-      selectedZone.value === 'norte' && exp.destinationId === 'dest-atacama' ||
       selectedZone.value === 'patagonia' && exp.destinationId === 'dest-patagonia' ||
       selectedZone.value === 'centro' && exp.destinationId === 'dest-cajon-maipo'
     );

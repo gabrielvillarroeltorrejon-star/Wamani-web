@@ -21,16 +21,17 @@ const contentStore = useContentStore();
         <div class="row align-items-center g-5">
           <div class="col-lg-6 position-relative">
             <!-- Bloque decorativo detrás de la imagen -->
-            <div class="bg-accent position-absolute top-0 start-0 w-75 h-100" style="background-color: #0FA095; margin-left: -20px; margin-top: -20px; z-index: 0;"></div>
+            <div class="position-absolute top-0 start-0 w-75 h-100 rounded-4" style="background-color: #E7DCC3; margin-left: -20px; margin-top: -20px; z-index: 0;"></div>
             <img :src="contentStore.content.about.historyImage" :alt="contentStore.content.about.historyTitle" class="img-fluid rounded-4 shadow-lg object-fit-cover w-100 position-relative z-1 history-main-img">
           </div>
           <div class="col-lg-6 px-lg-5">
-            <h2 class="font-brush display-2 mb-3 text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">{{ contentStore.content.about.historyTitle }}</h2>
-            <h3 class="font-brush display-4 mb-4 text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">{{ contentStore.content.about.historySubtitle }}</h3>
-            <p class="font-sans lead text-white fw-medium lh-lg mb-4" style="color: #FFFFFF !important; font-size: 1.15rem;">
+            <span class="small text-uppercase fw-bold d-block mb-2" style="color: #147E79; letter-spacing: 0.12em;">Nuestra Historia</span>
+            <h2 class="display-4 fw-bold mb-2 font-sans" style="color: #147E79;">{{ contentStore.content.about.historyTitle }}</h2>
+            <h3 class="fs-2 mb-4 brand-slogan" style="color: #147E79;">{{ contentStore.content.about.historySubtitle }}</h3>
+            <p class="font-sans lead fw-medium lh-lg mb-4" style="color: #4C4C4C !important; font-size: 1.15rem;">
               {{ contentStore.content.about.historyText1 }}
             </p>
-            <p class="font-sans text-white fw-medium lh-lg" style="color: #FFFFFF !important; font-size: 1.05rem;">
+            <p class="font-sans fw-medium lh-lg" style="color: #4C4C4C !important; font-size: 1.05rem;">
               {{ contentStore.content.about.historyText2 }}
             </p>
           </div>
@@ -39,21 +40,19 @@ const contentStore = useContentStore();
     </section>
 
     <!-- Misión y Visión (Contenedores Cuadrados y Centrados) -->
-    <section class="mission-vision-section py-5">
+    <section class="mission-vision-section py-5" style="background-color: #FAF8F5;">
       <div class="container py-4">
         <div class="row g-4 g-lg-5 justify-content-center">
           
           <!-- Contenedor 1: Nuestra Misión -->
           <div class="col-12 col-md-6 col-lg-6 col-xl-5 d-flex justify-content-center">
             <div class="mv-card p-4 p-md-5 w-100 position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center text-center">
-              <div class="mv-card-glow"></div>
-              
               <div class="position-relative z-2 d-flex flex-column align-items-center justify-content-center">
-                <h3 class="font-brush display-3 mb-2 text-white title-glow">
+                <h3 class="display-5 mb-2 text-white font-sans fw-bold">
                   Nuestra Misión
                 </h3>
                 
-                <div class="mv-divider mb-4 mx-auto"></div>
+                <div class="mv-divider mb-4 mx-auto" style="background: #E7DCC3;"></div>
 
                 <p class="font-sans text-white fw-medium lh-lg mb-0 mv-text" style="color: #FFFFFF !important; font-size: 1.05rem;">
                   {{ contentStore.content.about.mission }}
@@ -65,14 +64,12 @@ const contentStore = useContentStore();
           <!-- Contenedor 2: Nuestra Visión -->
           <div class="col-12 col-md-6 col-lg-6 col-xl-5 d-flex justify-content-center">
             <div class="mv-card p-4 p-md-5 w-100 position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center text-center">
-              <div class="mv-card-glow"></div>
-              
               <div class="position-relative z-2 d-flex flex-column align-items-center justify-content-center">
-                <h3 class="font-brush display-3 mb-2 text-white title-glow">
+                <h3 class="display-5 mb-2 text-white font-sans fw-bold">
                   Nuestra Visión
                 </h3>
 
-                <div class="mv-divider mb-4 mx-auto"></div>
+                <div class="mv-divider mb-4 mx-auto" style="background: #E7DCC3;"></div>
 
                 <p class="font-sans text-white fw-medium lh-lg mb-0 mv-text" style="color: #FFFFFF !important; font-size: 1.05rem;">
                   {{ contentStore.content.about.vision }}
@@ -86,35 +83,39 @@ const contentStore = useContentStore();
     </section>
 
     <!-- Equipo & Guías Certificados -->
-    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="advisors-section py-5 my-0">
+    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="advisors-section py-5 my-0" style="background-color: #FFFFFF;">
       <div class="container py-4">
         <div class="text-center mb-5">
-          <h2 class="font-brush display-3 mb-2 text-white" style="font-family: 'Caveat', cursive !important;">{{ contentStore.content.about.advisorsTitle || 'Nuestros Guías & Equipo' }}</h2>
-          <p class="font-sans lead text-white fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(20, 126, 121, 0.08); border: 1px solid rgba(20, 126, 121, 0.2);">
+            <i class="bi bi-people-fill" style="color: #147E79;"></i>
+            <span class="small text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem; color: #147E79;">Equipo & Fundadores</span>
+          </div>
+          <h2 class="display-5 font-sans fw-bold mb-2" style="color: #147E79;">{{ contentStore.content.about.advisorsTitle || 'Nuestros Guías & Equipo' }}</h2>
+          <p class="font-sans lead fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #4C4C4C !important;">
             {{ contentStore.content.about.advisorsSubtitle }}
           </p>
         </div>
 
         <div class="row g-4 justify-content-center">
           <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
-            <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
-              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
+            <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-sm position-relative d-flex flex-column border-0" style="background-color: #FFFFFF;">
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #E7DCC3;">
                 <img 
                   :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
                   :alt="adv.name" 
                   class="w-100 h-100 object-fit-cover transition-all hover-scale"
                   @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
                 />
-                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(20, 126, 121, 0.95) 0%, rgba(20, 126, 121, 0.3) 50%, transparent 100%);"></div>
                 <div class="position-absolute bottom-0 start-0 p-4 w-100">
-                  <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
-                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
+                  <h3 class="h4 text-white mb-0 font-sans fw-bold">{{ adv.name }}</h3>
+                  <span class="font-sans text-uppercase tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #E7DCC3 !important; letter-spacing: 0.08em;">
                     <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
                   </span>
                 </div>
               </div>
-              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
-                <p class="font-sans text-white fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">
+              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="border: 1px solid rgba(231, 220, 195, 0.5); border-top: none;">
+                <p class="font-sans fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #4C4C4C !important;">
                   {{ adv.bio }}
                 </p>
               </div>
