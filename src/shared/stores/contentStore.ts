@@ -374,9 +374,9 @@ const DEFAULT_CONTENT: SectionContent = {
   },
   gateway: {
     transbank: {
-      environment: 'INTEGRATION',
-      commerceCode: '53104647',
-      apiKey: '579B532A7440BB063079DED945F63E22AFD11A5FD53A474E83623606EA7AB382',
+      environment: 'PRODUCTION',
+      commerceCode: '597053104647',
+      apiKey: '07845f9a-aefe-442f-9fb9-054bfca3629f',
       isEnabled: true
     },
     bankTransfer: {

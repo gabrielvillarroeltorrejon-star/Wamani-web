@@ -1,3 +1,5 @@
+const PRODUCTION_COMMERCE_CODE = '597053104647';
+const PRODUCTION_API_KEY = '07845f9a-aefe-442f-9fb9-054bfca3629f';
 const INTEGRATION_COMMERCE_CODE = '597055555532';
 const INTEGRATION_API_KEY = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
 
@@ -21,22 +23,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Se requiere token_ws para confirmar la transacción' });
     }
 
-    const tbEnvironment = (process.env.TRANSBANK_ENVIRONMENT || 'INTEGRATION').toUpperCase();
-    const isProduction =
-      tbEnvironment === 'PRODUCTION' &&
-      Boolean(process.env.TRANSBANK_COMMERCE_CODE) &&
-      Boolean(process.env.TRANSBANK_API_KEY);
+    const forceIntegration = process.env.FORCE_INTEGRATION === 'true';
+    const isProduction = !forceIntegration;
 
     const baseUrl = isProduction
       ? 'https://webpay3g.transbank.cl'
       : 'https://webpay3gint.transbank.cl';
 
+    const envKey = (process.env.TRANSBANK_API_KEY || '').trim();
+    const useEnvKey = envKey && !envKey.startsWith('579B532A');
+
     const commerceCode = isProduction
-      ? process.env.TRANSBANK_COMMERCE_CODE.trim()
+      ? (process.env.TRANSBANK_COMMERCE_CODE || PRODUCTION_COMMERCE_CODE).trim()
       : INTEGRATION_COMMERCE_CODE;
 
     const apiKey = isProduction
-      ? process.env.TRANSBANK_API_KEY.trim()
+      ? (useEnvKey ? envKey : PRODUCTION_API_KEY)
       : INTEGRATION_API_KEY;
 
     const tbkRes = await fetch(

@@ -1522,9 +1522,9 @@ const printVoucher = () => {
               </div>
             </div>
 
-            <!-- Código de Convenio / Prueba Transbank ($50 CLP) -->
+            <!-- Código de Convenio / Producto de Prueba Transbank ($50 CLP) -->
             <div class="mb-3">
-              <div class="input-group input-group-sm">
+              <div class="input-group input-group-sm mb-2">
                 <input 
                   v-model="promoCodeInput" 
                   type="text" 
@@ -1536,9 +1536,15 @@ const printVoucher = () => {
                   Aplicar
                 </button>
               </div>
-              <span v-if="isTest50Active" class="small text-accent d-block mt-1" style="font-size: 0.74rem;">
-                <i class="bi bi-check-circle-fill me-1"></i> Tarifa de prueba real de $50 CLP activada.
-              </span>
+              <button 
+                type="button" 
+                class="btn btn-sm w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3"
+                :class="isTest50Active ? 'btn-success text-white' : 'btn-outline-accent'"
+                @click="isTest50Active = !isTest50Active; promoCodeInput = isTest50Active ? 'TBK50' : ''"
+              >
+                <i class="bi" :class="isTest50Active ? 'bi-check-circle-fill' : 'bi-lightning-charge-fill'"></i>
+                <span>{{ isTest50Active ? 'Producto Prueba $50 CLP Activado (Clic para quitar)' : 'Activar Producto de Prueba Transbank ($50 CLP)' }}</span>
+              </button>
             </div>
 
             <div class="d-flex justify-content-between align-items-end mb-3 pt-2">

@@ -45,28 +45,30 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // 2. Configuración de Transbank Webpay Plus REST API v1.2
+const PRODUCTION_COMMERCE_CODE = '597053104647';
+const PRODUCTION_API_KEY = '07845f9a-aefe-442f-9fb9-054bfca3629f';
 const INTEGRATION_COMMERCE_CODE = '597055555532';
 const INTEGRATION_API_KEY = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
 
 function getTransbankConfig() {
-  const tbEnvironment = (process.env.TRANSBANK_ENVIRONMENT || 'INTEGRATION').trim().toUpperCase();
-  const commerceCode = (process.env.TRANSBANK_COMMERCE_CODE || '').trim();
-  const apiKey = (process.env.TRANSBANK_API_KEY || '').trim();
-
-  if (tbEnvironment === 'PRODUCTION' && commerceCode && apiKey) {
+  const forceIntegration = process.env.FORCE_INTEGRATION === 'true';
+  if (forceIntegration) {
     return {
-      env: 'PRODUCTION',
-      baseUrl: 'https://webpay3g.transbank.cl',
-      commerceCode,
-      apiKey
+      env: 'INTEGRATION',
+      baseUrl: 'https://webpay3gint.transbank.cl',
+      commerceCode: INTEGRATION_COMMERCE_CODE,
+      apiKey: INTEGRATION_API_KEY
     };
   }
 
+  const envKey = (process.env.TRANSBANK_API_KEY || '').trim();
+  const useEnvKey = envKey && !envKey.startsWith('579B532A');
+
   return {
-    env: 'INTEGRATION',
-    baseUrl: 'https://webpay3gint.transbank.cl',
-    commerceCode: INTEGRATION_COMMERCE_CODE,
-    apiKey: INTEGRATION_API_KEY
+    env: 'PRODUCTION',
+    baseUrl: 'https://webpay3g.transbank.cl',
+    commerceCode: (process.env.TRANSBANK_COMMERCE_CODE || PRODUCTION_COMMERCE_CODE).trim(),
+    apiKey: useEnvKey ? envKey : PRODUCTION_API_KEY
   };
 }
 
