@@ -137,34 +137,33 @@ const baseTemplates: Partial<Experience>[] = [
   }
 ];
 
-export const mockExperiences: Experience[] = Array.from({ length: 30 }).map((_, index) => {
-  const templateIndex = index % baseTemplates.length;
-  const template = baseTemplates[templateIndex];
-  const isFeatured = index < 9;
-  
-  // Create variations to make them look distinct in a grid
+export const mockExperiences: Experience[] = baseTemplates.map((template, index) => {
   const id = `exp-00${index + 1}`;
-  const priceVariations = [1, 1.15, 0.9, 1.25, 0.95];
-  const basePrice = Math.round((template.pricing!.basePrice * priceVariations[index % priceVariations.length]) / 1000) * 1000;
+  const cleanSlug = template.title!
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
   return {
     ...template,
     id,
-    slug: `tour-${index + 1}`,
+    slug: cleanSlug,
     status: 'active',
     macroZone: template.macroZone || 'sur',
-    title: `${template.title} ${isFeatured ? 'Expedition' : ''} ${index > 5 ? `· Nivel ${Math.floor(index / 6) + 1}` : ''}`,
+    title: template.title!,
     coordinates: template.coordinates || { lat: -39.2743, lng: -71.9774 },
     duration: template.duration || { value: 6, unit: 'hours' },
     languages: ['es', 'en'],
     capacity: { min: 2, max: 12 },
     gallery: [
       template.coverImage!,
-      { url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80', alt: 'Expedición Chile 1' },
-      { url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80', alt: 'Expedición Chile 2' }
+      { url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80', alt: `${template.title} 1` },
+      { url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80', alt: `${template.title} 2` }
     ],
     pricing: {
-      basePrice,
+      basePrice: template.pricing!.basePrice,
       currency: 'CLP'
     },
     meetingPoint: template.destinationId === 'dest-atacama' 

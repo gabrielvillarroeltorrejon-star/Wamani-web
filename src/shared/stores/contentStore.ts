@@ -397,77 +397,7 @@ const DEFAULT_CONTENT: SectionContent = {
   }
 };
 
-const DEFAULT_BOOKINGS: Booking[] = [
-  {
-    id: 'b-1001',
-    buyOrder: 'WAM-2026-884920',
-    customerName: 'Carolina Valenzuela',
-    customerEmail: 'caro.valen@gmail.com',
-    customerPhone: '+56988776655',
-    customerRut: '17.849.321-4',
-    customerDocumentType: 'rut',
-    experienceTitle: 'Termas Pucón Indómito + Sunset en Lancha',
-    bookingDate: '2026-10-12',
-    pax: 2,
-    totalPrice: 130000,
-    status: 'confirmed',
-    source: 'automatic',
-    paymentMethod: 'webpay',
-    authorizationCode: '674829',
-    cardLast4: '4820',
-    notes: 'Pago Transbank Webpay Plus verificado.',
-    passengers: [
-      {
-        fullName: 'Carolina Valenzuela Silva',
-        documentType: 'rut',
-        documentNumber: '17.849.321-4',
-        age: 32,
-        phone: '+56988776655',
-        emergencyContact: 'Felipe Valenzuela (+56911223344)',
-        medicalConditions: 'Ninguna'
-      },
-      {
-        fullName: 'Felipe Valenzuela Silva',
-        documentType: 'rut',
-        documentNumber: '18.392.110-K',
-        age: 29,
-        phone: '+56911223344',
-        emergencyContact: 'Carolina Valenzuela (+56988776655)',
-        medicalConditions: 'Alergia a la penicilina'
-      }
-    ],
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 'b-1002',
-    buyOrder: 'WAP-938210',
-    customerName: 'Ricardo Medina',
-    customerEmail: 'r.medina@outlook.com',
-    customerPhone: '+56944332211',
-    customerRut: '15.420.198-2',
-    customerDocumentType: 'rut',
-    experienceTitle: 'Ascenso al Volcán Villarrica',
-    bookingDate: '2026-10-15',
-    pax: 1,
-    totalPrice: 120000,
-    status: 'pending',
-    source: 'whatsapp',
-    paymentMethod: 'whatsapp',
-    notes: 'Prospecto iniciado por WhatsApp. Coordinando detalles de traslado.',
-    passengers: [
-      {
-        fullName: 'Ricardo Medina Lagos',
-        documentType: 'rut',
-        documentNumber: '15.420.198-2',
-        age: 38,
-        phone: '+56944332211',
-        emergencyContact: 'Lorena Lagos (+56999887766)',
-        medicalConditions: 'Usa lentes de contacto en montaña'
-      }
-    ],
-    createdAt: new Date().toISOString()
-  }
-];
+const DEFAULT_BOOKINGS: Booking[] = [];
 
 export interface DiscountCode {
   id: string;

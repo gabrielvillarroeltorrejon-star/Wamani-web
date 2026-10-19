@@ -251,12 +251,6 @@ const startNextWebpayTest = async () => {
   await handleInitiatePayment();
 };
 
-// Simulador Transbank Webpay Plus
-const showWebpaySimulation = ref(false);
-const webpayCardNumber = ref('•••• •••• •••• 4242');
-const webpayExp = ref('12/28');
-const webpayCvv = ref('789');
-const webpayBank = ref('Banco de Chile');
 
 const currentDocumentNumber = computed(() => {
   return docType.value === 'rut' ? rut.value.trim() : passport.value.trim();
@@ -642,14 +636,12 @@ const handleInitiatePayment = async () => {
         return;
       }
     } catch (e) {
-      console.warn('Backend Webpay API no disponible en este momento, usando simulador interactivo:', e);
+      console.error('Error al conectar con Transbank Webpay Plus:', e);
     }
 
     if (!redirectedToRealWebpay) {
-      setTimeout(() => {
-        isProcessing.value = false;
-        showWebpaySimulation.value = true;
-      }, 600);
+      isProcessing.value = false;
+      alert('No se pudo conectar con Transbank Webpay en este momento. Por favor, intenta nuevamente o selecciona Transferencia Bancaria.');
     }
   } else {
     // Flujo de Transferencia Bancaria Directa
@@ -691,54 +683,6 @@ const handleInitiatePayment = async () => {
   }
 };
 
-const confirmWebpayPayment = (success: boolean) => {
-  showWebpaySimulation.value = false;
-  
-  if (success) {
-    const authCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const buyOrder = generateBuyOrder();
-
-    const newBooking = contentStore.addBooking({
-      customerName: `${name.value} ${lastname.value}`,
-      customerEmail: email.value,
-      customerPhone: phone.value,
-      customerRut: currentDocumentNumber.value,
-      customerDocumentType: docType.value,
-      emergencyContactName: emergencyName.value || undefined,
-      emergencyContactPhone: emergencyPhone.value || undefined,
-      medicalConditions: medicalConditions.value || undefined,
-      invoiceType: invoiceType.value,
-      billingDetails: invoiceType.value === 'factura' ? {
-        businessName: billingBusinessName.value,
-        rut: billingRut.value,
-        activity: billingActivity.value,
-        address: billingAddress.value
-      } : undefined,
-      experienceTitle: resolvedExperienceTitle.value,
-      experienceSlug: cartStore.items.length > 0 ? 'cart' : expSlug.value,
-      bookingDate: travelDate.value,
-      pax: effectivePaxCount.value,
-      totalPrice: cartStore.items.length > 0 ? cartStore.totalToPay : totalPrice.value,
-      cartItems: cartStore.items.length > 0 ? JSON.parse(JSON.stringify(cartStore.items)) : undefined,
-      status: 'confirmed',
-      source: 'automatic',
-      paymentMethod: 'webpay',
-      buyOrder,
-      authorizationCode: authCode,
-      cardLast4: webpayCardNumber.value.replace(/\s/g, '').slice(-4),
-      notes: fullNotes.value,
-      passengers: buildPassengersManifest()
-    });
-
-    completedBooking.value = newBooking;
-    cartStore.clearCart();
-    purchaseCompleted.value = true;
-    triggerVoucherEmail(newBooking);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    alert('Transacción cancelada o rechazada por el banco emisor. Por favor, reintenta o selecciona transferencia bancaria.');
-  }
-};
 
 const sendWhatsAppConfirmation = () => {
   if (!completedBooking.value) return;
@@ -1678,71 +1622,7 @@ const printVoucher = () => {
       </div>
     </Teleport>
 
-    <!-- MODAL SIMULADOR REALISTA DE PASARELA TRANSBANK WEBPAY PLUS -->
-    <Teleport to="body">
-      <div v-if="showWebpaySimulation" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
-        <div class="modal-card p-4 p-md-5 text-white shadow-2xl rounded-4" style="max-width: 540px; width: 100%; background: #045D56; border: 2px solid #2DD4BF;">
-          
-          <!-- Cabecera Oficial Webpay Plus -->
-          <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary border-opacity-25">
-            <div>
-              <span class="badge bg-danger text-white fw-bold px-3 py-1 mb-1">TRANSBANK</span>
-              <h3 class="h5 fw-bold text-white mb-0">Webpay Plus</h3>
-            </div>
-            <div class="text-end">
-              <span class="small text-white opacity-75 d-block" style="font-size: 0.72rem;">Comercio:</span>
-              <strong class="text-accent small">Wamani Expeditions</strong>
-            </div>
-          </div>
 
-          <div class="mb-4 p-3 rounded-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.3);">
-            <div class="d-flex justify-content-between mb-1 small">
-              <span class="text-white opacity-75">Orden de Compra:</span>
-              <strong class="text-white font-monospace">TBK-{{ Date.now().toString().slice(-6) }}</strong>
-            </div>
-            <div class="d-flex justify-content-between small">
-              <span class="text-white opacity-75">Total a Cobrar:</span>
-              <strong class="text-accent fs-5 font-monospace">{{ formatPrice(cartStore.totalToPay) }}</strong>
-            </div>
-          </div>
-
-          <!-- Campos de Tarjeta Simulada -->
-          <div class="row g-3 mb-4">
-            <div class="col-12">
-              <label class="form-label small fw-bold text-white">Número de Tarjeta</label>
-              <input v-model="webpayCardNumber" type="text" class="form-control admin-input text-dark fw-medium font-monospace" placeholder="•••• •••• •••• ••••">
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-bold text-white">Vencimiento</label>
-              <input v-model="webpayExp" type="text" class="form-control admin-input text-dark fw-medium text-center font-monospace" placeholder="MM/AA">
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-bold text-white">CVV</label>
-              <input v-model="webpayCvv" type="password" class="form-control admin-input text-dark fw-medium text-center font-monospace" placeholder="•••">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold text-white">Banco Emisor</label>
-              <input v-model="webpayBank" type="text" class="form-control admin-input text-dark fw-medium">
-            </div>
-          </div>
-
-          <!-- Botones de Acción de Pasarela -->
-          <div class="d-flex gap-2 pt-2">
-            <button class="btn btn-outline-danger w-50 py-2 fw-bold" @click="confirmWebpayPayment(false)">
-              <i class="bi bi-x-circle me-1"></i> Rechazar / Anular
-            </button>
-            <button class="btn btn-success w-50 py-2 fw-bold" @click="confirmWebpayPayment(true)">
-              <i class="bi bi-check-circle-fill me-1"></i> Autorizar Pago
-            </button>
-          </div>
-
-          <p class="text-center small text-white opacity-75 mt-3 mb-0" style="font-size: 0.72rem;">
-            <i class="bi bi-shield-lock me-1"></i> Entorno de transacción segura protegido con token criptográfico SHA-256.
-          </p>
-
-        </div>
-      </div>
-    </Teleport>
 
   </div>
 </template>
