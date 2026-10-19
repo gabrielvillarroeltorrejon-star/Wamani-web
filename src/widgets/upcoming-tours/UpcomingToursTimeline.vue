@@ -34,7 +34,7 @@ const tours = computed(() => {
           Experimenta la inmensidad de los glaciares, lagos color turquesa y las montañas más desafiantes del fin del mundo.
         </p>
         <div class="mt-4">
-          <a href="#" class="btn btn-outline-light rounded-0 px-4 py-3 font-sans text-uppercase small" style="letter-spacing: 0.1em;">Descubrir más</a>
+          <router-link to="/experiencias" class="btn btn-secondary rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm" style="letter-spacing: 0.1em;">Explorar Expediciones</router-link>
         </div>
       </div>
 

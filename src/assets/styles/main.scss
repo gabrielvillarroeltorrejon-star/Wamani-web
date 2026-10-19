@@ -41,9 +41,15 @@ p, .lead {
 }
 
 // ----------------------------------------------------
-// BOTONES OFICIALES DEL MANUAL DE MARCA (Página 9)
+// BOTONES OFICIALES DEL MANUAL DE MARCA (Arquetipo Píldora Unificado)
 // ----------------------------------------------------
-// Botón Principal: Verde Wamani (#147E79), tipografía elegante, texto Blanco Andino (#FFFFFF), bordes redondeados
+.btn {
+  border-radius: 50px !important;
+  font-family: $font-family-sans-serif;
+  letter-spacing: 0.02em;
+}
+
+// Botón Principal: Verde Wamani (#147E79), tipografía sans-serif, texto Blanco Andino (#FFFFFF), forma píldora
 .btn-primary, 
 .btn-wamani-primary,
 .btn-cyan-gradient {
@@ -51,8 +57,8 @@ p, .lead {
   color: $blanco-andino !important;
   border: 1px solid rgba($blanco-andino, 0.2) !important;
   font-family: $font-family-sans-serif;
-  font-weight: 600;
-  border-radius: 12px !important;
+  font-weight: 700;
+  border-radius: 50px !important;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: 0 4px 14px rgba(20, 126, 121, 0.35);
 
@@ -69,15 +75,16 @@ p, .lead {
   }
 }
 
-// Botón Secundario: Beige Tierra (#E7DCC3), texto Gris Piedra (#4C4C4C), bordes redondeados
+// Botón Secundario: Beige Tierra (#E7DCC3), texto Gris Piedra (#4C4C4C), forma píldora
 .btn-secondary, 
-.btn-wamani-secondary {
+.btn-wamani-secondary,
+.btn-accent {
   background-color: $beige-tierra !important;
   color: $gris-piedra !important;
   border: 1px solid rgba($gris-piedra, 0.15) !important;
   font-family: $font-family-sans-serif;
-  font-weight: 600;
-  border-radius: 12px !important;
+  font-weight: 700;
+  border-radius: 50px !important;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: 0 4px 12px rgba(76, 76, 76, 0.12);
 
@@ -94,15 +101,32 @@ p, .lead {
   }
 }
 
-// Botón de contorno con Verde Wamani o Beige Tierra
+// Botón de contorno con Verde Wamani o Beige Tierra (forma píldora)
 .btn-outline-primary,
+.btn-outline-accent,
+.btn-outline-light {
+  border-radius: 50px !important;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-outline-primary {
+  background-color: transparent !important;
+  color: $verde-wamani !important;
+  border: 2px solid $verde-wamani !important;
+
+  &:hover {
+    background-color: $verde-wamani !important;
+    color: $blanco-andino !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(20, 126, 121, 0.35);
+  }
+}
+
 .btn-outline-accent {
   background-color: transparent !important;
   color: $beige-tierra !important;
   border: 2px solid $beige-tierra !important;
-  border-radius: 12px !important;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
     background-color: $beige-tierra !important;
@@ -116,7 +140,8 @@ p, .lead {
   background-color: #25D366 !important;
   color: #FFFFFF !important;
   border: none !important;
-  border-radius: 20px !important;
+  border-radius: 50px !important;
+  font-weight: 700;
   transition: all 0.3s ease;
 
   &:hover {
@@ -128,52 +153,64 @@ p, .lead {
 }
 
 // ----------------------------------------------------
-// TARJETAS GLOBALES (VERDE WAMANI + BLANCO ANDINO + BEIGE TIERRA)
+// TARJETAS GLOBALES (ARQUETIPO LIMPIO Y DE ALTO CONTRASTE)
 // ----------------------------------------------------
-.card, .review-card, .featured-card, .w-card {
-  background-color: $verde-wamani !important;
-  color: $blanco-andino !important;
-  border: 1px solid rgba($beige-tierra, 0.25) !important;
-  border-radius: $border-radius-lg;
-  
-  p, span:not(.badge), li, div {
-    color: rgba($blanco-andino, 0.95) !important;
+// Tarjetas de catálogo y reseñas: Fondo Blanco Puro, bordes suaves de 22px, sombra difusa y textos oscuros legibles
+.catalog-card, .review-card, .white-card {
+  background-color: $blanco-andino !important;
+  color: $gris-piedra-dark !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15) !important;
   }
 
-  .text-muted, .text-secondary {
-    color: $beige-tierra !important;
-    opacity: 0.95 !important;
+  .card-img-wrapper {
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    overflow: hidden;
   }
+
+  h3, h4, h5, h6, .h5, .h6 {
+    font-family: $font-family-sans-serif !important;
+    color: #1C1C1E !important;
+    font-weight: 700 !important;
+  }
+
+  p, span:not(.badge):not(.price-val) {
+    color: $gris-piedra !important;
+  }
+
+  .text-accent, .category-tag {
+    color: $verde-wamani !important;
+    font-weight: 700 !important;
+  }
+
+  .price-val {
+    color: $verde-wamani !important;
+    font-weight: 800 !important;
+  }
+
+  .border-top {
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+// Tarjetas oscuras especializadas
+.card-dark, .featured-card {
+  background-color: $verde-wamani-dark !important;
+  color: $blanco-andino !important;
+  border: 1px solid rgba($beige-tierra, 0.25) !important;
+  border-radius: 22px !important;
 
   h3, h4, h5, h6, .h5, .h6 {
     font-family: $font-family-brush !important;
     color: $blanco-andino !important;
-  }
-
-  .text-accent, .text-primary, .category-tag {
-    color: $beige-tierra !important;
-  }
-}
-
-// Tarjetas de catálogo claras con Blanco Andino y textos en Gris Piedra
-.catalog-card {
-  background-color: $blanco-andino !important;
-  color: $gris-piedra-dark !important;
-  border: 1px solid rgba(76, 76, 76, 0.1) !important;
-  border-radius: 20px !important;
-
-  h3, h4, h5, h6, .h5, .h6 {
-    font-family: $font-family-sans-serif !important;
-    color: $gris-piedra-dark !important;
-    font-weight: 700 !important;
-  }
-
-  p {
-    color: $gris-piedra !important;
-  }
-
-  .text-accent {
-    color: $verde-wamani !important;
   }
 }
 

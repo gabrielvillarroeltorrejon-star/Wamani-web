@@ -428,7 +428,7 @@ const handleBookWhatsApp = () => {
           <strong class="text-accent fs-5 font-monospace" style="color: #E7DCC3 !important;">{{ formatPrice(experience.pricing.basePrice, 'CLP') }}</strong>
           <span class="small text-white opacity-75 ms-1" style="font-size: 0.7rem;">/ pax</span>
         </div>
-        <a href="#booking-section" class="btn btn-cyan-gradient px-4 py-2 fw-bold text-white d-flex align-items-center gap-2 text-decoration-none shadow" style="border-radius: 12px; font-size: 0.9rem;">
+        <a href="#booking-section" class="btn btn-primary px-4 py-2 fw-bold text-white d-flex align-items-center gap-2 text-decoration-none shadow rounded-pill" style="font-size: 0.9rem;">
           <i class="bi bi-calendar2-check-fill"></i> Reservar Cupos
         </a>
       </div>

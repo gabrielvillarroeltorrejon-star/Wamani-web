@@ -355,7 +355,7 @@ const goToWebpay = () => {
                   <span class="text-white small">Desde</span>
                   <strong class="fs-5" style="color: #E7DCC3;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
                 </div>
-                <a href="#modal-reservation-box" class="btn btn-secondary w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="border-radius: 12px;">
+                <a href="#modal-reservation-box" class="btn btn-secondary rounded-pill w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none">
                   <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
                 </a>
               </div>
@@ -553,8 +553,8 @@ const goToWebpay = () => {
 
 .catalog-card {
   background-color: #FFFFFF !important; /* Taste: Off-white/White premium background */
-  border-radius: 20px !important; 
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 22px !important; 
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.03); /* Taste: Soft diffuse shadow */
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   color: var(--bs-body-color);
@@ -578,8 +578,8 @@ const goToWebpay = () => {
   }
   
   .card-img-wrapper {
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
   }
   
   /* Ajustar textos internos para alto contraste en fondo claro (Impeccable) */

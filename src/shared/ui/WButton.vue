@@ -55,9 +55,9 @@ const handleClick = (event: MouseEvent) => {
 
 button {
   font-family: $font-family-sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.04em;
-  border-radius: 12px;
+  border-radius: 50px !important;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

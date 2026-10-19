@@ -324,8 +324,8 @@ const DEFAULT_CONTENT: SectionContent = {
         imageUrl: '/Logo_MarcaChile_Caja Roja.webp'
       }
     },
-    advisorsTitle: 'Nuestros Guías & Equipo',
-    advisorsSubtitle: 'Profesionales y guías certificados por SERNATUR, apasionados por el ecoturismo y la seguridad en montaña',
+    advisorsTitle: 'Nuestro Equipo & Asesores',
+    advisorsSubtitle: 'Profesionales apasionados por el ecoturismo, la seguridad en la montaña y el desarrollo local',
     advisors: [
       {
         id: 'adv-1',
@@ -506,6 +506,12 @@ export const useContentStore = defineStore('content', () => {
             historyImage: parsed.about?.historyImage || DEFAULT_CONTENT.about.historyImage,
             heroImage: parsed.about?.heroImage || DEFAULT_CONTENT.about.heroImage,
             accreditations: { ...DEFAULT_CONTENT.about.accreditations, ...parsed.about?.accreditations },
+            advisorsTitle: (parsed.about?.advisorsTitle && parsed.about.advisorsTitle !== 'Nuestros Guías & Equipo')
+              ? parsed.about.advisorsTitle
+              : DEFAULT_CONTENT.about.advisorsTitle,
+            advisorsSubtitle: (parsed.about?.advisorsSubtitle && !parsed.about.advisorsSubtitle.includes('SERNATUR'))
+              ? parsed.about.advisorsSubtitle
+              : DEFAULT_CONTENT.about.advisorsSubtitle,
             advisors: (Array.isArray(parsed.about?.advisors) && parsed.about.advisors.length > 0)
               ? parsed.about.advisors
               : DEFAULT_CONTENT.about.advisors
@@ -640,7 +646,7 @@ export const useContentStore = defineStore('content', () => {
         }));
       }
 
-      // 3. Cargar contenidos generales del sitio (incluyendo guías y equipo) desde Supabase
+      // 3. Cargar contenidos generales del sitio desde Supabase
       const { data: scData, error: scError } = await supabase.from('site_content').select('data').eq('key', 'main_content').single();
       if (!scError && scData?.data) {
         const cloud = scData.data;
@@ -652,6 +658,12 @@ export const useContentStore = defineStore('content', () => {
             historyImage: cloud.about?.historyImage || DEFAULT_CONTENT.about.historyImage,
             heroImage: cloud.about?.heroImage || DEFAULT_CONTENT.about.heroImage,
             accreditations: { ...DEFAULT_CONTENT.about.accreditations, ...cloud.about?.accreditations },
+            advisorsTitle: (cloud.about?.advisorsTitle && cloud.about.advisorsTitle !== 'Nuestros Guías & Equipo')
+              ? cloud.about.advisorsTitle
+              : DEFAULT_CONTENT.about.advisorsTitle,
+            advisorsSubtitle: (cloud.about?.advisorsSubtitle && !cloud.about.advisorsSubtitle.includes('SERNATUR'))
+              ? cloud.about.advisorsSubtitle
+              : DEFAULT_CONTENT.about.advisorsSubtitle,
             advisors: (Array.isArray(cloud.about?.advisors) && cloud.about.advisors.length > 0)
               ? cloud.about.advisors
               : (content.value.about?.advisors || DEFAULT_CONTENT.about.advisors)

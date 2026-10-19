@@ -54,7 +54,11 @@ $headings-font-weight:   800;
 $headings-color:         $blanco-andino;
 $line-height-base:       1.6;
 
-// 4. Bordes y Sombras Oficiales
-$border-radius:          0.75rem; // 12px redondeado oficial para botones, inputs y selects
-$border-radius-lg:       1.25rem; // 20px para tarjetas y cajas principales
-$border-radius-sm:       0.5rem;  // 8px
+// 4. Bordes y Sombras Oficiales (Manual de Marca & Arquetipo Unificado)
+$border-radius:          50px;   // Redondeado píldora oficial para todos los botones de acción y CTAs
+$btn-border-radius:      50px;
+$btn-border-radius-sm:   50px;
+$btn-border-radius-lg:   50px;
+$card-border-radius:     22px;   // 22px para tarjetas limpias de catálogo y módulos
+$border-radius-lg:       22px;
+$border-radius-sm:       12px;   // 12px para inputs, selects y chips
