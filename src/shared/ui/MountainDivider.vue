@@ -7,11 +7,11 @@ defineProps<{
 <template>
   <div class="mountain-divider-container position-relative w-100 overflow-hidden d-block" :class="{ 'is-dark': dark }">
     <div class="container-fluid px-0">
-      <!-- Ilustración Vectorial Artística de Cumbres Andinas para sobreponer sobre el Footer -->
+      <!-- Ilustración Vectorial Artística de Cumbres Andinas con Colores del Manual Wamani -->
       <svg viewBox="0 0 1440 96" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg" class="mountain-svg w-100 d-block">
         <defs>
           <filter id="peakGlowFooter" x="-5%" y="-10%" width="110%" height="130%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#045D56" flood-opacity="0.3" />
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0D5B57" flood-opacity="0.4" />
           </filter>
         </defs>
 
@@ -73,13 +73,15 @@ defineProps<{
         </g>
 
         <!-- Línea Base Continua pegada al footer sin fisura -->
-        <path d="M0,95.5 L1440,95.5" stroke="#045D56" stroke-width="2.5" class="base-stroke" />
+        <path d="M0,95.5 L1440,95.5" stroke="#0D5B57" stroke-width="2.5" class="base-stroke" />
       </svg>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .mountain-divider-container {
   margin: 0;
   padding: 0;
@@ -99,20 +101,21 @@ defineProps<{
     }
   }
 
+  // Capas con paleta oficial
   .mountain-dark {
-    fill: #045D56;
+    fill: $verde-wamani-dark; // #0D5B57
   }
 
   .mountain-highlight {
-    fill: #0FA095;
+    fill: $verde-wamani; // #147E79
   }
 
   .snow-cap {
-    fill: #2DD4BF;
+    fill: $blanco-andino; // #FFFFFF cumbres nevadas puras
   }
 
   .base-stroke {
-    color: #045D56;
+    stroke: $verde-wamani-dark;
   }
 }
 </style>

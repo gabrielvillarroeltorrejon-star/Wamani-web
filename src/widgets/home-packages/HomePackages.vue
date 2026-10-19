@@ -364,7 +364,7 @@ const goToWhatsApp = () => {
 
         <!-- TÍTULO INTEGRADO DENTRO DEL MARCO -->
         <div class="coverflow-header text-center mb-2 z-3 position-relative">
-          <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.12em;">
+          <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.12em; background-color: #E7DCC3; color: #0D5B57;">
             <i class="bi bi-stars me-1"></i> Ofertas Especiales
           </span>
           <h2 class="coverflow-section-title font-brush display-3 text-white mb-1" style="font-family: 'Caveat', cursive !important; text-shadow: 0 3px 12px rgba(0,0,0,0.85);">
@@ -386,7 +386,7 @@ const goToWhatsApp = () => {
           >
             <!-- Badge Superior -->
             <div class="position-absolute top-0 start-0 m-3 z-3 d-flex flex-wrap gap-2">
-              <span v-if="pkg.badgeText" class="badge bg-accent text-dark-mountain px-3 py-2 fw-bold text-uppercase rounded-pill shadow-sm" style="font-size: 0.72rem; letter-spacing: 0.08em;">
+              <span v-if="pkg.badgeText" class="badge px-3 py-2 fw-bold text-uppercase rounded-pill shadow-sm" style="font-size: 0.72rem; letter-spacing: 0.08em; background-color: #E7DCC3; color: #0D5B57;">
                 <i class="bi bi-tag-fill me-1"></i> {{ pkg.badgeText }}
               </span>
               <span class="badge bg-dark bg-opacity-75 text-white px-2 py-1 fw-semibold rounded-pill border border-secondary border-opacity-25 shadow-sm" style="font-size: 0.7rem;">
@@ -414,7 +414,7 @@ const goToWhatsApp = () => {
                   class="d-flex align-items-center gap-1 text-truncate"
                   style="font-size: 0.78rem;"
                 >
-                  <i class="bi bi-check2 text-accent"></i>
+                  <i class="bi bi-check2" style="color: #E7DCC3;"></i>
                   <span class="text-truncate">{{ getTourById(tId)?.title || tId }}</span>
                 </div>
               </div>
@@ -426,12 +426,12 @@ const goToWhatsApp = () => {
                     {{ formatCurrency(pkg.originalPrice) }}
                   </span>
                   <div class="d-flex align-items-baseline gap-1">
-                    <span class="fs-4 fw-bold text-accent lh-1">{{ formatCurrency(pkg.bundlePrice) }}</span>
+                    <span class="fs-4 fw-bold lh-1" style="color: #E7DCC3;">{{ formatCurrency(pkg.bundlePrice) }}</span>
                     <span class="text-white opacity-75 small" style="font-size: 0.75rem;">p/p</span>
                   </div>
                 </div>
                 
-                <span class="btn btn-sm btn-accent text-dark-mountain fw-bold rounded-pill px-3 py-1 shadow-sm" style="font-size: 0.72rem;">
+                <span class="btn btn-sm btn-secondary fw-bold rounded-pill px-3 py-1 shadow-sm" style="font-size: 0.72rem;">
                   Ver Combo <i class="bi bi-arrow-right ms-1"></i>
                 </span>
               </div>
@@ -487,34 +487,34 @@ const goToWhatsApp = () => {
             <div class="row g-0 modal-main-row">
               
               <!-- COLUMNA IZQUIERDA: DETALLES DE LOS TOURS INCLUIDOS -->
-              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
                 
                 <!-- Encabezado del Paquete -->
                 <div class="mb-4">
                   <div class="d-flex flex-wrap gap-2 mb-2">
-                    <span v-if="selectedPackage.badgeText" class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
+                    <span v-if="selectedPackage.badgeText" class="badge fw-bold px-3 py-1 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
                       {{ selectedPackage.badgeText }}
                     </span>
-                    <span class="badge bg-dark-mountain text-white fw-bold px-3 py-1 text-uppercase" style="font-size: 0.72rem;">
+                    <span class="badge fw-bold px-3 py-1 text-uppercase" style="font-size: 0.72rem; background-color: #147E79; color: #FFFFFF;">
                       Combo Multitour
                     </span>
                   </div>
-                  <h2 class="display-6 fw-bold mb-2" style="color: #033E3B !important;">{{ selectedPackage.title }}</h2>
-                  <p class="lead fw-normal text-muted mb-3" style="font-size: 1.05rem;">{{ selectedPackage.description }}</p>
+                  <h2 class="display-6 fw-bold mb-2" style="color: #147E79 !important;">{{ selectedPackage.title }}</h2>
+                  <p class="lead fw-normal mb-3" style="font-size: 1.05rem; color: #4C4C4C !important;">{{ selectedPackage.description }}</p>
 
                   <!-- BANNER DE AHORRO DESTACADO -->
-                  <div class="p-3 rounded-4 d-flex align-items-center gap-3 mb-4" style="background: rgba(45, 212, 191, 0.15); border: 1px solid rgba(4, 93, 86, 0.2);">
-                    <i class="bi bi-piggy-bank-fill fs-2 text-dark-mountain"></i>
+                  <div class="p-3 rounded-4 d-flex align-items-center gap-3 mb-4" style="background: rgba(231, 220, 195, 0.25); border: 1px solid rgba(20, 126, 121, 0.3);">
+                    <i class="bi bi-piggy-bank-fill fs-2" style="color: #147E79;"></i>
                     <div>
-                      <div class="fw-bold text-dark-mountain mb-0">¡Ahorras {{ formatCurrency(totalSavingsCLP) }} en total!</div>
-                      <div class="small text-muted">Tarifa combinada preferencial para {{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}.</div>
+                      <div class="fw-bold mb-0" style="color: #147E79;">¡Ahorras {{ formatCurrency(totalSavingsCLP) }} en total!</div>
+                      <div class="small" style="color: #4C4C4C;">Tarifa combinada preferencial para {{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}.</div>
                     </div>
                   </div>
                 </div>
 
                 <!-- LISTA DETALLADA DE TOURS INCLUIDOS -->
-                <h4 class="h5 fw-bold mb-3 d-flex align-items-center" style="color: #045D56 !important;">
-                  <i class="bi bi-card-checklist me-2 text-accent"></i>
+                <h4 class="h5 fw-bold mb-3 d-flex align-items-center" style="color: #147E79 !important;">
+                  <i class="bi bi-card-checklist me-2" style="color: #E7DCC3;"></i>
                   Detalle de los {{ selectedPackage.includedTourIds.length }} Tours Incluidos:
                 </h4>
 
@@ -523,7 +523,7 @@ const goToWhatsApp = () => {
                     v-for="(tourId, idx) in selectedPackage.includedTourIds" 
                     :key="tourId"
                     class="p-3 rounded-4 border d-flex flex-column flex-sm-row gap-3 align-items-start transition-all"
-                    style="border-color: rgba(4, 93, 86, 0.15) !important; background: #FAFAFA;"
+                    style="border-color: rgba(20, 126, 121, 0.15) !important; background: #FAFAFA;"
                   >
                     <!-- Miniatura del Tour -->
                     <div class="flex-shrink-0 rounded-3 overflow-hidden" style="width: 100px; height: 80px;">
@@ -537,27 +537,27 @@ const goToWhatsApp = () => {
                     <!-- Datos del Tour -->
                     <div class="flex-grow-1">
                       <div class="d-flex justify-content-between align-items-start mb-1">
-                        <span class="badge bg-secondary bg-opacity-10 text-dark-mountain fw-bold px-2 py-0 small" style="font-size: 0.68rem;">
+                        <span class="badge fw-bold px-2 py-0 small" style="font-size: 0.68rem; background-color: #E7DCC3; color: #0D5B57;">
                           Tour #{{ idx + 1 }}
                         </span>
-                        <span class="fw-bold small text-dark-mountain">
+                        <span class="fw-bold small" style="color: #147E79;">
                           Valor regular: {{ formatCurrency(getTourById(tourId)?.pricing.basePrice || 0) }}
                         </span>
                       </div>
-                      <h5 class="h6 fw-bold mb-1" style="color: #033E3B !important;">
+                      <h5 class="h6 fw-bold mb-1" style="color: #232323 !important;">
                         {{ getTourById(tourId)?.title || tourId }}
                       </h5>
-                      <p class="small text-muted mb-2 line-clamp-2" style="font-size: 0.82rem;">
+                      <p class="small mb-2 line-clamp-2" style="font-size: 0.82rem; color: #4C4C4C !important;">
                         {{ getTourById(tourId)?.summary || getTourById(tourId)?.description || 'Experiencia guiada con traslados y equipamiento.' }}
                       </p>
 
                       <!-- Tags del tour -->
                       <div class="d-flex flex-wrap gap-2">
-                        <span v-if="getTourById(tourId)?.duration" class="badge bg-light text-dark-mountain border px-2 py-1" style="font-size: 0.68rem;">
-                          <i class="bi bi-clock me-1 text-accent"></i>{{ getTourById(tourId)?.duration.value }} {{ getTourById(tourId)?.duration.unit === 'hours' ? 'horas' : 'días' }}
+                        <span v-if="getTourById(tourId)?.duration" class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.68rem;">
+                          <i class="bi bi-clock me-1" style="color: #147E79;"></i>{{ getTourById(tourId)?.duration.value }} {{ getTourById(tourId)?.duration.unit === 'hours' ? 'horas' : 'días' }}
                         </span>
-                        <span v-if="getTourById(tourId)?.difficulty" class="badge bg-light text-dark-mountain border px-2 py-1" style="font-size: 0.68rem;">
-                          <i class="bi bi-activity me-1 text-accent"></i>Dificultad: {{ getTourById(tourId)?.difficulty }}
+                        <span v-if="getTourById(tourId)?.difficulty" class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.68rem;">
+                          <i class="bi bi-activity me-1" style="color: #147E79;"></i>Dificultad: {{ getTourById(tourId)?.difficulty }}
                         </span>
                       </div>
                     </div>
@@ -565,8 +565,8 @@ const goToWhatsApp = () => {
                 </div>
 
                 <!-- Garantías y Beneficios -->
-                <div class="p-3 rounded-4" style="background: rgba(4, 93, 86, 0.05);">
-                  <div class="row g-2 text-dark-mountain small">
+                <div class="p-3 rounded-4" style="background: rgba(20, 126, 121, 0.06);">
+                  <div class="row g-2 text-dark small">
                     <div class="col-sm-6 d-flex align-items-center gap-2">
                       <i class="bi bi-shield-check text-success fs-5"></i>
                       <span><strong>Fechas Flexibles:</strong> Coordina los días de cada tour con tu asesor.</span>
@@ -581,27 +581,27 @@ const goToWhatsApp = () => {
               </div>
 
               <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-              <div class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+              <div class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
                 
                 <div>
-                  <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
+                  <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
                     Reserva de Paquete
                   </span>
                   <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
 
                   <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                  <div class="p-3 rounded-4 mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <!-- Selector de Fecha inicial -->
                     <div class="mb-3">
                       <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
-                        <i class="bi bi-calendar-event me-2 text-accent"></i>Fecha Estimada de Inicio
+                        <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha Estimada de Inicio
                       </label>
                       <input 
                         v-model="modalDate" 
                         type="date" 
                         :min="todayDate" 
                         class="form-control form-control-sm text-white fw-bold" 
-                        style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); color: #FFFFFF !important;"
+                        style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
                         required
                       >
                       <span class="small opacity-75 d-block mt-1" style="font-size: 0.72rem;">* La fecha exacta de cada excursión la coordinamos contigo según el clima.</span>
@@ -610,8 +610,8 @@ const goToWhatsApp = () => {
                     <!-- Selector de Pasajeros (+ / -) -->
                     <div>
                       <label class="form-label small fw-bold text-white mb-1 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
-                        <span><i class="bi bi-people-fill me-2 text-accent"></i>Número de Pasajeros</span>
-                        <span class="badge bg-accent text-dark-mountain fw-bold">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
+                        <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
+                        <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
                       </label>
                       <div class="d-flex align-items-center gap-2">
                         <button 
@@ -630,7 +630,7 @@ const goToWhatsApp = () => {
                           min="1" 
                           max="20" 
                           class="form-control form-control-sm text-center fw-bold text-white" 
-                          style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); max-width: 70px; color: #FFFFFF !important;"
+                          style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
                         >
                         <button 
                           type="button" 
@@ -646,18 +646,18 @@ const goToWhatsApp = () => {
                   </div>
 
                   <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white fw-semibold">Tarifa Combo por persona</span>
                       <span class="fw-bold text-white">{{ formatCurrency(selectedPackage.bundlePrice, 'CLP') }}</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white fw-semibold">Cantidad de viajeros</span>
-                      <span class="fw-bold text-accent">× {{ modalPax }}</span>
+                      <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white opacity-75">Ahorro total combo</span>
-                      <span class="badge bg-success text-white fw-bold">- {{ formatCurrency(totalSavingsCLP, 'CLP') }}</span>
+                      <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">- {{ formatCurrency(totalSavingsCLP, 'CLP') }}</span>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-end mt-3 mb-2">
@@ -667,7 +667,7 @@ const goToWhatsApp = () => {
                       </div>
                       <div class="text-end">
                         <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
-                        <span class="d-block small text-accent fw-bold" style="font-size: 0.78rem;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
+                        <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
                       </div>
                     </div>
                   </div>
@@ -678,14 +678,14 @@ const goToWhatsApp = () => {
                   <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
                     <i class="bi bi-cart-plus-fill fs-5"></i> Agregar Paquete al Carrito
                   </button>
-                  <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
+                  <button class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
                     <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
                   </button>
                   <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="goToWhatsApp">
                     <i class="bi bi-whatsapp fs-5"></i> Reservar vía Transferencia / WhatsApp
                   </button>
                   <div class="d-flex align-items-center justify-content-center gap-2 text-white small mt-1 fw-medium">
-                    <i class="bi bi-shield-lock-fill text-accent"></i>
+                    <i class="bi bi-shield-lock-fill" style="color: #E7DCC3;"></i>
                     <span>Transacción protegida por cifrado SSL 256-bit</span>
                   </div>
                 </div>
@@ -701,11 +701,13 @@ const goToWhatsApp = () => {
 </template>
 
 <style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .packages-3d-section {
   background-color: transparent;
 }
 
-// Marco 3D Verde Oscuro (Idéntico a Tours Destacados)
+// Marco 3D Verde Wamani
 .coverflow-3d-wrapper {
   width: 100%;
   min-height: 85vh;
@@ -716,10 +718,10 @@ const goToWhatsApp = () => {
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  background: rgba(4, 93, 86, 0.4);
+  background: rgba($verde-wamani, 0.45);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba($beige-tierra, 0.3);
+  box-shadow: 0 25px 60px rgba(13, 91, 87, 0.45);
   user-select: none;
 
   @media (max-width: 768px) {
@@ -734,6 +736,7 @@ const goToWhatsApp = () => {
     font-size: clamp(2.2rem, 4vw, 3.8rem);
     text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     letter-spacing: 0.02em;
+    color: $blanco-andino !important;
   }
 }
 
@@ -763,7 +766,7 @@ const goToWhatsApp = () => {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, rgba(4, 93, 86, 0.35) 0%, rgba(3, 62, 59, 0.9) 100%);
+    background: radial-gradient(circle at center, rgba($verde-wamani, 0.35) 0%, rgba($verde-wamani-dark, 0.9) 100%);
   }
 }
 
@@ -794,8 +797,8 @@ const goToWhatsApp = () => {
   height: clamp(350px, 51vh, 490px);
   border-radius: 20px;
   overflow: hidden;
-  background-color: #033E3B;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+  background-color: $verde-wamani-dark;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   transform-origin: center center;
   transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
               opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1),
@@ -826,9 +829,9 @@ const goToWhatsApp = () => {
     padding: 3rem 1.75rem 1.75rem 1.75rem;
     background: linear-gradient(
       to top,
-      rgba(3, 62, 59, 0.98) 0%,
-      rgba(3, 62, 59, 0.8) 50%,
-      rgba(3, 62, 59, 0.2) 75%,
+      rgba($verde-wamani-dark, 0.98) 0%,
+      rgba($verde-wamani-dark, 0.8) 50%,
+      rgba($verde-wamani-dark, 0.2) 75%,
       transparent 100%
     );
     z-index: 2;
@@ -843,7 +846,7 @@ const goToWhatsApp = () => {
     .coverflow-title {
       font-size: clamp(1.4rem, 2vw, 1.9rem);
       line-height: 1.15;
-      color: #FFFFFF !important;
+      color: $blanco-andino !important;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
       margin-bottom: 0.4rem;
 
@@ -860,7 +863,7 @@ const goToWhatsApp = () => {
     left: 0;
     right: 0;
     bottom: 0;
-    border: 1px solid rgba(45, 212, 191, 0.25);
+    border: 1px solid rgba($beige-tierra, 0.3);
     border-radius: inherit;
     pointer-events: none;
     transition: border-color 0.4s ease;
@@ -868,7 +871,7 @@ const goToWhatsApp = () => {
 
   &:hover {
     .coverflow-glow-border {
-      border-color: rgba(45, 212, 191, 0.7);
+      border-color: $beige-tierra;
     }
   }
 }
@@ -881,9 +884,9 @@ const goToWhatsApp = () => {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(3, 62, 59, 0.8);
-  border: 1px solid rgba(45, 212, 191, 0.5);
-  color: #FFFFFF;
+  background: rgba($verde-wamani-dark, 0.85);
+  border: 1px solid rgba($beige-tierra, 0.5);
+  color: $blanco-andino;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -903,11 +906,11 @@ const goToWhatsApp = () => {
   }
 
   &:hover {
-    background: #2DD4BF;
-    color: #033E3B;
-    border-color: #2DD4BF;
-    box-shadow: 0 0 22px rgba(45, 212, 191, 0.85);
-    transform: translateY(-50%) scale(1.12);
+    background: $beige-tierra;
+    color: $gris-piedra;
+    border-color: $beige-tierra;
+    box-shadow: 0 0 20px rgba($beige-tierra, 0.7);
+    transform: translateY(-50%) scale(1.1);
   }
 
   @media (max-width: 768px) {
@@ -929,7 +932,7 @@ const goToWhatsApp = () => {
     width: 10px;
     height: 10px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.3);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -937,12 +940,12 @@ const goToWhatsApp = () => {
 
     &.active {
       width: 36px;
-      background: linear-gradient(90deg, #0FA095, #2DD4BF);
-      box-shadow: 0 0 12px rgba(45, 212, 191, 0.8);
+      background: $beige-tierra;
+      box-shadow: 0 0 12px rgba($beige-tierra, 0.8);
     }
 
     &:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.6);
     }
   }
 }

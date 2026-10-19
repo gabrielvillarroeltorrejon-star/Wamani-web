@@ -1098,7 +1098,7 @@ const handleRestore = () => {
   <div class="admin-container min-vh-100 py-5 font-sans">
     <!-- 1. LOGIN PIN SECURITY OVERLAY -->
     <div v-if="!isAuthenticated" class="login-overlay d-flex align-items-center justify-content-center px-3">
-      <div class="card p-5 border-0 login-card text-center text-white" style="max-width: 440px; border-radius: 28px; background: #045D56; border: 1px solid rgba(45, 212, 191, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);">
+      <div class="card p-5 border-0 login-card text-center text-white" style="max-width: 440px; border-radius: 28px; background: #147E79; border: 1px solid rgba(231, 220, 195, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);">
         <img src="/Logo Wamani.png" alt="Wamani Logo" height="85" class="mb-4 mx-auto d-block" />
         <h2 class="h3 fw-bold font-serif mb-2 text-white">Panel de Control Wamani</h2>
         <p class="small text-white opacity-85 mb-4">Ingresa el PIN de seguridad asignado para administrar todo el sitio web.</p>
@@ -1394,7 +1394,7 @@ const handleRestore = () => {
                 <input v-model="homeForm.hero.videoUrl" type="text" class="form-control admin-input text-white">
               </div>
               <!-- Previsualización de video si existe -->
-              <div v-if="homeForm.hero.videoUrl" class="mt-3 p-2 rounded-3 border border-secondary border-opacity-25" style="background-color: #033E3B;">
+              <div v-if="homeForm.hero.videoUrl" class="mt-3 p-2 rounded-3 border border-secondary border-opacity-25" style="background-color: #0D5B57;">
                 <span class="small text-accent d-block mb-1 fw-bold">Vista previa del video:</span>
                 <video :src="homeForm.hero.videoUrl" autoplay muted loop playsinline class="w-100 rounded object-fit-cover" style="max-height: 140px;"></video>
               </div>
@@ -1607,7 +1607,7 @@ const handleRestore = () => {
                       :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
                       :alt="adv.name" 
                       class="rounded-circle object-fit-cover flex-shrink-0 shadow" 
-                      style="width: 75px; height: 75px; border: 2px solid #2DD4BF;"
+                      style="width: 75px; height: 75px; border: 2px solid #E7DCC3;"
                       @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
                     >
                     <div>
@@ -2036,7 +2036,7 @@ const handleRestore = () => {
                 </div>
               </div>
 
-              <div class="p-3 rounded-3 mb-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+              <div class="p-3 rounded-3 mb-3" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
                 <div class="mb-3">
                   <label class="form-label small fw-bold text-white mb-1">Ambiente de Operación</label>
                   <select v-model="gatewayForm.transbank.environment" class="form-select admin-input text-white fw-bold">
@@ -2069,7 +2069,7 @@ const handleRestore = () => {
             <div class="admin-module-card p-4 rounded-4 shadow-sm h-100">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center gap-2">
-                  <span class="p-2 rounded-circle bg-teal bg-opacity-25 text-accent d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(13, 148, 136, 0.25);">
+                  <span class="p-2 rounded-circle bg-teal bg-opacity-25 text-accent d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(20, 126, 121, 0.25);">
                     <i class="bi bi-bank fs-5"></i>
                   </span>
                   <div>
@@ -2082,7 +2082,7 @@ const handleRestore = () => {
                 </div>
               </div>
 
-              <div class="p-3 rounded-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+              <div class="p-3 rounded-3" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
                 <div class="row g-2 mb-2">
                   <div class="col-sm-6">
                     <label class="form-label small fw-bold text-white mb-1">Banco</label>
@@ -2128,7 +2128,7 @@ const handleRestore = () => {
                     <i class="bi bi-envelope-check-fill text-accent fs-5"></i>
                     Notificaciones Automáticas por Correo
                   </h4>
-                  <div class="p-3 rounded-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+                  <div class="p-3 rounded-3" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
                     <div class="mb-3">
                       <label class="form-label small fw-bold text-white mb-1">Email Administrador (Recibe copia de cada reserva)</label>
                       <input v-model="gatewayForm.emailNotifications.adminEmail" type="email" class="form-control admin-input text-white" placeholder="reservas@wamani.cl">
@@ -2152,7 +2152,7 @@ const handleRestore = () => {
                     <i class="bi bi-shield-lock-fill text-accent fs-5"></i>
                     Estado de Ciberseguridad del Sistema
                   </h4>
-                  <div class="p-3 rounded-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+                  <div class="p-3 rounded-3" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
                     <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
                       <li class="d-flex align-items-center justify-content-between text-white pb-2 border-bottom border-secondary border-opacity-25">
                         <span><i class="bi bi-check-circle-fill text-success me-2"></i>Cumplimiento PCI-DSS</span>
@@ -2365,7 +2365,7 @@ const handleRestore = () => {
           <div class="col-12">
             <label class="form-label small fw-bold text-white mb-2">Fotografía (Sube una foto o pega una URL)</label>
             <div class="d-flex gap-3 align-items-center">
-              <img v-if="advisorForm.image" :src="advisorForm.image" class="rounded-circle object-fit-cover flex-shrink-0 shadow" style="width: 70px; height: 70px; border: 2px solid #2DD4BF;" alt="Vista previa">
+              <img v-if="advisorForm.image" :src="advisorForm.image" class="rounded-circle object-fit-cover flex-shrink-0 shadow" style="width: 70px; height: 70px; border: 2px solid #E7DCC3;" alt="Vista previa">
               <div class="flex-grow-1">
                 <input type="file" class="form-control mb-2 admin-input text-white" accept="image/*" @change="handleAdvisorImageUpload">
                 <input v-model="advisorForm.image" type="text" class="form-control form-control-sm admin-input text-white" placeholder="O URL de imagen...">
@@ -2723,8 +2723,8 @@ const handleRestore = () => {
                 <div 
                   class="p-2 rounded-3 border d-flex align-items-center gap-2 cursor-pointer transition-all"
                   :style="{
-                    background: packageForm.includedTourIds.includes(exp.id) ? 'rgba(45, 212, 191, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-                    borderColor: packageForm.includedTourIds.includes(exp.id) ? '#2DD4BF' : 'rgba(255, 255, 255, 0.1)'
+                    background: packageForm.includedTourIds.includes(exp.id) ? 'rgba(231, 220, 195, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                    borderColor: packageForm.includedTourIds.includes(exp.id) ? '#E7DCC3' : 'rgba(255, 255, 255, 0.1)'
                   }"
                   @click="toggleTourSelection(exp.id)"
                 >
@@ -3122,12 +3122,12 @@ const handleRestore = () => {
 }
 
 /* Colores y Tokens Globales */
-$dark-mountain: #045D56;
-$dark-inner: #033E3B;
-$accent-turquoise: #2DD4BF;
+$dark-mountain: #147E79;
+$dark-inner: #0D5B57;
+$accent-turquoise: #E7DCC3;
 
 .text-dark-mountain {
-  color: #033E3B !important;
+  color: #0D5B57 !important;
 }
 
 .text-accent {
@@ -3140,18 +3140,21 @@ $accent-turquoise: #2DD4BF;
 
 .bg-accent {
   background-color: $accent-turquoise !important;
+  color: #4C4C4C !important;
 }
 
 .btn-accent {
   background-color: $accent-turquoise !important;
-  color: #033E3B !important;
+  color: #4C4C4C !important;
   border: none;
+  font-weight: 700;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background-color: lighten($accent-turquoise, 8%) !important;
+    background-color: #FFFFFF !important;
+    color: #147E79 !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(45, 212, 191, 0.4);
+    box-shadow: 0 6px 18px rgba(231, 220, 195, 0.4);
   }
 }
 
@@ -3163,43 +3166,43 @@ $accent-turquoise: #2DD4BF;
 
   &:hover {
     background-color: $accent-turquoise;
-    color: #033E3B;
+    color: #4C4C4C;
   }
 }
 
 /* Cards y Superficies */
 .admin-header-card {
-  background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);
-  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);
+  border: 1px solid rgba(231, 220, 195, 0.35);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
 }
 
 .admin-tabs-card {
-  background-color: #045D56;
-  border: 1px solid rgba(45, 212, 191, 0.3);
+  background-color: #147E79;
+  border: 1px solid rgba(231, 220, 195, 0.3);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .admin-module-card {
-  background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);
-  border: 1px solid rgba(45, 212, 191, 0.3);
+  background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);
+  border: 1px solid rgba(231, 220, 195, 0.3);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
 .admin-sub-card {
-  background-color: #033E3B;
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  background-color: #0D5B57;
+  border: 1px solid rgba(231, 220, 195, 0.25);
 }
 
 .admin-kpi-card {
-  background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);
-  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);
+  border: 1px solid rgba(231, 220, 195, 0.35);
 }
 
 /* Inputs & Form Controls */
 .admin-input {
-  background-color: #033E3B !important;
-  border: 1px solid rgba(45, 212, 191, 0.3) !important;
+  background-color: #0D5B57 !important;
+  border: 1px solid rgba(231, 220, 195, 0.3) !important;
   color: #FFFFFF !important;
 
   &::placeholder {
@@ -3207,9 +3210,9 @@ $accent-turquoise: #2DD4BF;
   }
 
   &:focus {
-    background-color: #022C2A !important;
+    background-color: #083E3B !important;
     border-color: $accent-turquoise !important;
-    box-shadow: 0 0 0 0.25rem rgba(45, 212, 191, 0.25) !important;
+    box-shadow: 0 0 0 0.25rem rgba(231, 220, 195, 0.25) !important;
     color: #FFFFFF !important;
   }
 }
@@ -3219,11 +3222,11 @@ $accent-turquoise: #2DD4BF;
   color: #FFFFFF;
   --bs-table-bg: transparent;
   --bs-table-color: #FFFFFF;
-  --bs-table-border-color: rgba(45, 212, 191, 0.15);
+  --bs-table-border-color: rgba(231, 220, 195, 0.15);
 
   thead {
-    background-color: #022C2A;
-    border-bottom: 2px solid rgba(45, 212, 191, 0.4);
+    background-color: #0D5B57;
+    border-bottom: 2px solid rgba(231, 220, 195, 0.4);
 
     th {
       color: $accent-turquoise;
@@ -3238,21 +3241,21 @@ $accent-turquoise: #2DD4BF;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: rgba(45, 212, 191, 0.08) !important;
+      background-color: rgba(231, 220, 195, 0.08) !important;
     }
 
     td {
       padding: 1rem 0.75rem;
-      border-bottom: 1px solid rgba(45, 212, 191, 0.15);
+      border-bottom: 1px solid rgba(231, 220, 195, 0.15);
     }
   }
 }
 
 /* Badges */
 .admin-pill-badge {
-  background-color: #022C2A;
+  background-color: #0D5B57;
   color: #FFFFFF;
-  border: 1px solid rgba(45, 212, 191, 0.3);
+  border: 1px solid rgba(231, 220, 195, 0.3);
 }
 
 .bg-emerald {
@@ -3276,14 +3279,15 @@ $accent-turquoise: #2DD4BF;
   transition: all 0.25s ease;
   
   &:hover {
-    background-color: rgba(45, 212, 191, 0.15);
+    background-color: rgba(231, 220, 195, 0.15);
     color: $accent-turquoise;
   }
   
   &.active {
-    color: #033E3B !important;
+    color: #4C4C4C !important;
     background-color: $accent-turquoise !important;
-    box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(231, 220, 195, 0.4);
   }
 }
 
@@ -3300,8 +3304,8 @@ $accent-turquoise: #2DD4BF;
 }
 
 .modal-card {
-  background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);
-  border: 1px solid rgba(45, 212, 191, 0.5);
+  background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);
+  border: 1px solid rgba(231, 220, 195, 0.5);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
 }
 
@@ -3312,7 +3316,7 @@ $accent-turquoise: #2DD4BF;
   right: 2rem;
   z-index: 1200;
   min-width: 280px;
-  background: #045D56;
+  background: #147E79;
   border: 1px solid $accent-turquoise;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }

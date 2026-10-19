@@ -21,7 +21,7 @@ const contentStore = useContentStore();
         <div class="row align-items-center g-5">
           <div class="col-lg-6 position-relative">
             <!-- Bloque decorativo detrás de la imagen -->
-            <div class="bg-accent position-absolute top-0 start-0 w-75 h-100" style="background-color: #0FA095; margin-left: -20px; margin-top: -20px; z-index: 0;"></div>
+            <div class="bg-accent position-absolute top-0 start-0 w-75 h-100" style="background-color: #147E79; margin-left: -20px; margin-top: -20px; z-index: 0;"></div>
             <img :src="contentStore.content.about.historyImage" :alt="contentStore.content.about.historyTitle" class="img-fluid rounded-4 shadow-lg object-fit-cover w-100 position-relative z-1 history-main-img">
           </div>
           <div class="col-lg-6 px-lg-5">
@@ -98,22 +98,22 @@ const contentStore = useContentStore();
         <div class="row g-4 justify-content-center">
           <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
             <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
-              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #0D5B57;">
                 <img 
                   :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
                   :alt="adv.name" 
                   class="w-100 h-100 object-fit-cover transition-all hover-scale"
                   @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
                 />
-                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(13, 91, 87, 0.95) 0%, rgba(13, 91, 87, 0.25) 50%, transparent 100%);"></div>
                 <div class="position-absolute bottom-0 start-0 p-4 w-100">
                   <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
-                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
+                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #E7DCC3 !important; letter-spacing: 0.08em;">
                     <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
                   </span>
                 </div>
               </div>
-              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
+              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);">
                 <p class="font-sans text-white fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">
                   {{ adv.bio }}
                 </p>
@@ -170,7 +170,7 @@ const contentStore = useContentStore();
 .about-view {
   min-height: 100vh;
   background-color: var(--bs-light);
-  color: #045D56;
+  color: #147E79;
 }
 
 .about-hero {
@@ -180,7 +180,7 @@ const contentStore = useContentStore();
 }
 
 .overlay {
-  background: linear-gradient(to bottom, rgba(26,26,26,0.6) 0%, rgba(131, 170, 168, 1) 100%);
+  background: linear-gradient(to bottom, rgba(26,26,26,0.6) 0%, rgba(13, 91, 87, 0.95) 100%);
 }
 
 .hero-title {
@@ -194,11 +194,11 @@ const contentStore = useContentStore();
 }
 
 .text-gold {
-  color: #2DD4BF;
+  color: #E7DCC3;
 }
 
 .text-accent {
-  color: #2DD4BF !important;
+  color: #E7DCC3 !important;
 }
 
 .history-main-img {
@@ -217,8 +217,8 @@ const contentStore = useContentStore();
    Misión y Visión (Tarjetas Cuadradas y Centradas)
 ---------------------------------------------------- */
 .mv-card {
-  background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);
-  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);
+  border: 1px solid rgba(231, 220, 195, 0.35);
   border-radius: 32px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
   min-height: 400px;
@@ -228,7 +228,7 @@ const contentStore = useContentStore();
 
 .mv-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(45, 212, 191, 0.7);
+  border-color: rgba(231, 220, 195, 0.7);
   box-shadow: 0 30px 65px rgba(0, 0, 0, 0.35);
 }
 
@@ -238,7 +238,7 @@ const contentStore = useContentStore();
   right: -50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(231, 220, 195, 0.15) 0%, transparent 70%);
   pointer-events: none;
   z-index: 1;
 }
@@ -246,9 +246,9 @@ const contentStore = useContentStore();
 .mv-divider {
   width: 70px;
   height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #2DD4BF 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #E7DCC3 50%, transparent 100%);
   border-radius: 2px;
-  box-shadow: 0 0 12px rgba(45, 212, 191, 0.7);
+  box-shadow: 0 0 12px rgba(231, 220, 195, 0.6);
 }
 
 .title-glow {
@@ -266,8 +266,8 @@ const contentStore = useContentStore();
 .icon-circle, .icon-square {
   width: 175px;
   height: 175px;
-  background-color: #045D56 !important;
-  border: 1px solid rgba(45, 212, 191, 0.35) !important;
+  background-color: #147E79 !important;
+  border: 1px solid rgba(231, 220, 195, 0.35) !important;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -275,7 +275,7 @@ const contentStore = useContentStore();
 .accreditation-card:hover .icon-circle,
 .accreditation-card:hover .icon-square {
   transform: translateY(-6px) scale(1.05);
-  border-color: #2DD4BF !important;
+  border-color: #E7DCC3 !important;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
 }
 
@@ -285,13 +285,13 @@ const contentStore = useContentStore();
 
 /* Tarjetas de Asesores */
 .advisor-card {
-  border: 1px solid rgba(45, 212, 191, 0.3);
+  border: 1px solid rgba(231, 220, 195, 0.3);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .advisor-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(45, 212, 191, 0.7);
+  border-color: rgba(231, 220, 195, 0.7);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
 }
 

@@ -120,7 +120,7 @@ onUnmounted(() => {
           <!-- Carrito de Compras -->
           <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative me-1 nav-icon-hover" @click="cartStore.toggleCart" title="Ver carrito">
             <i class="bi bi-cart3"></i>
-            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
+            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #E7DCC3; color: #0D5B57;">
               {{ cartStore.totalItems }}
             </span>
           </button>
@@ -147,7 +147,7 @@ onUnmounted(() => {
           <!-- Carrito de Compras Móvil -->
           <button class="btn btn-link text-white p-0 border-0 fs-5 lh-1 text-decoration-none position-relative nav-icon-hover" @click="cartStore.toggleCart" aria-label="Ver carrito">
             <i class="bi bi-cart3"></i>
-            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent text-dark-mountain" style="font-size: 0.65rem;">
+            <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.65rem; background-color: #E7DCC3; color: #0D5B57;">
               {{ cartStore.totalItems }}
             </span>
           </button>
@@ -198,25 +198,25 @@ onUnmounted(() => {
               <!-- Links de Navegación Móvil -->
               <nav class="d-flex flex-column gap-3 py-2">
                 <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-house-door me-2 text-accent"></i>Inicio
+                  <i class="bi bi-house-door me-2" style="color: #E7DCC3;"></i>Inicio
                 </router-link>
                 <router-link to="/experiencias" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-compass me-2 text-accent"></i>Expediciones & Tours
+                  <i class="bi bi-compass me-2" style="color: #E7DCC3;"></i>Expediciones & Tours
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#servicios' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-stars me-2 text-accent"></i>Nuestros Servicios
+                  <i class="bi bi-stars me-2" style="color: #E7DCC3;"></i>Nuestros Servicios
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#destinos' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-geo-alt me-2 text-accent"></i>Destinos & Catálogo
+                  <i class="bi bi-geo-alt me-2" style="color: #E7DCC3;"></i>Destinos & Catálogo
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#guias' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-person-badge me-2 text-accent"></i>Nuestros Guías
+                  <i class="bi bi-person-badge me-2" style="color: #E7DCC3;"></i>Nuestros Guías
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#opiniones' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-chat-heart me-2 text-accent"></i>Reseñas de Clientes
+                  <i class="bi bi-chat-heart me-2" style="color: #E7DCC3;"></i>Reseñas de Clientes
                 </router-link>
                 <router-link to="/nosotros" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-people me-2 text-accent"></i>Quiénes Somos
+                  <i class="bi bi-people me-2" style="color: #E7DCC3;"></i>Quiénes Somos
                 </router-link>
               </nav>
             </div>
@@ -261,7 +261,7 @@ onUnmounted(() => {
               </a>
               <img src="/Logo_MarcaChile_Caja Roja.webp" alt="Marca Chile" height="36" class="object-fit-contain" />
             </div>
-            <p class="small text-accent mb-3" style="font-size: 0.8rem;">
+            <p class="small mb-3" style="font-size: 0.8rem; color: #E7DCC3;">
               <i class="bi bi-patch-check-fill me-1"></i>Reg. SERNATUR N° {{ contentStore.content.legal.sernaturRegistry }}
             </p>
             
@@ -272,7 +272,7 @@ onUnmounted(() => {
           
           <!-- Columna 2: Quick Links -->
           <div class="col-6 col-md-2">
-            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Explora</h5>
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Explora</h5>
             <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small">
               <li><router-link to="/" class="text-white-50 text-decoration-none nav-link-custom">Inicio</router-link></li>
               <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Portafolio</router-link></li>
@@ -285,20 +285,20 @@ onUnmounted(() => {
           
           <!-- Columna 3: Contacto -->
           <div class="col-6 col-md-3">
-            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Contacto</h5>
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Contacto</h5>
             <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small text-white-50">
               <li class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-location-dot text-accent" style="width: 16px; text-align: center;"></i> <span>{{ contentStore.content.contact.address }}</span>
+                <i class="fa-solid fa-location-dot" style="width: 16px; text-align: center; color: #E7DCC3;"></i> <span>{{ contentStore.content.contact.address }}</span>
               </li>
               <li class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-envelope text-accent" style="width: 16px; text-align: center;"></i> <span>{{ contentStore.content.contact.email }}</span>
+                <i class="fa-solid fa-envelope" style="width: 16px; text-align: center; color: #E7DCC3;"></i> <span>{{ contentStore.content.contact.email }}</span>
               </li>
             </ul>
           </div>
           
           <!-- Columna 4: Redes Sociales -->
           <div class="col-12 col-md-4">
-            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Síguenos</h5>
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Síguenos</h5>
             <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small text-white-50">
               <li>
                 <a :href="`https://wa.me/${contentStore.content.contact.whatsappNumber}?text=${encodeURIComponent(contentStore.content.contact.whatsappMessage)}`" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center gap-2 social-link-item py-1">
@@ -359,7 +359,7 @@ onUnmounted(() => {
         <div class="d-flex align-items-center justify-content-between gap-2">
           <div class="d-flex flex-column text-white text-truncate me-2">
             <span class="small opacity-90 fw-bold text-truncate" style="font-size: 0.68rem; letter-spacing: 0.08em;">WAMANI EXPERIENCE</span>
-            <span class="fw-semibold text-accent text-truncate" style="font-size: 0.8rem; color: #2DD4BF !important;">Expediciones en Chile</span>
+            <span class="fw-semibold text-truncate" style="font-size: 0.8rem; color: #E7DCC3 !important;">Expediciones en Chile</span>
           </div>
           <div class="d-flex align-items-center gap-2 flex-shrink-0">
             <router-link 
@@ -390,30 +390,36 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .premium-footer { 
-  background: linear-gradient(180deg, #045D56 0%, #033E3B 100%);
-  border-top: 1px solid rgba(45, 212, 191, 0.25);
+  background: linear-gradient(180deg, $verde-wamani 0%, $verde-wamani-dark 100%);
+  border-top: 1px solid rgba($beige-tierra, 0.35);
 }
 
 .premium-footer .text-white-50 {
-  color: rgba(255, 255, 255, 0.82) !important;
+  color: rgba($blanco-andino, 0.85) !important;
 }
 
 .premium-footer a.text-white-50:hover {
-  color: #2DD4BF !important;
+  color: $beige-tierra !important;
 }
+
 .app-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
 main {
   flex: 1;
 }
+
 .z-3 {
   z-index: 1030;
 }
+
 .logo-center {
   position: absolute;
   left: 50%;
@@ -432,43 +438,44 @@ main {
 }
 
 .nav-pill {
-  background: rgba(4, 93, 86, 0.4); /* Transparente verdoso */
+  background: rgba($verde-wamani, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba($beige-tierra, 0.3);
   transition: background 0.4s ease;
 }
 
 .navbar-scrolled .nav-pill {
-  background: rgba(4, 93, 86, 0.7); /* Verdoso más intenso al hacer scroll */
+  background: rgba($verde-wamani-dark, 0.88);
+  border-color: rgba($beige-tierra, 0.5);
 }
 
 .nav-icon-hover {
   transition: color 0.3s ease, transform 0.2s ease;
   
   &:hover {
-    color: #0FA095 !important;
+    color: $beige-tierra !important;
     transform: scale(1.1);
   }
 }
 
 .custom-dropdown-glass {
-  background: rgba(4, 93, 86, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba($verde-wamani-dark, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba($beige-tierra, 0.35) !important;
   padding: 0.5rem 0;
   
   .dropdown-item {
-    color: white !important;
+    color: $blanco-andino !important;
     transition: background 0.3s ease, color 0.3s ease;
     padding: 0.5rem 1.25rem;
     
     &:hover {
-      background: rgba(255, 255, 255, 0.1) !important;
-      color: #0FA095 !important;
+      background: rgba($beige-tierra, 0.2) !important;
+      color: $beige-tierra !important;
     }
   }
 }
@@ -481,37 +488,39 @@ main {
   pointer-events: none !important;
 }
 
+// Botón Principal en Navbar: Verde Wamani (#147E79)
 .btn-accent-navbar {
-  background-color: #0FA095;
-  color: #FFFFFF !important;
+  background-color: $verde-wamani;
+  color: $blanco-andino !important;
   border-radius: 999px;
   padding: 0.5rem 1.25rem;
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  border: none;
-  box-shadow: 0 4px 15px rgba(15, 160, 149, 0.2);
-}
+  border: 1px solid rgba($beige-tierra, 0.4);
+  box-shadow: 0 4px 15px rgba(20, 126, 121, 0.35);
 
-.btn-accent-navbar:hover {
-  background-color: lighten(#0FA095, 5%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(15, 160, 149, 0.3);
-}
+  &:hover {
+    background-color: $verde-wamani-light;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(20, 126, 121, 0.5);
+  }
 
-.btn-accent-navbar:active {
-  transform: scale(0.96) translateY(0); /* Kowalski */
-  box-shadow: 0 2px 8px rgba(15, 160, 149, 0.2);
+  &:active {
+    transform: scale(0.96) translateY(0);
+    box-shadow: 0 2px 8px rgba(20, 126, 121, 0.3);
+  }
 }
 
 .nav-link-custom {
   position: relative;
   transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  opacity: 0.85;
-}
-.nav-link-custom:hover {
-  opacity: 1;
-  color: #0FA095 !important;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+    color: $beige-tierra !important;
+  }
 }
 
 .social-link-item {
@@ -520,33 +529,21 @@ main {
   gap: 0.5rem !important;
   text-decoration: none;
   transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
 
-.social-link-item span:not(.social-icon-wrapper) {
-  line-height: 1 !important;
-  transform: translateY(1.5px); /* Corrección de alineación óptica */
-}
+  span:not(.social-icon-wrapper) {
+    line-height: 1 !important;
+    transform: translateY(1.5px);
+  }
 
-.social-link-item:hover {
-  color: #0FA095 !important;
-}
+  &:hover {
+    color: $beige-tierra !important;
 
-.social-link-item:hover .social-icon-wrapper {
-  border-color: #0FA095 !important;
-  background-color: rgba(15, 160, 149, 0.1);
-  transform: scale(1.08);
-}
-
-.contact-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  line-height: 1 !important;
-}
-
-.contact-item span {
-  line-height: 1 !important;
-  transform: translateY(1.5px); /* Corrección de alineación óptica */
+    .social-icon-wrapper {
+      border-color: $beige-tierra !important;
+      background-color: rgba($beige-tierra, 0.15);
+      transform: scale(1.08);
+    }
+  }
 }
 
 .brand-title-nav {
@@ -560,14 +557,14 @@ main {
   }
 }
 
-/* Estilos de Drawer Móvil */
+/* Estilos de Drawer Móvil con Paleta Oficial */
 .mobile-menu-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(13, 91, 87, 0.85);
   backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
@@ -578,10 +575,10 @@ main {
   width: 85%;
   max-width: 380px;
   height: 100%;
-  background: rgba(28, 28, 30, 0.98); /* Premium dark */
+  background: rgba($verde-wamani-dark, 0.98);
   backdrop-filter: blur(16px);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba($beige-tierra, 0.25);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.45);
   animation: slideInRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -595,7 +592,7 @@ main {
 }
 
 .mobile-nav-link {
-  color: #FFFFFF !important;
+  color: $blanco-andino !important;
   text-decoration: none;
   font-size: 1.15rem;
   font-weight: 500;
@@ -606,18 +603,18 @@ main {
   align-items: center;
 
   &:hover, &:focus, &.router-link-active {
-    background-color: rgba(15, 160, 149, 0.15);
-    color: #0FA095 !important;
+    background-color: rgba($beige-tierra, 0.15);
+    color: $beige-tierra !important;
     transform: translateX(8px);
   }
 }
 
 /* Barra inferior de acción rápida móvil */
 .mobile-bottom-cta-bar {
-  background: rgba(28, 28, 30, 0.95) !important;
+  background: rgba($verde-wamani-dark, 0.96) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba($beige-tierra, 0.3) !important;
   z-index: 1035 !important;
 }
 

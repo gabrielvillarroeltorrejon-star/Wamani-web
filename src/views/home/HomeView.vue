@@ -177,8 +177,8 @@ onMounted(() => {
     <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="py-5">
       <div class="container py-4">
         <div class="text-center mb-5">
-          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(4, 93, 86, 0.45); border: 1px solid rgba(45, 212, 191, 0.35);">
-            <i class="bi bi-patch-check-fill text-accent"></i>
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(20, 126, 121, 0.45); border: 1px solid rgba(231, 220, 195, 0.45);">
+            <i class="bi bi-patch-check-fill" style="color: #E7DCC3;"></i>
             <span class="small text-white text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem;">Equipo & Guías SERNATUR</span>
           </div>
           <h2 class="display-4 font-brush fw-bold mb-2 text-white" style="font-family: 'Caveat', cursive !important;">
@@ -192,22 +192,22 @@ onMounted(() => {
         <div class="row g-4 justify-content-center">
           <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
             <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
-              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #0D5B57;">
                 <img 
                   :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
                   :alt="adv.name" 
                   class="w-100 h-100 object-fit-cover transition-all hover-scale"
                   @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
                 />
-                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(20, 126, 121, 0.95) 0%, rgba(20, 126, 121, 0.25) 50%, transparent 100%);"></div>
                 <div class="position-absolute bottom-0 start-0 p-4 w-100">
                   <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
-                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
+                  <span class="font-sans text-uppercase tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #E7DCC3 !important; letter-spacing: 0.08em;">
                     <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
                   </span>
                 </div>
               </div>
-              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
+              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%);">
                 <p class="font-sans text-white fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">
                   {{ adv.bio }}
                 </p>
@@ -249,7 +249,7 @@ onMounted(() => {
 
             <div class="row g-0 modal-main-row">
               <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
                 
                 <!-- Galería -->
                 <div class="modal-gallery mb-4">
@@ -264,40 +264,40 @@ onMounted(() => {
                 </div>
 
                 <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #045D56; color: #2DD4BF; font-size: 0.75rem;">
+                  <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #147E79; color: #E7DCC3; font-size: 0.75rem;">
                     {{ selectedExperience.categories ? selectedExperience.categories[0] : 'EXPERIENCIA' }}
                   </span>
-                  <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-clock me-1 text-accent"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
-                  <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-bar-chart-fill me-1 text-accent"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
+                  <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-clock me-1" style="color: #E7DCC3;"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
+                  <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-bar-chart-fill me-1" style="color: #E7DCC3;"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
                 </div>
                 
-                <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #045D56 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-                <p class="lead mb-3 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+                <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #147E79 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
+                <p class="lead mb-3 fw-semibold" style="color: #232323 !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
 
                 <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
-                <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #045D56;">
+                <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #147E79;">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-white small">Desde</span>
-                    <strong class="text-accent fs-5">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
+                    <strong class="fs-5" style="color: #E7DCC3;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
                   </div>
-                  <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #2DD4BF !important; color: #022927 !important; border-radius: 12px;">
+                  <a href="#modal-reservation-box" class="btn btn-secondary w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="border-radius: 12px;">
                     <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
                   </a>
                 </div>
 
                 <div class="mb-4">
-                  <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Descripción</h4>
-                  <p class="lh-lg fw-medium" style="color: #022C2A !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
+                  <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Descripción</h4>
+                  <p class="lh-lg fw-medium" style="color: #4C4C4C !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
                 </div>
 
                 <div class="mb-4" v-if="selectedExperience.itinerary && selectedExperience.itinerary.length">
-                  <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Itinerario</h4>
+                  <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Itinerario</h4>
                   <div class="itinerary-timeline">
                     <div v-for="(item, idx) in selectedExperience.itinerary" :key="idx" class="itinerary-item">
-                      <div class="itinerary-time fw-bold" style="color: #0FA095 !important;">{{ item.dayOrTime }}</div>
+                      <div class="itinerary-time fw-bold" style="color: #147E79 !important;">{{ item.dayOrTime }}</div>
                       <div class="itinerary-content pb-3">
-                        <h5 class="fw-bold h6 mb-1" style="color: #045D56 !important;">{{ item.title }}</h5>
-                        <p class="small mb-0 fw-medium" style="color: #022C2A !important;">{{ item.description }}</p>
+                        <h5 class="fw-bold h6 mb-1" style="color: #147E79 !important;">{{ item.title }}</h5>
+                        <p class="small mb-0 fw-medium" style="color: #4C4C4C !important;">{{ item.description }}</p>
                       </div>
                     </div>
                   </div>
@@ -307,7 +307,7 @@ onMounted(() => {
                   <div class="col-md-6">
                     <h4 class="fw-bold h6 mb-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>Qué incluye</h4>
                     <ul class="list-unstyled">
-                      <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #045D56 !important;">
+                      <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #147E79 !important;">
                         <i class="bi bi-check-circle-fill text-success me-2"></i> {{ inc }}
                       </li>
                     </ul>
@@ -315,7 +315,7 @@ onMounted(() => {
                   <div class="col-md-6 mt-3 mt-md-0">
                     <h4 class="fw-bold h6 mb-3 text-danger"><i class="bi bi-x-circle-fill me-2"></i>Qué no incluye</h4>
                     <ul class="list-unstyled">
-                      <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #033E3B !important;">
+                      <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #4C4C4C !important;">
                         <i class="bi bi-x-circle-fill text-danger me-2"></i> {{ ninc }}
                       </li>
                     </ul>
@@ -323,34 +323,34 @@ onMounted(() => {
                 </div>
 
                 <div class="pt-3 border-top border-secondary border-opacity-25">
-                  <p class="small mb-1 fw-semibold" style="color: #033E3B !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
-                  <p class="small mb-0 fw-semibold" style="color: #033E3B !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
+                  <p class="small mb-1 fw-semibold" style="color: #4C4C4C !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
+                  <p class="small mb-0 fw-semibold" style="color: #4C4C4C !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
                 </div>
 
               </div>
 
               <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-              <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+              <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
                 
                 <div>
-                  <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
+                  <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
                     Área de Reserva Segura
                   </span>
                   <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
 
                   <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                  <div class="p-3 rounded-4 mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <!-- Selector de Fecha -->
                     <div class="mb-3">
                       <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
-                        <i class="bi bi-calendar-event me-2 text-accent"></i>Fecha de Excursión
+                        <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha de Excursión
                       </label>
                       <input 
                         v-model="modalDate" 
                         type="date" 
                         :min="todayDate" 
                         class="form-control form-control-sm text-white fw-bold" 
-                        style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); color: #FFFFFF !important;"
+                        style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
                         required
                       >
                     </div>
@@ -358,8 +358,8 @@ onMounted(() => {
                     <!-- Selector de Pasajeros (+ / -) -->
                     <div>
                       <label class="form-label small fw-bold text-white mb-1 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
-                        <span><i class="bi bi-people-fill me-2 text-accent"></i>Número de Pasajeros</span>
-                        <span class="badge bg-accent text-dark-mountain fw-bold">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
+                        <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
+                        <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
                       </label>
                       <div class="d-flex align-items-center gap-2">
                         <button 
@@ -378,7 +378,7 @@ onMounted(() => {
                           min="1" 
                           max="20" 
                           class="form-control form-control-sm text-center fw-bold text-white" 
-                          style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); max-width: 70px; color: #FFFFFF !important;"
+                          style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
                         >
                         <button 
                           type="button" 
@@ -394,14 +394,14 @@ onMounted(() => {
                   </div>
 
                   <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Tarifa por persona</span>
                       <span class="fw-bold text-white" style="color: #FFFFFF !important;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }}</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Cantidad de viajeros</span>
-                      <span class="fw-bold text-accent">× {{ modalPax }}</span>
+                      <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-end mt-3 mb-2">
@@ -411,7 +411,7 @@ onMounted(() => {
                       </div>
                       <div class="text-end">
                         <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem; color: #FFFFFF !important;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
-                        <span class="d-block small text-accent fw-bold" style="font-size: 0.78rem;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
+                        <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
                       </div>
                     </div>
                   </div>
@@ -422,14 +422,14 @@ onMounted(() => {
                   <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
                     <i class="bi bi-cart-plus-fill fs-5"></i> Agregar al Carrito
                   </button>
-                  <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
+                  <button class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
                     <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
                   </button>
                   <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="goToWhatsApp(selectedExperience.title)">
                     <i class="bi bi-whatsapp fs-5"></i> Reservar vía Transferencia / WhatsApp
                   </button>
                   <div class="d-flex align-items-center justify-content-center gap-2 text-white small mt-1 fw-medium" style="color: #FFFFFF !important;">
-                    <i class="bi bi-shield-lock-fill text-accent"></i>
+                    <i class="bi bi-shield-lock-fill" style="color: #E7DCC3;"></i>
                     <span>Transacción protegida por cifrado SSL 256-bit</span>
                   </div>
                 </div>

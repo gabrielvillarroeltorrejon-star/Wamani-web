@@ -21,7 +21,7 @@ const contentStore = useContentStore();
       <!-- Contenedor Principal -->
       <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.45); line-height: 1.8;">
+          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.45); line-height: 1.8;">
 
             <div class="legal-content">
               <section class="mb-5">
@@ -79,10 +79,10 @@ const contentStore = useContentStore();
   color: #FFFFFF;
 }
 .text-accent {
-  color: #2DD4BF !important;
+  color: #E7DCC3 !important;
 }
 .legal-content h3 {
-  border-bottom: 1px solid rgba(45, 212, 191, 0.25);
+  border-bottom: 1px solid rgba(231, 220, 195, 0.25);
   padding-bottom: 8px;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.05em;

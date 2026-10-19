@@ -262,14 +262,14 @@ watch(() => route.hash, () => {
           <a 
             href="#paquetes" 
             class="btn rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm text-decoration-none"
-            style="background: rgba(45, 212, 191, 0.15); border: 1px solid #2DD4BF; color: #2DD4BF;"
+            style="background: rgba(231, 220, 195, 0.15); border: 1px solid #E7DCC3; color: #E7DCC3;"
           >
             <i class="bi bi-box-seam-fill"></i>
             <span>Paquetes & Combos</span>
           </a>
         </div>
 
-        <!-- CONTENEDOR BUSCADOR EN VERDE BOSQUE #045D56 -->
+        <!-- CONTENEDOR BUSCADOR EN VERDE WAMANI #147E79 -->
         <div class="search-filter-box mx-auto p-3 p-md-4 rounded-4 shadow-lg">
           <div class="row g-3 align-items-center">
             
@@ -347,7 +347,7 @@ watch(() => route.hash, () => {
           <!-- Contador de Resultados & Configuración de Viaje -->
           <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top border-light border-opacity-25 px-1 gap-2">
             <span class="small text-white fw-semibold">
-              <i class="bi bi-compass me-1 text-accent" style="color: #2DD4BF !important;"></i> Mostrando <strong class="text-white fw-bold">{{ filteredExperiences.length }}</strong> experiencias disponibles
+              <i class="bi bi-compass me-1 text-accent" style="color: #E7DCC3 !important;"></i> Mostrando <strong class="text-white fw-bold">{{ filteredExperiences.length }}</strong> experiencias disponibles
             </span>
             <div class="d-flex align-items-center gap-2">
               <span class="badge bg-dark bg-opacity-75 text-white border border-secondary border-opacity-50 small px-3 py-1 fw-bold">
@@ -367,13 +367,13 @@ watch(() => route.hash, () => {
               <div class="position-relative overflow-hidden">
                 <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" width="400" height="220" loading="lazy" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
                 <div class="card-image-overlay"></div>
-                <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
+                <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #E7DCC3 !important;">
                   <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
                 </span>
               </div>
               <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
                 <div>
-                  <p class="small text-accent mb-1 text-uppercase fw-bold" style="color: #2DD4BF !important; font-size: 0.78rem; letter-spacing: 0.08em;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
+                  <p class="small text-accent mb-1 text-uppercase fw-bold" style="color: #E7DCC3 !important; font-size: 0.78rem; letter-spacing: 0.08em;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
                   <h3 class="h5 font-brush fw-bold mb-2 text-white" style="font-size: 1.65rem; color: #FFFFFF !important; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">{{ exp.title }}</h3>
                   <p class="small mb-3 text-truncate fw-medium" style="color: #FFFFFF !important; font-size: 0.88rem; opacity: 1;">{{ exp.summary }}</p>
                 </div>
@@ -381,7 +381,7 @@ watch(() => route.hash, () => {
                 <div class="mt-auto pt-3 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
                   <div>
                     <span class="small d-block fw-semibold" style="font-size: 0.8rem; color: #FFFFFF !important;">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
-                    <span class="fw-bold text-accent fs-5" style="color: #2DD4BF !important;">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
+                    <span class="fw-bold text-accent fs-5" style="color: #E7DCC3 !important;">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
                   </div>
                   <WButton variant="primary" size="sm" class="px-3 py-2 btn-cyan-gradient fw-bold">Ver y Reservar</WButton>
                 </div>
@@ -407,7 +407,7 @@ watch(() => route.hash, () => {
 
             <div class="row g-0 modal-main-row">
               <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
                 
                 <!-- Galería -->
                 <div class="modal-gallery mb-4">
@@ -422,40 +422,40 @@ watch(() => route.hash, () => {
                 </div>
 
                 <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #045D56; color: #2DD4BF; font-size: 0.75rem;">
+                  <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #147E79; color: #E7DCC3; font-size: 0.75rem;">
                     {{ selectedExperience.categories ? selectedExperience.categories[0] : 'EXPERIENCIA' }}
                   </span>
-                  <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-clock me-1 text-accent"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
-                  <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-bar-chart-fill me-1 text-accent"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
+                  <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-clock me-1 text-accent"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
+                  <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-bar-chart-fill me-1 text-accent"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
                 </div>
                 
-                <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #045D56 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-                <p class="lead mb-3 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+                <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #147E79 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
+                <p class="lead mb-3 fw-semibold" style="color: #0D5B57 !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
 
                 <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
-                <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #045D56;">
+                <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #147E79;">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-white small">Desde</span>
                     <strong class="text-accent fs-5">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
                   </div>
-                  <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #2DD4BF !important; color: #022927 !important; border-radius: 12px;">
+                  <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #E7DCC3 !important; color: #4C4C4C !important; border-radius: 12px;">
                     <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
                   </a>
                 </div>
 
                 <div class="mb-4">
-                  <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Descripción</h4>
-                  <p class="lh-lg fw-medium" style="color: #022C2A !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
+                  <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Descripción</h4>
+                  <p class="lh-lg fw-medium" style="color: #4C4C4C !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
                 </div>
 
                 <div class="mb-4" v-if="selectedExperience.itinerary && selectedExperience.itinerary.length">
-                  <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Itinerario</h4>
+                  <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Itinerario</h4>
                   <div class="itinerary-timeline">
                     <div v-for="(item, idx) in selectedExperience.itinerary" :key="idx" class="itinerary-item">
-                      <div class="itinerary-time fw-bold" style="color: #0FA095 !important;">{{ item.dayOrTime }}</div>
+                      <div class="itinerary-time fw-bold" style="color: #147E79 !important;">{{ item.dayOrTime }}</div>
                       <div class="itinerary-content pb-3">
-                        <h5 class="fw-bold h6 mb-1" style="color: #045D56 !important;">{{ item.title }}</h5>
-                        <p class="small mb-0 fw-medium" style="color: #022C2A !important;">{{ item.description }}</p>
+                        <h5 class="fw-bold h6 mb-1" style="color: #147E79 !important;">{{ item.title }}</h5>
+                        <p class="small mb-0 fw-medium" style="color: #4C4C4C !important;">{{ item.description }}</p>
                       </div>
                     </div>
                   </div>
@@ -465,7 +465,7 @@ watch(() => route.hash, () => {
                   <div class="col-md-6">
                     <h4 class="fw-bold h6 mb-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>Qué incluye</h4>
                     <ul class="list-unstyled">
-                      <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #045D56 !important;">
+                      <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #147E79 !important;">
                         <i class="bi bi-check-circle-fill text-success me-2"></i> {{ inc }}
                       </li>
                     </ul>
@@ -473,7 +473,7 @@ watch(() => route.hash, () => {
                   <div class="col-md-6 mt-3 mt-md-0">
                     <h4 class="fw-bold h6 mb-3 text-danger"><i class="bi bi-x-circle-fill me-2"></i>Qué no incluye</h4>
                     <ul class="list-unstyled">
-                      <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #033E3B !important;">
+                      <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #0D5B57 !important;">
                         <i class="bi bi-x-circle-fill text-danger me-2"></i> {{ ninc }}
                       </li>
                     </ul>
@@ -481,14 +481,14 @@ watch(() => route.hash, () => {
                 </div>
 
                 <div class="pt-3 border-top border-secondary border-opacity-25">
-                  <p class="small mb-1 fw-semibold" style="color: #033E3B !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
-                  <p class="small mb-0 fw-semibold" style="color: #033E3B !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
+                  <p class="small mb-1 fw-semibold" style="color: #0D5B57 !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
+                  <p class="small mb-0 fw-semibold" style="color: #0D5B57 !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
                 </div>
 
               </div>
 
               <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-              <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+              <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
                 
                 <div>
                   <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
@@ -497,7 +497,7 @@ watch(() => route.hash, () => {
                   <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
 
                   <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                  <div class="p-3 rounded-4 mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <!-- Selector de Fecha -->
                     <div class="mb-3">
                       <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
@@ -508,7 +508,7 @@ watch(() => route.hash, () => {
                         type="date" 
                         :min="todayDate" 
                         class="form-control form-control-sm text-white fw-bold" 
-                        style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); color: #FFFFFF !important;"
+                        style="background-color: #0D5B57; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
                         required
                       >
                     </div>
@@ -536,7 +536,7 @@ watch(() => route.hash, () => {
                           min="1" 
                           max="20" 
                           class="form-control form-control-sm text-center fw-bold text-white" 
-                          style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); max-width: 70px; color: #FFFFFF !important;"
+                          style="background-color: #0D5B57; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
                         >
                         <button 
                           type="button" 
@@ -552,7 +552,7 @@ watch(() => route.hash, () => {
                   </div>
 
                   <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                       <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Tarifa por persona</span>
                       <span class="fw-bold text-white" style="color: #FFFFFF !important;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }}</span>
@@ -624,23 +624,24 @@ watch(() => route.hash, () => {
 
 .macrozone-filter-bar {
   .btn-macrozone-active {
-    background-color: #2DD4BF !important;
-    color: #022927 !important;
-    border: 1px solid #2DD4BF !important;
-    box-shadow: 0 4px 14px rgba(45, 212, 191, 0.4) !important;
+    background-color: #E7DCC3 !important;
+    color: #4C4C4C !important;
+    border: 1px solid #E7DCC3 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 14px rgba(231, 220, 195, 0.4) !important;
     transform: translateY(-2px);
   }
 
   .btn-macrozone-inactive {
-    background-color: rgba(3, 62, 59, 0.85) !important;
+    background-color: rgba(13, 91, 87, 0.85) !important;
     color: #ffffff !important;
-    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    border: 1px solid rgba(231, 220, 195, 0.35) !important;
     backdrop-filter: blur(8px);
     
     &:hover {
-      background-color: #045D56 !important;
-      border-color: #2DD4BF !important;
-      color: #2DD4BF !important;
+      background-color: #147E79 !important;
+      border-color: #E7DCC3 !important;
+      color: #E7DCC3 !important;
       transform: translateY(-1px);
     }
   }
@@ -662,21 +663,23 @@ watch(() => route.hash, () => {
 
 // Grid Tarjetas Catalog
 .catalog-card {
-  background-color: #045D56 !important; /* Verde bosque profundo Wamani */
+  background-color: #147E79 !important; /* Verde Wamani */
   border-radius: $border-radius-lg !important; /* Usar border-radius unificado de 20px */
+  border: 1px solid rgba(231, 220, 195, 0.25) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   color: #ffffff;
   
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    border-color: rgba(231, 220, 195, 0.6) !important;
     
     .transition-transform {
       transform: scale(1.05);
     }
     
     .card-image-overlay {
-      background: linear-gradient(to bottom, rgba(26, 26, 26, 0.1) 0%, rgba($primary, 0.75) 100%);
+      background: linear-gradient(to bottom, rgba(26, 26, 26, 0.1) 0%, rgba(20, 126, 121, 0.75) 100%);
     }
   }
   
@@ -690,15 +693,15 @@ watch(() => route.hash, () => {
   }
   
   .text-muted, p:not(.text-accent) {
-    color: #BCE2E0 !important; /* Verde agua claro, súper legible */
+    color: #FFFFFF !important;
   }
   
   .text-accent {
-    color: #2DD4BF !important; /* Acento verde agua brillante */
+    color: #E7DCC3 !important; /* Beige Tierra */
   }
   
   .border-top {
-    border-top-color: rgba(255, 255, 255, 0.1) !important;
+    border-top-color: rgba(255, 255, 255, 0.15) !important;
   }
   
   .text-dark {

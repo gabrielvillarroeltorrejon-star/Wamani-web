@@ -710,7 +710,7 @@ const printVoucher = () => {
       <!-- PANTALLA DE COMPRA EXITOSA (VOUCHER / COMPROBANTE OFICIAL) -->
       <div v-if="purchaseCompleted && completedBooking" class="row justify-content-center">
         <div class="col-12 col-lg-8">
-          <div class="voucher-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.45);">
+          <div class="voucher-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.45);">
             
             <!-- Encabezado del Voucher -->
             <div class="text-center mb-4 pb-4 border-bottom border-secondary border-opacity-25">
@@ -726,7 +726,7 @@ const printVoucher = () => {
             </div>
 
             <!-- Resumen de Transacción / Voucher -->
-            <div class="p-4 rounded-4 mb-4" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.3);">
+            <div class="p-4 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.3);">
               <div class="row g-3">
                 <div class="col-sm-6">
                   <span class="small text-white opacity-75 d-block">Número de Orden (Buy Order)</span>
@@ -791,7 +791,7 @@ const printVoucher = () => {
 
                     <!-- Token de Transacción Transbank (Para Validación Técnica / Comprobante) -->
                     <div v-if="completedBooking.transbankToken || lastTransbankToken" class="col-12 border-top border-secondary border-opacity-25 pt-3 mt-2">
-                      <div class="p-3 rounded-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(15, 160, 149, 0.15); border: 1px dashed #2DD4BF;">
+                      <div class="p-3 rounded-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(231, 220, 195, 0.15); border: 1px dashed #E7DCC3;">
                         <div class="overflow-hidden">
                           <span class="badge bg-accent text-dark-mountain fw-bold mb-1" style="font-size: 0.68rem;">TOKEN WEBPAY (token_ws)</span>
                           <div class="font-monospace small text-white text-truncate" style="font-size: 0.78rem;">
@@ -812,7 +812,7 @@ const printVoucher = () => {
                       </span>
                       <div class="table-responsive rounded-3 overflow-hidden border border-secondary border-opacity-25">
                         <table class="table table-sm table-dark table-hover mb-0 small align-middle">
-                          <thead style="background: rgba(4, 93, 86, 0.9);">
+                          <thead style="background: rgba(20, 126, 121, 0.95);">
                             <tr>
                               <th scope="col" style="width: 30px;" class="text-center">#</th>
                               <th scope="col">Nombre Completo</th>
@@ -851,7 +851,7 @@ const printVoucher = () => {
             </div>
 
             <!-- Datos Bancarios Dinámicos en caso de Transferencia -->
-            <div v-if="completedBooking.paymentMethod === 'transfer'" class="p-4 rounded-4 mb-4" style="background-color: #033E3B; border: 1px dashed rgba(45, 212, 191, 0.5);">
+            <div v-if="completedBooking.paymentMethod === 'transfer'" class="p-4 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px dashed rgba(231, 220, 195, 0.5);">
               <h4 class="h6 text-accent fw-bold text-uppercase mb-3"><i class="bi bi-bank2 me-2"></i>Datos para Transferencia Bancaria</h4>
               <ul class="list-unstyled mb-0 small text-white lh-lg">
                 <li><strong>Banco:</strong> {{ contentStore.content.gateway.bankTransfer.bankName || 'Banco Santander Chile' }}</li>
@@ -890,7 +890,7 @@ const printVoucher = () => {
       <!-- PANTALLA OFICIAL DE TRANSACCIÓN RECHAZADA O ANULADA (NORMATIVA TRANSBANK) -->
       <div v-else-if="paymentRejected && rejectedDetails" class="row justify-content-center">
         <div class="col-12 col-lg-8">
-          <div class="voucher-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 2px solid #EF4444;">
+          <div class="voucher-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 2px solid #EF4444;">
             <div class="text-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
               <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger text-white p-3 mb-3 shadow" style="width: 70px; height: 70px;">
                 <i class="bi bi-x-octagon-fill fs-1"></i>
@@ -903,7 +903,7 @@ const printVoucher = () => {
               </p>
             </div>
 
-            <div class="p-4 rounded-4 mb-4" style="background-color: #022C2A; border: 1px solid rgba(239, 68, 68, 0.4);">
+            <div class="p-4 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(239, 68, 68, 0.4);">
               <h4 class="h6 fw-bold text-warning mb-2">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>Las posibles causas de este rechazo son:
               </h4>
@@ -916,7 +916,7 @@ const printVoucher = () => {
             </div>
 
             <!-- Token de Transacción para Formulario de Validación de Transbank -->
-            <div v-if="rejectedDetails.token" class="p-3 rounded-3 mb-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(15, 160, 149, 0.15); border: 1px dashed #2DD4BF;">
+            <div v-if="rejectedDetails.token" class="p-3 rounded-3 mb-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(231, 220, 195, 0.15); border: 1px dashed #E7DCC3;">
               <div class="overflow-hidden">
                 <span class="badge bg-accent text-dark-mountain fw-bold mb-1" style="font-size: 0.68rem;">
                   TOKEN TRANSBANK ({{ rejectedDetails.status === 'ABORTED' ? 'TBK_TOKEN - Cancelada' : 'token_ws - Rechazada' }})
@@ -960,7 +960,7 @@ const printVoucher = () => {
 
         <!-- STEPPER VISUAL EN 2 PASOS (CRO) -->
         <div class="col-12 mb-2">
-          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+          <div class="checkout-stepper-container p-3 rounded-4 shadow-sm" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
             <div class="d-flex align-items-center justify-content-center gap-3 gap-md-5">
               <!-- Paso 1 Tab -->
               <div 
@@ -970,7 +970,7 @@ const printVoucher = () => {
               >
                 <div 
                   class="rounded-circle d-flex align-items-center justify-content-center fw-bold font-monospace shadow-sm"
-                  :style="currentStep === 1 ? 'width: 32px; height: 32px; background-color: #2DD4BF; color: #022927;' : 'width: 32px; height: 32px; background-color: rgba(45,212,191,0.25); color: #2DD4BF;'"
+                  :style="currentStep === 1 ? 'width: 32px; height: 32px; background-color: #E7DCC3; color: #4C4C4C;' : 'width: 32px; height: 32px; background-color: rgba(231,220,195,0.25); color: #E7DCC3;'"
                 >
                   <i v-if="currentStep === 2" class="bi bi-check-lg fs-5"></i>
                   <span v-else>1</span>
@@ -979,7 +979,7 @@ const printVoucher = () => {
               </div>
 
               <!-- Separador -->
-              <div class="step-line-divider" style="width: 50px; height: 2px; background-color: rgba(45, 212, 191, 0.4);"></div>
+              <div class="step-line-divider" style="width: 50px; height: 2px; background-color: rgba(231, 220, 195, 0.4);"></div>
 
               <!-- Paso 2 Tab -->
               <div 
@@ -988,7 +988,7 @@ const printVoucher = () => {
               >
                 <div 
                   class="rounded-circle d-flex align-items-center justify-content-center fw-bold font-monospace shadow-sm"
-                  :style="currentStep === 2 ? 'width: 32px; height: 32px; background-color: #2DD4BF; color: #022927;' : 'width: 32px; height: 32px; background-color: rgba(255,255,255,0.15); color: #fff;'"
+                  :style="currentStep === 2 ? 'width: 32px; height: 32px; background-color: #E7DCC3; color: #4C4C4C;' : 'width: 32px; height: 32px; background-color: rgba(255,255,255,0.15); color: #fff;'"
                 >
                   <span>2</span>
                 </div>
@@ -1000,9 +1000,9 @@ const printVoucher = () => {
 
         <!-- RESUMEN COMPACTO MÓVIL (d-lg-none) -->
         <div class="col-12 d-lg-none mb-2">
-          <div class="p-3 rounded-4 shadow-sm text-white" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+          <div class="p-3 rounded-4 shadow-sm text-white" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
             <div class="d-flex align-items-center gap-3">
-              <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(45, 212, 191, 0.3);">
+              <img :src="experience?.coverImage.url" alt="Tour" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 65px; height: 65px; border: 1px solid rgba(231, 220, 195, 0.3);">
               <div class="flex-grow-1">
                 <h4 class="h6 fw-bold text-white mb-1" style="font-size: 0.95rem;">{{ resolvedExperienceTitle }}</h4>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
@@ -1019,7 +1019,7 @@ const printVoucher = () => {
           <form @submit.prevent="handleInitiatePayment" novalidate class="d-flex flex-column gap-4">
             
             <!-- PASO 1: DATOS DE LOS PASAJEROS -->
-            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <div v-show="currentStep === 1" class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
               <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
                   <i class="bi bi-person-circle fs-4"></i> 1. Pasajero Titular (Responsable de la Reserva)
@@ -1131,7 +1131,7 @@ const printVoucher = () => {
                       v-for="(comp, idx) in accompanyingPassengers" 
                       :key="idx" 
                       class="p-3 p-md-4 rounded-4" 
-                      style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.35);"
+                      style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);"
                     >
                       <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25 flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
@@ -1259,7 +1259,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
                 <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
                   <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
                 </h3>
@@ -1284,7 +1284,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 3. DOCUMENTO TRIBUTARIO ELECTRÓNICO (SII) -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <h3 class="h5 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
                     <i class="bi bi-receipt-cutoff fs-4"></i> 3. Documento Tributario (Servicio de Impuestos Internos)
@@ -1309,7 +1309,7 @@ const printVoucher = () => {
                   </div>
                 </div>
 
-                <div v-if="invoiceType === 'boleta'" class="p-3 rounded-3 small text-white opacity-90" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+                <div v-if="invoiceType === 'boleta'" class="p-3 rounded-3 small text-white opacity-90" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
                   <i class="bi bi-info-circle text-accent me-1"></i> Se emitirá Boleta Electrónica a nombre del pasajero titular y será despachada a tu correo electrónico registrado.
                 </div>
 
@@ -1343,7 +1343,7 @@ const printVoucher = () => {
               </div>
 
               <!-- 4. MÉTODO DE PAGO Y PASARELAS -->
-              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+              <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
                 <h3 class="h5 fw-bold text-accent mb-4 d-flex align-items-center gap-2">
                   <i class="bi bi-wallet2 fs-4"></i> 4. Selecciona tu Método de Pago
                 </h3>
@@ -1411,7 +1411,7 @@ const printVoucher = () => {
 
         <!-- COLUMNA DERECHA: RESUMEN DE COMPRA CON TRANSPARENCIA TOTAL -->
         <div class="col-12 col-lg-4">
-          <div class="checkout-summary-card p-4 rounded-4 shadow-sm text-white sticky-top" style="top: 100px; background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.35);">
+          <div class="checkout-summary-card p-4 rounded-4 shadow-sm text-white sticky-top" style="top: 100px; background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
             
             <h3 class="h5 fw-bold text-accent mb-4 pb-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
               <i class="bi bi-bag-check-fill"></i> Resumen de la Orden
@@ -1438,7 +1438,7 @@ const printVoucher = () => {
               </div>
             </div>
 
-            <div class="summary-breakdown p-3 rounded-3 mb-3" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.25);">
+            <div class="summary-breakdown p-3 rounded-3 mb-3" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.25);">
               <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-white opacity-75">Subtotal:</span>
                 <span class="fw-bold text-white">{{ formatPrice(baseTotalPrice) }}</span>
@@ -1499,7 +1499,7 @@ const printVoucher = () => {
               <span>{{ isProcessing ? 'Conectando con Webpay...' : (currentStep === 1 && !isTest50Active ? 'Continuar al Paso 2 (Pago)' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})`) }}</span>
             </button>
 
-            <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #033E3B;">
+            <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #0D5B57;">
               <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg" style="font-size: 0.78rem;">
                 <li><i class="bi bi-patch-check-fill text-accent me-2"></i>Guías registrados SERNATUR (Reg. {{ contentStore.content.legal.sernaturRegistry }})</li>
                 <li><i class="bi bi-shield-lock-fill text-accent me-2"></i>Pasarela Transbank Webpay Plus (SSL 256-Bit)</li>
@@ -1516,12 +1516,12 @@ const printVoucher = () => {
     <!-- MODAL INFORMATIVO LEGAL INTERACTIVO (TÉRMINOS / CANCELACIÓN / PRIVACIDAD) -->
     <Teleport to="body">
       <div v-if="showLegalModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" style="z-index: 1060;">
-        <div class="modal-card p-4 p-md-5 text-white shadow-2xl rounded-4" style="max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; background: #045D56; border: 2px solid #2DD4BF;">
+        <div class="modal-card p-4 p-md-5 text-white shadow-2xl rounded-4" style="max-width: 700px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; background: #147E79; border: 2px solid #E7DCC3;">
           
           <!-- Encabezado del Modal Legal -->
           <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom border-secondary border-opacity-25 flex-shrink-0">
             <div>
-              <span class="badge px-2 py-1 mb-1" style="background-color: #022C2A; color: #2DD4BF; font-size: 0.72rem;">TRANSPARENCIA NORMATIVA CHILE</span>
+              <span class="badge px-2 py-1 mb-1" style="background-color: #0D5B57; color: #E7DCC3; font-size: 0.72rem;">TRANSPARENCIA NORMATIVA CHILE</span>
               <h3 class="h5 fw-bold text-white mb-0">Marco Legal & Condiciones</h3>
             </div>
             <button type="button" class="btn btn-outline-light btn-sm rounded-circle p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" @click="showLegalModal = false">
@@ -1639,42 +1639,46 @@ const printVoucher = () => {
 }
 
 .text-accent {
-  color: #0FA095 !important;
+  color: #E7DCC3 !important;
 }
 
 .bg-accent {
-  background-color: #0FA095 !important;
+  background-color: #147E79 !important;
+  color: #FFFFFF !important;
 }
 
 .bg-emerald {
-  background-color: #10B981 !important;
+  background-color: #147E79 !important;
 }
 
 .bg-amber {
-  background-color: #F59E0B !important;
+  background-color: #E7DCC3 !important;
+  color: #4C4C4C !important;
 }
 
 .btn-accent {
-  background-color: #0FA095 !important;
-  color: #1C1C1E !important;
+  background-color: #E7DCC3 !important;
+  color: #4C4C4C !important;
   border: none;
+  font-weight: 700;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background-color: lighten(#2DD4BF, 8%) !important;
+    background-color: #FFFFFF !important;
+    color: #147E79 !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(45, 212, 191, 0.4);
+    box-shadow: 0 6px 20px rgba(231, 220, 195, 0.4);
   }
 }
 
 .btn-outline-accent {
-  border: 1px solid #2DD4BF;
-  color: #2DD4BF;
+  border: 1px solid #E7DCC3;
+  color: #E7DCC3;
   background: transparent;
 
   &:hover {
-    background-color: #2DD4BF;
-    color: #033E3B;
+    background-color: #E7DCC3;
+    color: #4C4C4C;
   }
 }
 
@@ -1695,30 +1699,30 @@ const printVoucher = () => {
   color: #1C1C1E !important;
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(0, 0, 0, 0.4) !important;
   }
 
   &:focus {
-    background-color: #011E1C !important;
-    border-color: #0FA095 !important;
-    box-shadow: 0 0 0 0.25rem rgba(45, 212, 191, 0.25) !important;
+    background-color: #FFFFFF !important;
+    border-color: #147E79 !important;
+    box-shadow: 0 0 0 0.25rem rgba(20, 126, 121, 0.25) !important;
   }
 }
 
 .payment-method-card {
-  background-color: #022C2A;
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  background-color: #0D5B57;
+  border: 1px solid rgba(231, 220, 195, 0.25);
   transition: all 0.25s ease;
 
   &:hover {
-    border-color: #2DD4BF;
-    background-color: rgba(45, 212, 191, 0.05);
+    border-color: #E7DCC3;
+    background-color: rgba(231, 220, 195, 0.1);
   }
 
   &.selected {
-    border-color: #2DD4BF;
-    background-color: rgba(45, 212, 191, 0.12);
-    box-shadow: 0 0 15px rgba(45, 212, 191, 0.25);
+    border-color: #E7DCC3;
+    background-color: rgba(231, 220, 195, 0.18);
+    box-shadow: 0 0 15px rgba(231, 220, 195, 0.3);
   }
 }
 

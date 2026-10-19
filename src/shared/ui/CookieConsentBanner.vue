@@ -33,10 +33,10 @@ const acceptEssential = () => {
       aria-label="Aviso de Cookies y Privacidad"
     >
       <div class="container">
-        <div class="cookie-card p-3 p-md-4 rounded-4 shadow-2xl text-white d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3" style="background: linear-gradient(135deg, #033E3B 0%, #022C2A 100%); border: 1px solid rgba(45, 212, 191, 0.45); box-shadow: 0 10px 40px rgba(0,0,0,0.45);">
+        <div class="cookie-card p-3 p-md-4 rounded-4 shadow-2xl text-white d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3" style="background: linear-gradient(135deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.45); box-shadow: 0 10px 40px rgba(0,0,0,0.45);">
           
           <div class="d-flex align-items-start gap-3">
-            <div class="cookie-icon flex-shrink-0 mt-1 d-none d-sm-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px; background: rgba(45, 212, 191, 0.15); color: #2DD4BF;">
+            <div class="cookie-icon flex-shrink-0 mt-1 d-none d-sm-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px; background: rgba(231, 220, 195, 0.15); color: #E7DCC3;">
               <i class="bi bi-shield-check fs-4"></i>
             </div>
             <div>
@@ -63,7 +63,7 @@ const acceptEssential = () => {
             <button 
               type="button" 
               class="btn btn-sm px-4 py-2 fw-bold text-dark rounded-3 shadow-sm" 
-              style="background-color: #2DD4BF; color: #022927 !important; font-size: 0.82rem;" 
+              style="background-color: #E7DCC3; color: #4C4C4C !important; font-size: 0.82rem;" 
               @click="acceptAll"
               aria-label="Aceptar todas las cookies"
             >
@@ -82,7 +82,7 @@ const acceptEssential = () => {
   z-index: 1050;
 }
 .text-accent {
-  color: #2DD4BF !important;
+  color: #E7DCC3 !important;
 }
 .cookie-banner {
   pointer-events: none;

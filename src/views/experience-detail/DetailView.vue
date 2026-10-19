@@ -421,14 +421,14 @@ const handleBookWhatsApp = () => {
     </div>
 
     <!-- Barra fija de reserva para móviles -->
-    <div class="d-lg-none fixed-bottom p-3 border-top border-secondary border-opacity-50 shadow-2xl z-3" style="background-color: #033E3B !important;">
+    <div class="d-lg-none fixed-bottom p-3 border-top border-secondary border-opacity-50 shadow-2xl z-3" style="background-color: #0D5B57 !important;">
       <div class="d-flex align-items-center justify-content-between gap-2">
         <div>
           <span class="small text-white opacity-75 d-block" style="font-size: 0.72rem;">Desde</span>
-          <strong class="text-accent fs-5 font-monospace">{{ formatPrice(experience.pricing.basePrice, 'CLP') }}</strong>
+          <strong class="text-accent fs-5 font-monospace" style="color: #E7DCC3 !important;">{{ formatPrice(experience.pricing.basePrice, 'CLP') }}</strong>
           <span class="small text-white opacity-75 ms-1" style="font-size: 0.7rem;">/ pax</span>
         </div>
-        <a href="#booking-section" class="btn btn-cyan-gradient px-4 py-2 fw-bold text-dark-mountain d-flex align-items-center gap-2 text-decoration-none shadow" style="border-radius: 12px; font-size: 0.9rem;">
+        <a href="#booking-section" class="btn btn-cyan-gradient px-4 py-2 fw-bold text-white d-flex align-items-center gap-2 text-decoration-none shadow" style="border-radius: 12px; font-size: 0.9rem;">
           <i class="bi bi-calendar2-check-fill"></i> Reservar Cupos
         </a>
       </div>
@@ -462,11 +462,11 @@ const handleBookWhatsApp = () => {
 }
 
 .text-accent {
-  color: #0FA095 !important;
+  color: #147E79 !important;
 }
 
 .bg-accent {
-  background-color: #0FA095 !important;
+  background-color: #147E79 !important;
 }
 
 .premium-card {
@@ -482,8 +482,8 @@ const handleBookWhatsApp = () => {
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   
   &:focus {
-    border-color: #0FA095 !important;
-    box-shadow: 0 0 0 3px rgba(15, 160, 149, 0.2) !important;
+    border-color: #147E79 !important;
+    box-shadow: 0 0 0 3px rgba(20, 126, 121, 0.2) !important;
   }
 }
 
@@ -510,14 +510,14 @@ const handleBookWhatsApp = () => {
 }
 
 .btn-cyan-gradient {
-  background: linear-gradient(135deg, #0FA095 0%, #077A73 100%) !important;
+  background: #147E79 !important;
   color: #FFFFFF !important;
   border: none;
 
   &:hover {
-    background: linear-gradient(135deg, lighten(#0FA095, 5%) 0%, #0FA095 100%) !important;
+    background: lighten(#147E79, 5%) !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(15, 160, 149, 0.25);
+    box-shadow: 0 6px 20px rgba(20, 126, 121, 0.35);
   }
 }
 

@@ -154,7 +154,7 @@ const goToCheckout = () => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(2, 44, 42, 0.6);
+  background-color: rgba(13, 91, 87, 0.6);
   backdrop-filter: blur(8px);
   z-index: 1040;
   transition: opacity 0.3s ease;
@@ -179,10 +179,10 @@ const goToCheckout = () => {
 }
 
 .modern-glass {
-  background: linear-gradient(145deg, rgba(4, 93, 86, 0.95) 0%, rgba(2, 62, 59, 0.98) 100%);
+  background: linear-gradient(145deg, rgba(20, 126, 121, 0.97) 0%, rgba(13, 91, 87, 0.98) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(231, 220, 195, 0.25);
   border-radius: 24px; /* Bordes redondeados completos */
 }
 
@@ -279,8 +279,8 @@ const goToCheckout = () => {
 }
 
 .coupon-active-badge {
-  background: rgba(45, 212, 191, 0.15);
-  border: 1px dashed rgba(45, 212, 191, 0.4);
+  background: rgba(231, 220, 195, 0.15);
+  border: 1px dashed rgba(231, 220, 195, 0.4);
   border-radius: 12px;
 }
 
@@ -322,17 +322,19 @@ const goToCheckout = () => {
 }
 
 .btn-accent-glow {
-  background: linear-gradient(45deg, $accent-gold, #14B8A6);
-  border: none;
-  color: #022C2A;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+  background: #E7DCC3;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #4C4C4C;
+  font-weight: 700;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   
   &:hover {
+    background: #FFFFFF;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(45, 212, 191, 0.6);
-    color: #022C2A;
+    box-shadow: 0 8px 25px rgba(231, 220, 195, 0.4);
+    color: #147E79;
   }
   
   &:active {
@@ -346,7 +348,7 @@ const goToCheckout = () => {
 }
 
 .text-accent {
-  color: $accent-gold !important;
+  color: #E7DCC3 !important;
 }
 </style>
 

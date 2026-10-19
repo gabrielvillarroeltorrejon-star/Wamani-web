@@ -1,43 +1,60 @@
 // -----------------------------------------
-// Wamani Experience - Variables Editoriales Premium
+// Wamani Experience - Variables Oficiales (Manual de Marca)
 // -----------------------------------------
 
-// 1. Colores de Marca
-$dark-mountain:   #045D56; // Verde agua profundo
-$earth-brown:     #0FA095; // Verde agua primario del logo
-$light-cream:     #2BA59A; // Fondo Turquesa suave (antes Off-White)
-$accent-gold:     #2DD4BF; // Turquesa Neón / Resplandor
-$white:           #FFFFFF;
-$text-dark:       #1C1C1E; // Rich dark for typography
-$gray-muted:      #E0F2F1; // Gris/Turquesa claro para texto secundario
+// 1. Colores Oficiales del Manual de Marca Wamani Experience
+$verde-wamani:       #147E79; // Color principal: naturaleza, profundidad y confianza
+$blanco-andino:      #FFFFFF; // Contraste, limpieza y pureza
+$gris-piedra:        #4C4C4C; // Textos secundarios
+$beige-tierra:       #E7DCC3; // Aplicaciones naturales, fondos cálidos
+
+// Variantes y matices armónicos de marca
+$verde-wamani-dark:  #0D5B57; // Tono profundo para footers y fondos de alta jerarquía
+$verde-wamani-light: #1A9A94; // Tono iluminado para hovers interactivos
+$beige-tierra-light: #F7F4EC; // Fondo cálido suave para contraste de lectura
+$gris-piedra-dark:   #232323; // Texto oscuro de máxima legibilidad
+$gris-piedra-light:  #707070; // Texto secundario suave
+
+// Alias retrocompatibles de arquitectura
+$dark-mountain:      $verde-wamani-dark;
+$earth-brown:        $verde-wamani;
+$light-cream:        $beige-tierra;
+$accent-gold:        $beige-tierra;
+$white:              $blanco-andino;
+$text-dark:          $gris-piedra-dark;
+$gray-muted:         $gris-piedra;
 
 // 2. Override de variables Bootstrap
-$primary:         $earth-brown; 
-$secondary:       $gray-muted;
-$accent:          $earth-brown;
-$body-bg:         $light-cream;
-$body-color:      $white;
+$primary:            $verde-wamani; 
+$secondary:          $beige-tierra;
+$accent:             $beige-tierra;
+$body-bg:            $verde-wamani;
+$body-color:         $blanco-andino;
 
 $theme-colors: (
-  "primary":    $primary,
-  "secondary":  $secondary,
-  "accent":     $accent,
-  "light":      $light-cream,
-  "dark":       $dark-mountain,
-  "text-dark":  $text-dark
+  "primary":         $verde-wamani,
+  "secondary":       $beige-tierra,
+  "accent":          $beige-tierra,
+  "light":           $beige-tierra-light,
+  "dark":            $verde-wamani-dark,
+  "text-dark":       $gris-piedra-dark,
+  "gris-piedra":     $gris-piedra,
+  "beige-tierra":    $beige-tierra,
+  "verde-wamani":    $verde-wamani
 );
 
-// 3. Tipografía Editorial
+// 3. Tipografía Oficial del Manual
+// Principal: Montserrat | Secundaria: Playfair Display
 $font-family-sans-serif: 'Montserrat', system-ui, -apple-system, sans-serif;
-$font-family-serif: 'Playfair Display', Georgia, serif;
-$font-family-brush: 'Caveat', cursive;
+$font-family-serif:      'Playfair Display', Georgia, serif;
+$font-family-brush:      'Caveat', cursive;
 
-$headings-font-family: $font-family-sans-serif;
-$headings-font-weight: 800; // Extra bold for strong hierarchy (Impeccable)
-$headings-color: $text-dark;
-$line-height-base: 1.6; // Improved readability
+$headings-font-family:   $font-family-sans-serif;
+$headings-font-weight:   800;
+$headings-color:         $blanco-andino;
+$line-height-base:       1.6;
 
-// 4. Bordes y Sombras
-$border-radius:               0.75rem; // 12px para botones, inputs y selects
-$border-radius-lg:            1.25rem; // 20px para tarjetas y cajas principales
-$border-radius-sm:            0.5rem;  // 8px
+// 4. Bordes y Sombras Oficiales
+$border-radius:          0.75rem; // 12px redondeado oficial para botones, inputs y selects
+$border-radius-lg:       1.25rem; // 20px para tarjetas y cajas principales
+$border-radius-sm:       0.5rem;  // 8px

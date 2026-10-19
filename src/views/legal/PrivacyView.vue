@@ -10,7 +10,7 @@ const contentStore = useContentStore();
       
       <!-- Encabezado Editorial -->
       <div class="text-center text-white mb-5">
-        <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide mb-3" style="background-color: #045D56; color: #2DD4BF; font-size: 0.8rem; letter-spacing: 0.15em;">
+        <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide mb-3" style="background-color: #147E79; color: #E7DCC3; font-size: 0.8rem; letter-spacing: 0.15em;">
           Protección de la Vida Privada & Ley 19.628
         </span>
         <h1 class="display-4 fw-bold font-brush text-white mb-2" style="font-family: 'Caveat', cursive !important;">
@@ -27,26 +27,26 @@ const contentStore = useContentStore();
       <!-- Contenedor Principal -->
       <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.45); line-height: 1.8;">
+          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.45); line-height: 1.8;">
 
             <!-- Resumen de Principios Clave -->
             <div class="row g-3 mb-5">
               <div class="col-md-4">
-                <div class="p-3 rounded-3 text-center h-100" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.3);">
+                <div class="p-3 rounded-3 text-center h-100" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.3);">
                   <i class="bi bi-shield-check text-accent fs-2 mb-2 d-block"></i>
                   <strong class="d-block mb-1 text-white">Transparencia Total</strong>
                   <span class="small opacity-85">Tus datos solo se usan para tu viaje, tus seguros y tu seguridad en montaña.</span>
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="p-3 rounded-3 text-center h-100" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.3);">
+                <div class="p-3 rounded-3 text-center h-100" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.3);">
                   <i class="bi bi-credit-card-2-back text-accent fs-2 mb-2 d-block"></i>
                   <strong class="d-block mb-1 text-white">Pagos Tokenizados</strong>
                   <span class="small opacity-85">Nunca almacenamos números de tarjeta ni claves. Transbank procesa el 100%.</span>
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="p-3 rounded-3 text-center h-100" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.3);">
+                <div class="p-3 rounded-3 text-center h-100" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.3);">
                   <i class="bi bi-person-lock text-accent fs-2 mb-2 d-block"></i>
                   <strong class="d-block mb-1 text-white">Derechos ARCO</strong>
                   <span class="small opacity-85">Puedes solicitar en cualquier momento la consulta o borrado de tu información.</span>
@@ -161,13 +161,13 @@ const contentStore = useContentStore();
   color: #FFFFFF;
 }
 .text-accent {
-  color: #2DD4BF !important;
+  color: #E7DCC3 !important;
 }
 .tracking-wide {
   letter-spacing: 0.12em;
 }
 .legal-content h3 {
-  border-bottom: 1px solid rgba(45, 212, 191, 0.25);
+  border-bottom: 1px solid rgba(231, 220, 195, 0.25);
   padding-bottom: 8px;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.05em;

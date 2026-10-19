@@ -38,15 +38,26 @@ const classes = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .card {
   overflow: hidden;
-  background-color: #045D56 !important;
-  border: 1px solid rgba(45, 212, 191, 0.15);
-  box-shadow: 0 8px 30px rgba(4, 93, 86, 0.25);
-  color: #FFFFFF;
+  background-color: $verde-wamani !important;
+  border: 1px solid rgba($beige-tierra, 0.3) !important;
+  box-shadow: 0 8px 30px rgba(13, 91, 87, 0.35);
+  color: $blanco-andino;
+  border-radius: $border-radius-lg;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
 }
+
 .cursor-pointer {
   cursor: pointer;
+}
+
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(13, 91, 87, 0.45);
+  border-color: rgba($beige-tierra, 0.6) !important;
 }
 </style>

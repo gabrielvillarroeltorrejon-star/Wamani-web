@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { useContentStore } from '@/shared/stores/contentStore';
 
 const contentStore = useContentStore();
@@ -10,7 +10,7 @@ const contentStore = useContentStore();
       
       <!-- Encabezado Editorial -->
       <div class="text-center text-white mb-5">
-        <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide mb-3" style="background-color: #045D56; color: #2DD4BF; font-size: 0.8rem; letter-spacing: 0.15em;">
+        <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide mb-3" style="background-color: #147E79; color: #E7DCC3; font-size: 0.8rem; letter-spacing: 0.15em;">
           Marco Regulatorio & E-Commerce Chile
         </span>
         <h1 class="display-4 fw-bold font-brush text-white mb-2" style="font-family: 'Caveat', cursive !important;">
@@ -27,10 +27,10 @@ const contentStore = useContentStore();
       <!-- Tarjeta Contenedora Principal -->
       <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%); border: 1px solid rgba(45, 212, 191, 0.45); line-height: 1.8;">
+          <div class="legal-card p-4 p-md-5 rounded-4 shadow-lg text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.45); line-height: 1.8;">
 
             <!-- Ficha de Identificación del Proveedor (Decreto 6/2021 Art. 2) -->
-            <div class="provider-box p-4 rounded-4 mb-5" style="background-color: #022C2A; border: 1px solid rgba(45, 212, 191, 0.35);">
+            <div class="provider-box p-4 rounded-4 mb-5" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
               <h2 class="h5 fw-bold text-accent mb-3 d-flex align-items-center gap-2">
                 <i class="bi bi-building-check fs-4"></i> 1. Identificación del Proveedor y Prestador Oficial
               </h2>
@@ -83,7 +83,7 @@ const contentStore = useContentStore();
                 <p>
                   Todos los precios publicados en el sitio web se expresan en <strong>Pesos Chilenos (CLP)</strong> e incluyen el <strong>Impuesto al Valor Agregado (IVA del 19%)</strong> conforme a la legislación tributaria chilena, salvo que expresamente se indique lo contrario. Las referencias en dólares estadounidenses (USD) o reales brasileños (BRL) tienen fines informativos de conversión referencial para turistas extranjeros.
                 </p>
-                <div class="alert alert-dark p-3 rounded-3 border-secondary border-opacity-50 text-white" style="background-color: #022C2A;">
+                <div class="alert alert-dark p-3 rounded-3 border-secondary border-opacity-50 text-white" style="background-color: #0D5B57;">
                   <strong class="text-accent"><i class="bi bi-info-circle-fill me-1"></i> Entradas a Parques Nacionales y Reservas del Estado (CONAF):</strong>
                   Salvo mención explícita en el detalle del tour ("Qué incluye"), las tarifas de ingreso a áreas silvestres protegidas (como el Parque Nacional Villarrica o Parque Nacional Huerquehue) no forman parte de la tarifa de guiado y deben ser gestionadas por cada visitante en la plataforma oficial del Estado (<em>pasesparques.cl</em> de CONAF). WAMANI brindará asistencia técnica a los pasajeros para dicha gestión.
                 </div>
@@ -95,8 +95,8 @@ const contentStore = useContentStore();
                   En conformidad con el <strong>Artículo 3° bis letra b) de la Ley N° 19.496</strong> y la naturaleza de las prestaciones turísticas con reserva de aforos y cupos exclusivos fijados para fechas determinadas, WAMANI estipula expresamente que <strong>no opera el derecho a retracto unilateral genérico de 10 días</strong> una vez confirmada la fecha, aplicándose en su lugar la siguiente <strong>Política de Cancelación y Reembolso Transparente</strong>:
                 </p>
                 <div class="table-responsive my-3">
-                  <table class="table table-dark table-bordered table-striped" style="border-color: rgba(45, 212, 191, 0.35);">
-                    <thead style="background-color: #022C2A;">
+                  <table class="table table-dark table-bordered table-striped" style="border-color: rgba(231, 220, 195, 0.35);">
+                    <thead style="background-color: #0D5B57;">
                       <tr>
                         <th class="text-accent">Anticipación del Aviso de Cancelación</th>
                         <th class="text-accent">Porcentaje de Reembolso</th>
@@ -204,13 +204,13 @@ const contentStore = useContentStore();
   color: #FFFFFF;
 }
 .text-accent {
-  color: #2DD4BF !important;
+  color: #E7DCC3 !important;
 }
 .tracking-wide {
   letter-spacing: 0.12em;
 }
 .legal-content h3 {
-  border-bottom: 1px solid rgba(45, 212, 191, 0.25);
+  border-bottom: 1px solid rgba(231, 220, 195, 0.25);
   padding-bottom: 8px;
   font-family: 'Montserrat', sans-serif;
   letter-spacing: 0.05em;

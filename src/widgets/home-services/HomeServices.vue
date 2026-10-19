@@ -70,15 +70,15 @@ const closeModal = () => {
       </div>
     </div>
 
-    <!-- Modal Flotante de Detalles en Verde Bosque #045D56 -->
+    <!-- Modal Flotante de Detalles en Verde Wamani #147E79 -->
     <Teleport to="body">
       <Transition name="fade">
         <div v-if="selectedService" class="service-modal-backdrop position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3 p-md-4 p-lg-5" style="z-index: 1060;">
           <!-- Fondo clickeable para cerrar -->
           <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-75 backdrop-blur" @click="closeModal"></div>
           
-          <!-- Contenedor del Modal en Verde Bosque #045D56 -->
-          <div class="service-modal-content text-white position-relative shadow-2xl overflow-y-auto max-h-90 w-100 rounded-custom custom-scrollbar" style="max-width: 900px; background-color: #045D56 !important; border: 1px solid rgba(45, 212, 191, 0.35); box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+          <!-- Contenedor del Modal en Verde Wamani #147E79 -->
+          <div class="service-modal-content text-white position-relative shadow-2xl overflow-y-auto max-h-90 w-100 rounded-custom custom-scrollbar" style="max-width: 900px; background-color: #147E79 !important; border: 1px solid rgba(231, 220, 195, 0.35); box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
             
             <!-- Botón Cerrar Flotante Interno -->
             <button @click="closeModal" class="btn btn-close-custom position-absolute top-0 end-0 m-4 z-3 d-flex align-items-center justify-content-center rounded-circle border-0 text-white transition-all shadow-sm">
@@ -90,13 +90,13 @@ const closeModal = () => {
               <img :src="selectedService.coverImage" :alt="selectedService.title" class="w-100 h-100 object-fit-cover scale-in-anim">
               <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-dark-bottom"></div>
               <div class="position-absolute bottom-0 start-0 p-4 p-md-5 w-100">
-                <span class="font-sans text-uppercase text-white tracking-wide small mb-2 d-block fw-bold opacity-90" style="letter-spacing: 0.12em;">{{ selectedService.subtitle }}</span>
+                <span class="font-sans text-uppercase tracking-wide small mb-2 d-block fw-bold" style="letter-spacing: 0.12em; color: #E7DCC3;">{{ selectedService.subtitle }}</span>
                 <h2 class="font-brush display-3 mb-0 text-white text-shadow" style="font-family: 'Caveat', cursive !important;">{{ selectedService.title }}</h2>
               </div>
             </div>
 
-            <!-- Cuerpo del Modal en #045D56 -->
-            <div class="modal-body p-4 p-md-5" style="background-color: #045D56 !important;">
+            <!-- Cuerpo del Modal en #147E79 -->
+            <div class="modal-body p-4 p-md-5" style="background-color: #147E79 !important;">
               
               <!-- Descripción -->
               <div class="mb-5">
@@ -107,8 +107,8 @@ const closeModal = () => {
                 <p v-for="(parrafo, idx) in selectedService.description" :key="idx" class="font-sans lead text-white opacity-95 lh-lg mb-4 text-justify" style="font-size: 1.05rem;">
                   {{ parrafo }}
                 </p>
-                <div v-if="selectedService.targetAudience" class="p-4 rounded-4 border-start border-4 border-accent mt-4 shadow-sm" style="background-color: #033E3B !important; border-color: #2DD4BF !important;">
-                  <h5 class="font-sans text-uppercase tracking-wide small mb-2 text-accent fw-bold" style="color: #2DD4BF !important;">Dirigido a:</h5>
+                <div v-if="selectedService.targetAudience" class="p-4 rounded-4 border-start border-4 mt-4 shadow-sm" style="background-color: #0D5B57 !important; border-color: #E7DCC3 !important;">
+                  <h5 class="font-sans text-uppercase tracking-wide small mb-2 fw-bold" style="color: #E7DCC3 !important;">Dirigido a:</h5>
                   <p class="font-sans mb-0 text-white opacity-90">{{ selectedService.targetAudience }}</p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ const closeModal = () => {
                 </h4>
                 <ul class="list-unstyled row g-4">
                   <li v-for="(char, idx) in selectedService.characteristics" :key="idx" class="col-md-6 d-flex align-items-start gap-3">
-                    <span class="text-accent mt-1 p-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="background-color: #033E3B; border: 1px solid #2DD4BF; color: #2DD4BF; width: 32px; height: 32px;">
+                    <span class="mt-1 p-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="background-color: #0D5B57; border: 1px solid #E7DCC3; color: #E7DCC3; width: 32px; height: 32px;">
                       <i class="bi bi-check-lg fw-bold"></i>
                     </span>
                     <span class="font-sans text-white opacity-95 lh-lg pt-1">{{ char }}</span>
@@ -139,7 +139,7 @@ const closeModal = () => {
                 </h4>
                 <div class="row g-3">
                   <div v-for="(img, idx) in selectedService.gallery" :key="idx" class="col-12 col-sm-6 col-md-4">
-                    <div class="gallery-img-wrapper rounded-3 overflow-hidden shadow-sm position-relative group" style="height: 200px; border: 1px solid rgba(45, 212, 191, 0.25);">
+                    <div class="gallery-img-wrapper rounded-3 overflow-hidden shadow-sm position-relative group" style="height: 200px; border: 1px solid rgba(231, 220, 195, 0.3);">
                       <img :src="img" alt="Gallery image" class="w-100 h-100 object-fit-cover transition-all duration-500 hover-scale">
                       <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-0 hover-opacity-25 transition-all"></div>
                     </div>
@@ -150,15 +150,17 @@ const closeModal = () => {
             </div>
             
             <!-- Modal Footer CTA con Conversión Directa -->
-            <div class="p-4 p-md-5 text-center border-top border-light border-opacity-15 rounded-bottom-custom" style="background-color: #033E3B !important;">
+            <div class="p-4 p-md-5 text-center border-top border-light border-opacity-15 rounded-bottom-custom" style="background-color: #0D5B57 !important;">
               <h4 class="font-brush text-white display-5 mb-3" style="font-family: 'Caveat', cursive !important;">¿Listo para vivir la experiencia?</h4>
               <p class="small text-white opacity-85 mb-4 max-w-700 mx-auto">Selecciona tu fecha y cantidad de personas en nuestro catálogo o comunícate con un asesor Wamani para un itinerario a medida.</p>
               
               <div class="d-flex flex-wrap gap-3 justify-content-center">
-                <a href="#destinos" class="btn btn-cyan-gradient rounded-pill px-4 py-3 font-sans text-uppercase tracking-wide transition-all d-inline-flex align-items-center gap-2 text-decoration-none fw-bold" @click="closeModal" style="color: #022927 !important; letter-spacing: 0.08em;">
+                <!-- Botón Secundario Oficial (Beige Tierra + texto Gris Piedra) -->
+                <a href="#destinos" class="btn btn-secondary rounded-pill px-4 py-3 font-sans text-uppercase tracking-wide transition-all d-inline-flex align-items-center gap-2 text-decoration-none fw-bold" @click="closeModal" style="letter-spacing: 0.08em;">
                   <i class="bi bi-calendar3"></i>
                   Ver Fechas y Precios en Catálogo
                 </a>
+                <!-- WhatsApp CTA -->
                 <a :href="`https://wa.me/${contentStore.content.contact.whatsappNumber || '56985673376'}?text=${encodeURIComponent('Hola Wamani Experience, deseo cotizar el servicio: ' + selectedService.title)}`" target="_blank" class="btn btn-whatsapp-custom rounded-pill px-4 py-3 font-sans text-uppercase tracking-wide transition-all d-inline-flex align-items-center gap-2 text-decoration-none fw-bold" style="letter-spacing: 0.08em;">
                   <i class="bi bi-whatsapp"></i>
                   Cotizar por WhatsApp
@@ -180,7 +182,7 @@ const closeModal = () => {
 }
 
 .text-accent {
-  color: #2DD4BF !important;
+  color: $beige-tierra !important;
 }
 
 /* Grilla Custom (3 arriba, 2 centrados abajo) */
@@ -218,20 +220,20 @@ const closeModal = () => {
 
 .service-card {
   min-height: 290px;
-  background-color: #045D56; /* Keep background image behind it */
+  background-color: $verde-wamani; /* Color Oficial Verde Wamani */
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .rounded-custom {
-  border-radius: 24px; /* More premium radius */
+  border-radius: 24px;
 }
 
 .card-border {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba($beige-tierra, 0.25);
 }
 
 .card-overlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.1) 100%);
+  background: linear-gradient(to top, rgba(13, 91, 87, 0.9) 0%, rgba(20, 126, 121, 0.4) 50%, rgba(0, 0, 0, 0.1) 100%);
 }
 
 .transition-all {
@@ -248,15 +250,15 @@ const closeModal = () => {
 
 .service-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.15) !important;
+  border-color: rgba($beige-tierra, 0.6);
+  box-shadow: 0 16px 40px -8px rgba(13, 91, 87, 0.35) !important;
   
   .card-image-wrapper img {
-    transform: scale(1.05); /* Softer zoom */
+    transform: scale(1.05);
   }
   
   .card-overlay {
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.15) 100%);
+    background: linear-gradient(to top, rgba(13, 91, 87, 0.95) 0%, rgba(20, 126, 121, 0.5) 50%, rgba(0, 0, 0, 0.15) 100%);
   }
   
   .btn-anim {
@@ -266,8 +268,8 @@ const closeModal = () => {
 }
 
 .service-card:active {
-  transform: scale(0.97) translateY(0); /* Kowalski micro-interaction */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 4px 12px rgba(13, 91, 87, 0.2) !important;
 }
 
 .btn-anim {
@@ -284,8 +286,8 @@ const closeModal = () => {
   width: 40px;
   height: 3px;
   border-radius: 2px;
-  background-color: #2DD4BF;
-  box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+  background-color: $beige-tierra;
+  box-shadow: 0 0 10px rgba($beige-tierra, 0.5);
 }
 
 .text-shadow {
@@ -319,17 +321,17 @@ const closeModal = () => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(3, 62, 59, 0.5); 
+  background: rgba($verde-wamani-dark, 0.5); 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(45, 212, 191, 0.4); 
+  background: rgba($beige-tierra, 0.5); 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 212, 191, 0.8);
+  background: $beige-tierra;
 }
 
 .scale-in-anim {
@@ -350,19 +352,19 @@ const closeModal = () => {
 }
 
 .bg-gradient-dark-bottom {
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(4,93,86,1) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(20, 126, 121, 1) 100%);
 }
 
 .btn-close-custom {
-  background-color: rgba(3, 62, 59, 0.85);
-  border: 1px solid rgba(45, 212, 191, 0.4) !important;
+  background-color: rgba($verde-wamani-dark, 0.85);
+  border: 1px solid rgba($beige-tierra, 0.4) !important;
   width: 44px;
   height: 44px;
   backdrop-filter: blur(6px);
   
   &:hover {
-    background-color: #2DD4BF;
-    color: #033E3B !important;
+    background-color: $beige-tierra;
+    color: $gris-piedra !important;
     transform: rotate(90deg) scale(1.1);
   }
 }

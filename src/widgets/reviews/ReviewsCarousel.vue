@@ -70,21 +70,21 @@ onUnmounted(() => {
               {{ review.text }}
             </p>
             
-            <!-- Enlace Leer Más en Turquesa -->
-            <a href="https://www.tripadvisor.cl/Attraction_Review-g294305-d33952297-Reviews-Wamani_experience-Santiago_Santiago_Metropolitan_Region.html" target="_blank" class="text-accent text-decoration-none small fw-bold d-block mb-3" style="color: #2DD4BF !important;" aria-label="Leer más opiniones reales en TripAdvisor">Leer más en TripAdvisor <i class="bi bi-arrow-up-right-square ms-1"></i></a>
+            <!-- Enlace Leer Más en Verde Wamani -->
+            <a href="https://www.tripadvisor.cl/Attraction_Review-g294305-d33952297-Reviews-Wamani_experience-Santiago_Santiago_Metropolitan_Region.html" target="_blank" class="text-decoration-none small fw-bold d-block mb-3" style="color: #E7DCC3 !important;" aria-label="Leer más opiniones reales en TripAdvisor">Leer más en TripAdvisor <i class="bi bi-arrow-up-right-square ms-1"></i></a>
             
             <!-- Autor y Avatar -->
             <div class="d-flex flex-column align-items-center mt-auto pt-3 border-top border-light border-opacity-25 w-100">
-              <img :src="review.avatar" :alt="review.name" class="rounded-circle object-fit-cover shadow-sm mb-2" style="width: 48px; height: 48px; border: 2px solid #2DD4BF;" />
+              <img :src="review.avatar" :alt="review.name" class="rounded-circle object-fit-cover shadow-sm mb-2" style="width: 48px; height: 48px; border: 2px solid #E7DCC3;" />
               <h5 class="fw-bold mb-0 text-white" style="font-size: 0.95rem; color: #FFFFFF !important;">{{ review.name }}</h5>
               <span class="small text-white opacity-75 mt-1" style="font-size: 0.75rem;">{{ review.date }}</span>
               
               <!-- Loguito TripAdvisor -->
               <div class="d-flex align-items-center justify-content-center gap-1 mt-2 text-white fw-semibold" style="font-size: 0.78rem;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="#2DD4BF" xmlns="http://www.w3.org/2000/svg" class="d-inline-block align-middle me-1" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#E7DCC3" xmlns="http://www.w3.org/2000/svg" class="d-inline-block align-middle me-1" aria-hidden="true">
                   <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.5 17c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm7 4c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5 2.5 1.119 2.5 2.5-1.119 2.5-2.5 2.5zm0-4c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5 1.5-.673 1.5-1.5-.673-1.5-1.5-1.5zm.5-4h-8v-2h8v2z"/>
                 </svg>
-                <span style="color: #2DD4BF;">Tripadvisor Verificado</span>
+                <span style="color: #E7DCC3;">Tripadvisor Verificado</span>
               </div>
             </div>
           </WCard>

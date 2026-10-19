@@ -264,6 +264,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .coverflow-3d-wrapper {
   width: 100%;
   min-height: 85vh;
@@ -274,10 +276,10 @@ onUnmounted(() => {
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  background: rgba(4, 93, 86, 0.4);
+  background: rgba($verde-wamani, 0.45);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba($beige-tierra, 0.3);
+  box-shadow: 0 25px 60px rgba(13, 91, 87, 0.45);
   user-select: none;
 
   @media (max-width: 768px) {
@@ -292,6 +294,7 @@ onUnmounted(() => {
     font-size: clamp(2.2rem, 4vw, 3.8rem);
     text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     letter-spacing: 0.02em;
+    color: $blanco-andino !important;
   }
 }
 
@@ -321,7 +324,7 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, rgba(4, 93, 86, 0.35) 0%, rgba(3, 62, 59, 0.9) 100%);
+    background: radial-gradient(circle at center, rgba($verde-wamani, 0.35) 0%, rgba($verde-wamani-dark, 0.9) 100%);
   }
 }
 
@@ -352,8 +355,8 @@ onUnmounted(() => {
   height: clamp(340px, 50vh, 480px);
   border-radius: 20px;
   overflow: hidden;
-  background-color: #033E3B;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+  background-color: $verde-wamani-dark;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   transform-origin: center center;
   transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
               opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1),
@@ -375,8 +378,6 @@ onUnmounted(() => {
     pointer-events: none;
   }
 
-
-
   // Gradiente y Textos
   .coverflow-info {
     position: absolute;
@@ -386,9 +387,9 @@ onUnmounted(() => {
     padding: 3rem 1.75rem 1.75rem 1.75rem;
     background: linear-gradient(
       to top,
-      rgba(3, 62, 59, 0.98) 0%,
-      rgba(3, 62, 59, 0.75) 45%,
-      rgba(3, 62, 59, 0.2) 75%,
+      rgba($verde-wamani-dark, 0.98) 0%,
+      rgba($verde-wamani-dark, 0.75) 45%,
+      rgba($verde-wamani-dark, 0.2) 75%,
       transparent 100%
     );
     z-index: 2;
@@ -403,7 +404,7 @@ onUnmounted(() => {
     .coverflow-title {
       font-size: clamp(1.4rem, 2vw, 2rem);
       line-height: 1.15;
-      color: #FFFFFF !important;
+      color: $blanco-andino !important;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
       margin-bottom: 0.4rem;
 
@@ -415,7 +416,7 @@ onUnmounted(() => {
 
     .coverflow-subtitle {
       font-size: 0.88rem;
-      color: #FFFFFF !important;
+      color: $beige-tierra !important;
       font-weight: 500;
       margin-bottom: 0;
       line-height: 1.35;
@@ -433,7 +434,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    border: 1px solid rgba(45, 212, 191, 0.25);
+    border: 1px solid rgba($beige-tierra, 0.3);
     border-radius: inherit;
     pointer-events: none;
     transition: border-color 0.4s ease;
@@ -441,7 +442,7 @@ onUnmounted(() => {
 
   &:hover {
     .coverflow-glow-border {
-      border-color: rgba(45, 212, 191, 0.7);
+      border-color: $beige-tierra;
     }
   }
 }
@@ -454,9 +455,9 @@ onUnmounted(() => {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(3, 62, 59, 0.8);
-  border: 1px solid rgba(45, 212, 191, 0.5);
-  color: #FFFFFF;
+  background: rgba($verde-wamani-dark, 0.85);
+  border: 1px solid rgba($beige-tierra, 0.5);
+  color: $blanco-andino;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -476,11 +477,11 @@ onUnmounted(() => {
   }
 
   &:hover {
-    background: #2DD4BF;
-    color: #033E3B;
-    border-color: #2DD4BF;
-    box-shadow: 0 0 22px rgba(45, 212, 191, 0.85);
-    transform: translateY(-50%) scale(1.12);
+    background: $beige-tierra;
+    color: $gris-piedra;
+    border-color: $beige-tierra;
+    box-shadow: 0 0 20px rgba($beige-tierra, 0.7);
+    transform: translateY(-50%) scale(1.1);
   }
 
   @media (max-width: 768px) {
@@ -502,7 +503,7 @@ onUnmounted(() => {
     width: 10px;
     height: 10px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.3);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -510,12 +511,12 @@ onUnmounted(() => {
 
     &.active {
       width: 36px;
-      background: linear-gradient(90deg, #0FA095, #2DD4BF);
-      box-shadow: 0 0 12px rgba(45, 212, 191, 0.8);
+      background: $beige-tierra;
+      box-shadow: 0 0 12px rgba($beige-tierra, 0.8);
     }
 
     &:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.6);
     }
   }
 }

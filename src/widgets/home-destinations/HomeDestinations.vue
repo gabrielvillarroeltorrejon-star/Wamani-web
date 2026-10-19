@@ -178,7 +178,7 @@ const goToWebpay = () => {
           Descubre aventuras únicas en los paisajes más imponentes del sur de Chile, define tu fecha y cotiza en vivo
         </p>
 
-        <!-- CONTENEDOR BUSCADOR EN VERDE BOSQUE #045D56 -->
+        <!-- CONTENEDOR BUSCADOR EN VERDE WAMANI #147E79 -->
         <div class="search-filter-box mx-auto p-3 p-md-4 rounded-4 shadow-lg">
           <div class="row g-3 align-items-center">
             
@@ -256,13 +256,13 @@ const goToWebpay = () => {
           <!-- Contador de Resultados & Configuración de Viaje -->
           <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top border-light border-opacity-25 px-1 gap-2">
             <span class="small text-white fw-semibold">
-              <i class="bi bi-compass me-1 text-accent" style="color: #2DD4BF !important;"></i> Mostrando <strong class="text-white fw-bold">{{ filteredExperiences.length }}</strong> experiencias disponibles
+              <i class="bi bi-compass me-1" style="color: #E7DCC3 !important;"></i> Mostrando <strong class="text-white fw-bold">{{ filteredExperiences.length }}</strong> experiencias disponibles
             </span>
             <div class="d-flex align-items-center gap-2">
               <span class="badge bg-dark bg-opacity-75 text-white border border-secondary border-opacity-50 small px-3 py-1 fw-bold">
-                <i class="bi bi-person-fill text-accent me-1"></i> Cotizando para <strong class="text-white">{{ searchPax }} {{ searchPax === 1 ? 'persona' : 'personas' }}</strong>
+                <i class="bi bi-person-fill me-1" style="color: #E7DCC3;"></i> Cotizando para <strong class="text-white">{{ searchPax }} {{ searchPax === 1 ? 'persona' : 'personas' }}</strong>
               </span>
-              <span v-if="searchDate" class="badge bg-dark bg-opacity-75 text-accent border border-secondary border-opacity-50 small px-3 py-1 fw-bold">
+              <span v-if="searchDate" class="badge bg-dark bg-opacity-75 border border-secondary border-opacity-50 small px-3 py-1 fw-bold" style="color: #E7DCC3;">
                 <i class="bi bi-calendar-event me-1"></i> {{ searchDate }}
               </span>
             </div>
@@ -276,23 +276,23 @@ const goToWebpay = () => {
             <div class="position-relative overflow-hidden card-img-wrapper">
               <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" width="400" height="220" loading="lazy" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
               <div class="card-image-overlay"></div>
-              <span class="badge bg-dark bg-opacity-85 text-accent position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #2DD4BF !important;">
+              <span class="badge bg-dark bg-opacity-85 position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #E7DCC3 !important;">
                 <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
               </span>
             </div>
             <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
               <div>
-                <p class="small text-accent mb-1 text-uppercase fw-bold" style="font-size: 0.78rem; letter-spacing: 0.08em;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
+                <p class="small text-accent mb-1 text-uppercase fw-bold" style="font-size: 0.78rem; letter-spacing: 0.08em; color: #147E79 !important;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
                 <h3 class="h5 fw-bold mb-2">{{ exp.title }}</h3>
-                <p class="small mb-3 text-truncate fw-medium">{{ exp.summary }}</p>
+                <p class="small mb-3 text-truncate fw-medium" style="color: #4C4C4C !important;">{{ exp.summary }}</p>
               </div>
               
               <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                 <div>
-                  <span class="small d-block fw-semibold">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
-                  <span class="fw-bold text-accent fs-5">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
+                  <span class="small d-block fw-semibold" style="color: #4C4C4C !important;">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
+                  <span class="fw-bold fs-5" style="color: #147E79 !important;">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
                 </div>
-                <WButton variant="primary" size="sm" class="px-3 py-2 btn-cyan-gradient fw-bold">Ver y Reservar</WButton>
+                <WButton variant="primary" size="sm" class="px-3 py-2 fw-bold">Ver y Reservar</WButton>
               </div>
             </div>
           </WCard>
@@ -300,10 +300,12 @@ const goToWebpay = () => {
       </div>
       
       <div class="text-center mt-5 d-flex justify-content-center flex-wrap gap-3">
-        <router-link to="/experiencias" class="btn rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm" style="letter-spacing: 0.1em; background-color: #045D56; color: #FFFFFF; border: 1px solid rgba(45,212,191,0.5);">
+        <!-- Botón Principal Oficial (Verde Wamani + texto Blanco Andino) -->
+        <router-link to="/experiencias" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm" style="letter-spacing: 0.1em;">
           Ver Todas las Expediciones
         </router-link>
-        <router-link to="/experiencias#paquetes" class="btn rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm d-inline-flex align-items-center gap-2" style="letter-spacing: 0.1em; background-color: #2DD4BF; color: #022927; border: none;">
+        <!-- Botón Secundario Oficial (Beige Tierra + texto Gris Piedra) -->
+        <router-link to="/experiencias#paquetes" class="btn btn-secondary rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm d-inline-flex align-items-center gap-2" style="letter-spacing: 0.1em;">
           <i class="bi bi-box-seam-fill"></i> Paquetes & Combos de Expedición
         </router-link>
       </div>
@@ -322,7 +324,7 @@ const goToWebpay = () => {
 
           <div class="row g-0 modal-main-row">
             <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-            <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #045D56 !important;">
+            <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
               
               <!-- Galería -->
               <div class="modal-gallery mb-4">
@@ -337,40 +339,40 @@ const goToWebpay = () => {
               </div>
 
               <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #045D56; color: #2DD4BF; font-size: 0.75rem;">
+                <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #147E79; color: #E7DCC3; font-size: 0.75rem;">
                   {{ selectedExperience.categories ? selectedExperience.categories[0] : 'EXPERIENCIA' }}
                 </span>
-                <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-clock me-1 text-accent"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
-                <span class="small ms-2 fw-semibold" style="color: #045D56 !important;"><i class="bi bi-bar-chart-fill me-1 text-accent"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
+                <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-clock me-1" style="color: #E7DCC3;"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
+                <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-bar-chart-fill me-1" style="color: #E7DCC3;"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
               </div>
               
-              <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #045D56 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-              <p class="lead mb-3 fw-semibold" style="color: #033E3B !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
+              <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #147E79 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
+              <p class="lead mb-3 fw-semibold" style="color: #232323 !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
 
               <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
-              <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #045D56;">
+              <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #147E79;">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <span class="text-white small">Desde</span>
-                  <strong class="text-accent fs-5">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
+                  <strong class="fs-5" style="color: #E7DCC3;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
                 </div>
-                <a href="#modal-reservation-box" class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background-color: #2DD4BF !important; color: #022927 !important; border-radius: 12px;">
+                <a href="#modal-reservation-box" class="btn btn-secondary w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="border-radius: 12px;">
                   <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
                 </a>
               </div>
 
               <div class="mb-4">
-                <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Descripción</h4>
-                <p class="lh-lg fw-medium" style="color: #022C2A !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
+                <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Descripción</h4>
+                <p class="lh-lg fw-medium" style="color: #4C4C4C !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
               </div>
 
               <div class="mb-4" v-if="selectedExperience.itinerary && selectedExperience.itinerary.length">
-                <h4 class="fw-bold h5 mb-3" style="color: #045D56 !important;">Itinerario</h4>
+                <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Itinerario</h4>
                 <div class="itinerary-timeline">
                   <div v-for="(item, idx) in selectedExperience.itinerary" :key="idx" class="itinerary-item">
-                    <div class="itinerary-time fw-bold" style="color: #0FA095 !important;">{{ item.dayOrTime }}</div>
+                    <div class="itinerary-time fw-bold" style="color: #147E79 !important;">{{ item.dayOrTime }}</div>
                     <div class="itinerary-content pb-3">
-                      <h5 class="fw-bold h6 mb-1" style="color: #045D56 !important;">{{ item.title }}</h5>
-                      <p class="small mb-0 fw-medium" style="color: #022C2A !important;">{{ item.description }}</p>
+                      <h5 class="fw-bold h6 mb-1" style="color: #147E79 !important;">{{ item.title }}</h5>
+                      <p class="small mb-0 fw-medium" style="color: #4C4C4C !important;">{{ item.description }}</p>
                     </div>
                   </div>
                 </div>
@@ -380,7 +382,7 @@ const goToWebpay = () => {
                 <div class="col-md-6">
                   <h4 class="fw-bold h6 mb-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>Qué incluye</h4>
                   <ul class="list-unstyled">
-                    <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #045D56 !important;">
+                    <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #147E79 !important;">
                       <i class="bi bi-check-circle-fill text-success me-2"></i> {{ inc }}
                     </li>
                   </ul>
@@ -388,7 +390,7 @@ const goToWebpay = () => {
                 <div class="col-md-6 mt-3 mt-md-0">
                   <h4 class="fw-bold h6 mb-3 text-danger"><i class="bi bi-x-circle-fill me-2"></i>Qué no incluye</h4>
                   <ul class="list-unstyled">
-                    <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #033E3B !important;">
+                    <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #4C4C4C !important;">
                       <i class="bi bi-x-circle-fill text-danger me-2"></i> {{ ninc }}
                     </li>
                   </ul>
@@ -396,34 +398,34 @@ const goToWebpay = () => {
               </div>
 
               <div class="pt-3 border-top border-secondary border-opacity-25">
-                <p class="small mb-1 fw-semibold" style="color: #033E3B !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
-                <p class="small mb-0 fw-semibold" style="color: #033E3B !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
+                <p class="small mb-1 fw-semibold" style="color: #4C4C4C !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
+                <p class="small mb-0 fw-semibold" style="color: #4C4C4C !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
               </div>
 
             </div>
 
             <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-            <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #045D56 !important; color: #FFFFFF !important;">
+            <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
               
               <div>
-                <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em;">
+                <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
                   Área de Reserva Segura
                 </span>
                 <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
 
                 <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                <div class="p-3 rounded-4 mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                   <!-- Selector de Fecha -->
                   <div class="mb-3">
                     <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
-                      <i class="bi bi-calendar-event me-2 text-accent"></i>Fecha de Excursión
+                      <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha de Excursión
                     </label>
                     <input 
                       v-model="modalDate" 
                       type="date" 
                       :min="todayDate" 
                       class="form-control form-control-sm text-white fw-bold" 
-                      style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); color: #FFFFFF !important;"
+                      style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
                       required
                     >
                   </div>
@@ -431,8 +433,8 @@ const goToWebpay = () => {
                   <!-- Selector de Pasajeros (+ / -) -->
                   <div>
                     <label class="form-label small fw-bold text-white mb-1 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
-                      <span><i class="bi bi-people-fill me-2 text-accent"></i>Número de Pasajeros</span>
-                      <span class="badge bg-accent text-dark-mountain fw-bold">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
+                      <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
+                      <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
                     </label>
                     <div class="d-flex align-items-center gap-2">
                       <button 
@@ -451,7 +453,7 @@ const goToWebpay = () => {
                         min="1" 
                         max="20" 
                         class="form-control form-control-sm text-center fw-bold text-white" 
-                        style="background-color: #022C2A; border-color: rgba(45, 212, 191, 0.4); max-width: 70px; color: #FFFFFF !important;"
+                        style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
                       >
                       <button 
                         type="button" 
@@ -467,14 +469,14 @@ const goToWebpay = () => {
                 </div>
 
                 <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #033E3B; border: 1px solid rgba(45, 212, 191, 0.35);">
+                <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
                   <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                     <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Tarifa por persona</span>
                     <span class="fw-bold text-white" style="color: #FFFFFF !important;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }}</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
                     <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Cantidad de viajeros</span>
-                    <span class="fw-bold text-accent">× {{ modalPax }}</span>
+                    <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
                   </div>
                   
                   <div class="d-flex justify-content-between align-items-end mt-3 mb-2">
@@ -484,7 +486,7 @@ const goToWebpay = () => {
                     </div>
                     <div class="text-end">
                       <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem; color: #FFFFFF !important;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
-                      <span class="d-block small text-accent fw-bold" style="font-size: 0.78rem;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
+                      <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
                     </div>
                   </div>
                 </div>
@@ -495,14 +497,14 @@ const goToWebpay = () => {
                 <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
                   <i class="bi bi-cart-plus-fill fs-5"></i> Agregar al Carrito
                 </button>
-                <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
+                <button class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
                   <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
                 </button>
                 <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="goToWhatsApp(selectedExperience.title)">
                   <i class="bi bi-whatsapp fs-5"></i> Reservar vía Transferencia / WhatsApp
                 </button>
                 <div class="d-flex align-items-center justify-content-center gap-2 text-white small mt-1 fw-medium" style="color: #FFFFFF !important;">
-                  <i class="bi bi-shield-lock-fill text-accent"></i>
+                  <i class="bi bi-shield-lock-fill" style="color: #E7DCC3;"></i>
                   <span>Transacción protegida por cifrado SSL 256-bit</span>
                 </div>
               </div>
@@ -592,7 +594,7 @@ const goToWebpay = () => {
   }
   
   .text-accent {
-    color: #0FA095 !important; /* Verde agua principal */
+    color: #147E79 !important; /* Verde Wamani */
   }
   
   .border-top {

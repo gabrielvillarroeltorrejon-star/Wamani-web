@@ -6,12 +6,14 @@ defineProps<{
 
 <template>
   <div class="andes-art-divider position-relative w-100 overflow-hidden d-block" :class="{ 'is-dark': dark }">
-    <!-- Línea Sutil con Degradé según la Paleta Wamani -->
+    <!-- Línea Sutil con Degradé según la Paleta Oficial Wamani -->
     <div class="subtle-gradient-top-line"></div>
   </div>
 </template>
 
 <style scoped lang="scss">
+@import '@/assets/styles/variables';
+
 .andes-art-divider {
   margin: 0;
   padding: 0;
@@ -19,35 +21,34 @@ defineProps<{
 
   .subtle-gradient-top-line {
     width: 100%;
-    height: 5px;
+    height: 4px;
     border-radius: 4px;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(4, 93, 86, 0.35) 15%,
-      #0FA095 40%,
-      #2DD4BF 50%,
-      #0FA095 60%,
-      rgba(4, 93, 86, 0.35) 85%,
+      rgba($verde-wamani, 0.25) 15%,
+      $verde-wamani 40%,
+      $beige-tierra 50%,
+      $verde-wamani 60%,
+      rgba($verde-wamani, 0.25) 85%,
       transparent 100%
     );
-    box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+    box-shadow: 0 0 12px rgba($beige-tierra, 0.4);
   }
 
-  /* Estilos para Fondo Oscuro (sección Nosotros) */
   &.is-dark {
     .subtle-gradient-top-line {
       background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(45, 212, 191, 0.2) 15%,
-        #0FA095 40%,
-        #2DD4BF 50%,
-        #0FA095 60%,
-        rgba(45, 212, 191, 0.2) 85%,
+        rgba($beige-tierra, 0.2) 15%,
+        $verde-wamani 40%,
+        $beige-tierra 50%,
+        $verde-wamani 60%,
+        rgba($beige-tierra, 0.2) 85%,
         transparent 100%
       );
-      box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+      box-shadow: 0 0 12px rgba($beige-tierra, 0.45);
     }
   }
 }

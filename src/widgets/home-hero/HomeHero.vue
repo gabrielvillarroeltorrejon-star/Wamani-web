@@ -222,17 +222,19 @@ onMounted(() => {
 }
 
 .btn-hero-glass {
-  background: rgba(4, 93, 86, 0.45) !important; /* Turquesa oscuro transparente */
+  background: rgba(20, 126, 121, 0.88) !important; /* Verde Wamani Oficial */
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(231, 220, 195, 0.4) !important; /* Borde Beige Tierra */
   color: #FFFFFF !important;
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 8px 24px rgba(20, 126, 121, 0.45);
   
   &:hover {
-    background: rgba(4, 93, 86, 0.75) !important;
+    background: #1A9A94 !important;
+    border-color: #E7DCC3 !important;
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 30px rgba(20, 126, 121, 0.6);
   }
   
   &:active {

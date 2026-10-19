@@ -1,10 +1,9 @@
-// 1. Importar variables y configuraciones de Wamani
+// 1. Importar variables y configuraciones de Wamani (Manual de Marca)
 @import 'variables';
 
 // 2. Importar Bootstrap
 @import 'bootstrap/scss/bootstrap';
 
-// 3. Clases de utilidad y personalizaciones globales
 // 3. Clases de utilidad y personalizaciones globales
 html, body {
   overflow-x: hidden;
@@ -15,8 +14,8 @@ html, body {
 }
 
 body {
-  background-color: $body-bg;
-  color: $body-color;
+  background-color: $verde-wamani;
+  color: $blanco-andino;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: $font-family-sans-serif;
@@ -24,7 +23,7 @@ body {
   transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Evitar zoom automático indeseado en iPhones al tocar campos de texto */
+/* Evitar zoom automático indeseado en móviles al tocar inputs */
 @media (max-width: 767.98px) {
   input, select, textarea {
     font-size: 16px !important;
@@ -32,74 +31,84 @@ body {
 }
 
 p, .lead {
-  color: $text-dark;
-  opacity: 0.9;
+  color: $blanco-andino;
+  opacity: 0.95;
 }
 
 .text-muted {
-  opacity: 0.85 !important;
+  color: $beige-tierra !important;
+  opacity: 0.9 !important;
 }
 
-// Tarjetas globales con fondo Verde Bosque #045D56 y texto blanco puro
-.card, .review-card, .catalog-card, .featured-card, .w-card {
-  background-color: #045D56 !important;
-  color: #FFFFFF !important;
-  border: 1px solid rgba(45, 212, 191, 0.15) !important;
-  
-  p, span:not(.badge), li, div {
-    color: rgba(255, 255, 255, 0.9) !important;
-  }
-
-  .text-muted, .text-secondary {
-    color: rgba(255, 255, 255, 0.8) !important;
-    opacity: 1 !important;
-  }
-
-  h3, h4, h5, h6, .h5, .h6 {
-    font-family: $font-family-brush !important;
-    color: #FFFFFF !important;
-  }
-
-  .text-accent, .text-primary, .category-tag {
-    color: #2DD4BF !important;
-  }
-}
-
-input.form-control, select.form-select, textarea.form-control {
-  color: #033E3B !important;
-}
-
-/* Ocultar flechas / spinners nativos de inputs numéricos (Chrome, Safari, Edge, Opera, Firefox) */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none !important;
-  margin: 0 !important;
-}
-
-input[type=number] {
-  -moz-appearance: textfield !important;
-  appearance: textfield !important;
-}
-
+// ----------------------------------------------------
+// BOTONES OFICIALES DEL MANUAL DE MARCA (Página 9)
+// ----------------------------------------------------
+// Botón Principal: Verde Wamani (#147E79), tipografía elegante, texto Blanco Andino (#FFFFFF), bordes redondeados
+.btn-primary, 
+.btn-wamani-primary,
 .btn-cyan-gradient {
-  background: linear-gradient(135deg, #0FA095 0%, #077A73 100%) !important;
-  color: #FFFFFF !important;
-  border: none !important;
+  background: $verde-wamani !important;
+  color: $blanco-andino !important;
+  border: 1px solid rgba($blanco-andino, 0.2) !important;
+  font-family: $font-family-sans-serif;
   font-weight: 600;
   border-radius: 12px !important;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 4px 12px rgba(15, 160, 149, 0.2);
+  box-shadow: 0 4px 14px rgba(20, 126, 121, 0.35);
 
   &:hover {
-    background: linear-gradient(135deg, #11B8AC 0%, #088C84 100%) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 8px 24px rgba(15, 160, 149, 0.35);
+    background: $verde-wamani-light !important;
+    color: $blanco-andino !important;
+    box-shadow: 0 8px 24px rgba(20, 126, 121, 0.5);
     transform: translateY(-2px);
   }
   
   &:active {
-    transform: scale(0.96) translateY(0);
-    box-shadow: 0 2px 8px rgba(15, 160, 149, 0.2);
+    transform: scale(0.97) translateY(0);
+    box-shadow: 0 2px 8px rgba(20, 126, 121, 0.25);
+  }
+}
+
+// Botón Secundario: Beige Tierra (#E7DCC3), texto Gris Piedra (#4C4C4C), bordes redondeados
+.btn-secondary, 
+.btn-wamani-secondary {
+  background-color: $beige-tierra !important;
+  color: $gris-piedra !important;
+  border: 1px solid rgba($gris-piedra, 0.15) !important;
+  font-family: $font-family-sans-serif;
+  font-weight: 600;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 12px rgba(76, 76, 76, 0.12);
+
+  &:hover {
+    background-color: darken($beige-tierra, 6%) !important;
+    color: $gris-piedra-dark !important;
+    box-shadow: 0 6px 18px rgba(76, 76, 76, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(0.97) translateY(0);
+    box-shadow: 0 2px 6px rgba(76, 76, 76, 0.1);
+  }
+}
+
+// Botón de contorno con Verde Wamani o Beige Tierra
+.btn-outline-primary,
+.btn-outline-accent {
+  background-color: transparent !important;
+  color: $beige-tierra !important;
+  border: 2px solid $beige-tierra !important;
+  border-radius: 12px !important;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover {
+    background-color: $beige-tierra !important;
+    color: $gris-piedra !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(231, 220, 195, 0.3);
   }
 }
 
@@ -118,8 +127,74 @@ input[type=number] {
   }
 }
 
+// ----------------------------------------------------
+// TARJETAS GLOBALES (VERDE WAMANI + BLANCO ANDINO + BEIGE TIERRA)
+// ----------------------------------------------------
+.card, .review-card, .featured-card, .w-card {
+  background-color: $verde-wamani !important;
+  color: $blanco-andino !important;
+  border: 1px solid rgba($beige-tierra, 0.25) !important;
+  border-radius: $border-radius-lg;
+  
+  p, span:not(.badge), li, div {
+    color: rgba($blanco-andino, 0.95) !important;
+  }
+
+  .text-muted, .text-secondary {
+    color: $beige-tierra !important;
+    opacity: 0.95 !important;
+  }
+
+  h3, h4, h5, h6, .h5, .h6 {
+    font-family: $font-family-brush !important;
+    color: $blanco-andino !important;
+  }
+
+  .text-accent, .text-primary, .category-tag {
+    color: $beige-tierra !important;
+  }
+}
+
+// Tarjetas de catálogo claras con Blanco Andino y textos en Gris Piedra
+.catalog-card {
+  background-color: $blanco-andino !important;
+  color: $gris-piedra-dark !important;
+  border: 1px solid rgba(76, 76, 76, 0.1) !important;
+  border-radius: 20px !important;
+
+  h3, h4, h5, h6, .h5, .h6 {
+    font-family: $font-family-sans-serif !important;
+    color: $gris-piedra-dark !important;
+    font-weight: 700 !important;
+  }
+
+  p {
+    color: $gris-piedra !important;
+  }
+
+  .text-accent {
+    color: $verde-wamani !important;
+  }
+}
+
+input.form-control, select.form-select, textarea.form-control {
+  color: $gris-piedra-dark !important;
+}
+
+/* Ocultar flechas de inputs numéricos */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type=number] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
 // -----------------------------------------
-// REDISEÑO TOTAL DEL MODAL DE EXPERIENCIAS
+// MODAL DE EXPERIENCIAS & RESERVAS
 // -----------------------------------------
 .custom-modal-backdrop {
   position: fixed;
@@ -127,7 +202,7 @@ input[type=number] {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(14, 93, 89, 0.85);
   backdrop-filter: blur(8px);
   z-index: 2050;
   display: flex;
@@ -143,7 +218,7 @@ input[type=number] {
 }
 
 .custom-modal-content {
-  background: #FFFFFF !important;
+  background: $blanco-andino !important;
   width: 100%;
   max-width: 1200px;
   max-height: 94vh;
@@ -151,7 +226,7 @@ input[type=number] {
   position: relative;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
 
   @media (min-width: 992px) {
     height: 100%;
@@ -168,15 +243,15 @@ input[type=number] {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #FFFFFF;
-  border: 2px solid #045D56;
+  background: $blanco-andino;
+  border: 2px solid $verde-wamani;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  color: #045D56;
+  color: $verde-wamani;
   z-index: 40;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
   touch-action: manipulation;
   
@@ -188,62 +263,62 @@ input[type=number] {
   }
   
   &:hover, &:active {
-    background: #045D56;
-    color: #FFFFFF;
+    background: $verde-wamani;
+    color: $blanco-andino;
     transform: scale(1.08);
   }
 }
 
 .custom-modal-info {
-  background-color: #FFFFFF !important;
-  color: #045D56 !important;
+  background-color: $blanco-andino !important;
+  color: $gris-piedra-dark !important;
 
   h2, h3, h4, h5, h6 {
-    color: #045D56 !important;
+    color: $verde-wamani !important;
   }
   
   p, span:not(.badge), li, div {
-    color: #224845 !important;
+    color: $gris-piedra !important;
   }
 
   .text-muted {
-    color: #4E6E6C !important;
+    color: $gris-piedra-light !important;
     opacity: 1 !important;
   }
 }
 
 .custom-modal-sidebar {
-  background-color: #045D56 !important;
-  color: #FFFFFF !important;
-  border-left: 1px solid rgba(45, 212, 191, 0.2) !important;
+  background-color: $verde-wamani !important;
+  color: $blanco-andino !important;
+  border-left: 1px solid rgba($beige-tierra, 0.3) !important;
 
   h3, h4, h5, h6 {
-    color: #FFFFFF !important;
+    color: $blanco-andino !important;
     font-family: $font-family-brush !important;
   }
 
   p, span:not(.badge), li, div {
-    color: #FFFFFF !important;
+    color: $blanco-andino !important;
   }
 
   .text-muted {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: $beige-tierra !important;
     opacity: 1 !important;
   }
 
   .summary-list {
     .border-bottom {
-      border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+      border-bottom-color: rgba($blanco-andino, 0.15) !important;
     }
   }
 
   .price-box-card {
-    background-color: #033E3B !important;
-    border: 1px solid rgba(45, 212, 191, 0.3) !important;
+    background-color: $verde-wamani-dark !important;
+    border: 1px solid rgba($beige-tierra, 0.45) !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 
     .text-accent {
-      color: #2DD4BF !important;
+      color: $beige-tierra !important;
     }
   }
 }
@@ -276,22 +351,22 @@ input[type=number] {
     overflow: visible !important;
     padding: 1.5rem !important;
     border-left: none !important;
-    border-top: 3px solid rgba(45, 212, 191, 0.4) !important;
+    border-top: 3px solid rgba($beige-tierra, 0.5) !important;
   }
 }
 
 h1, h2, h3, .font-serif, .font-brush {
   font-family: $font-family-brush !important;
-  color: #FFFFFF !important;
+  color: $blanco-andino !important;
 }
 
 // ----------------------------------------------------
-// CONTENEDOR BUSCADOR Y FILTROS EN VERDE BOSQUE #045D56
+// BUSCADOR Y FILTROS EN VERDE WAMANI (#147E79)
 // ----------------------------------------------------
 .search-filter-box {
-  background-color: #045D56 !important;
-  border: 1px solid rgba(45, 212, 191, 0.35) !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25) !important;
+  background-color: $verde-wamani !important;
+  border: 1px solid rgba($beige-tierra, 0.4) !important;
+  box-shadow: 0 16px 36px rgba(13, 91, 87, 0.45) !important;
   max-width: 1140px;
   width: 100%;
   position: relative;
@@ -306,7 +381,7 @@ h1, h2, h3, .font-serif, .font-brush {
       left: 0.95rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #045D56 !important;
+      color: $verde-wamani !important;
       font-size: 1.05rem;
       pointer-events: none;
       z-index: 5;
@@ -314,10 +389,10 @@ h1, h2, h3, .font-serif, .font-brush {
   }
 
   .custom-search-input, .custom-select-input {
-    background-color: #FFFFFF !important;
-    color: #033E3B !important;
+    background-color: $blanco-andino !important;
+    color: $gris-piedra-dark !important;
     font-weight: 600 !important;
-    border: 2px solid rgba(45, 212, 191, 0.4) !important;
+    border: 2px solid rgba($beige-tierra, 0.7) !important;
     border-radius: 14px !important;
     height: 52px !important;
     padding-left: 2.35rem !important;
@@ -325,31 +400,31 @@ h1, h2, h3, .font-serif, .font-brush {
     transition: all 0.3s ease;
 
     &::placeholder {
-      color: #6E8E8B !important;
+      color: $gris-piedra !important;
       font-weight: 500 !important;
-      opacity: 1 !important;
+      opacity: 0.8 !important;
     }
 
     &:focus {
-      background-color: #FFFFFF !important;
-      border-color: #0FA095 !important;
-      box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.45) !important;
-      color: #022927 !important;
+      background-color: $blanco-andino !important;
+      border-color: $verde-wamani !important;
+      box-shadow: 0 0 0 4px rgba($verde-wamani, 0.25) !important;
+      color: $gris-piedra-dark !important;
       outline: none !important;
     }
   }
 
   select.custom-select-input {
     padding-right: 2rem !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23045D56' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23147E79' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
     background-repeat: no-repeat !important;
     background-position: right 0.75rem center !important;
     background-size: 14px 10px !important;
     cursor: pointer;
 
     option {
-      background-color: #FFFFFF !important;
-      color: #033E3B !important;
+      background-color: $blanco-andino !important;
+      color: $gris-piedra-dark !important;
       padding: 10px;
     }
   }
@@ -359,18 +434,9 @@ h1, h2, h3, .font-serif, .font-brush {
   font-family: $font-family-sans-serif !important;
 }
 
-// Navegación vertical texto
-.vertical-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-}
-
-// Separadores elegantes tradicionales con degradé sutil de marca
+// Separadores elegantes con los colores del manual
 .divider-line {
-  height: 5px;
+  height: 4px;
   width: 100%;
   margin: 2rem 0;
   border: none;
@@ -378,19 +444,16 @@ h1, h2, h3, .font-serif, .font-brush {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(4, 93, 86, 0.35) 15%,
-    #0FA095 40%,
-    #2DD4BF 50%,
-    #0FA095 60%,
-    rgba(4, 93, 86, 0.35) 85%,
+    rgba($verde-wamani, 0.35) 15%,
+    $verde-wamani 40%,
+    $beige-tierra 50%,
+    $verde-wamani 60%,
+    rgba($verde-wamani, 0.35) 85%,
     transparent 100%
   );
-  box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+  box-shadow: 0 0 12px rgba($beige-tierra, 0.5);
 }
 
-// -----------------------------------------
-// Separadores de Sección Ultra Premium (Gradiente Verde Agua & Glow)
-// -----------------------------------------
 .premium-divider {
   position: relative;
   width: 100%;
@@ -400,14 +463,14 @@ h1, h2, h3, .font-serif, .font-brush {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(4, 93, 86, 0.2) 15%,
-    #0FA095 40%,
-    #2DD4BF 50%,
-    #0FA095 60%,
-    rgba(4, 93, 86, 0.2) 85%,
+    rgba($verde-wamani, 0.2) 15%,
+    $verde-wamani 40%,
+    $beige-tierra 50%,
+    $verde-wamani 60%,
+    rgba($verde-wamani, 0.2) 85%,
     transparent 100%
   );
-  box-shadow: 0 0 14px rgba(45, 212, 191, 0.6);
+  box-shadow: 0 0 14px rgba($beige-tierra, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -416,12 +479,12 @@ h1, h2, h3, .font-serif, .font-brush {
   &::after {
     content: '✦';
     font-size: 0.75rem;
-    color: #045D56;
-    background-color: #83AAA8;
+    color: $verde-wamani;
+    background-color: $beige-tierra;
     padding: 2px 10px;
     border-radius: 20px;
-    border: 1px solid rgba(4, 93, 86, 0.4);
-    box-shadow: 0 0 10px rgba(4, 93, 86, 0.2);
+    border: 1px solid rgba($verde-wamani, 0.4);
+    box-shadow: 0 0 10px rgba($verde-wamani, 0.2);
   }
 }
 
@@ -434,14 +497,14 @@ h1, h2, h3, .font-serif, .font-brush {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(15, 160, 149, 0.3) 15%,
-    #0FA095 40%,
-    #2DD4BF 50%,
-    #0FA095 60%,
-    rgba(15, 160, 149, 0.3) 85%,
+    rgba($verde-wamani, 0.3) 15%,
+    $verde-wamani 40%,
+    $beige-tierra 50%,
+    $verde-wamani 60%,
+    rgba($verde-wamani, 0.3) 85%,
     transparent 100%
   );
-  box-shadow: 0 0 16px rgba(45, 212, 191, 0.8);
+  box-shadow: 0 0 16px rgba($beige-tierra, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -450,17 +513,17 @@ h1, h2, h3, .font-serif, .font-brush {
   &::after {
     content: '✦';
     font-size: 0.75rem;
-    color: #2DD4BF;
-    background-color: #033E3B;
+    color: $beige-tierra;
+    background-color: $verde-wamani-dark;
     padding: 2px 10px;
     border-radius: 20px;
-    border: 1px solid rgba(45, 212, 191, 0.6);
-    box-shadow: 0 0 12px rgba(45, 212, 191, 0.7);
+    border: 1px solid rgba($beige-tierra, 0.6);
+    box-shadow: 0 0 12px rgba($beige-tierra, 0.4);
   }
 }
 
 // ----------------------------------------------------
-// CARRUSEL TOURS DESTACADOS (INSPIRACIÓN PINTEREST)
+// CARRUSEL TOURS DESTACADOS
 // ----------------------------------------------------
 .pinterest-carousel-container {
   position: relative;
@@ -474,7 +537,7 @@ h1, h2, h3, .font-serif, .font-brush {
   gap: 1.5rem;
   padding: 0.5rem 0.25rem 1.5rem 0.25rem;
   scrollbar-width: thin;
-  scrollbar-color: #2DD4BF rgba(255, 255, 255, 0.15);
+  scrollbar-color: $beige-tierra rgba(255, 255, 255, 0.15);
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 
@@ -489,12 +552,12 @@ h1, h2, h3, .font-serif, .font-brush {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #0FA095, #2DD4BF);
+    background: linear-gradient(90deg, $verde-wamani, $beige-tierra);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+    box-shadow: 0 0 10px rgba($beige-tierra, 0.5);
 
     &:hover {
-      background: #2DD4BF;
+      background: $beige-tierra;
     }
   }
 
@@ -517,9 +580,9 @@ h1, h2, h3, .font-serif, .font-brush {
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
-    background-color: #045D56;
-    border: 1px solid rgba(45, 212, 191, 0.2);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    background-color: $verde-wamani;
+    border: 1px solid rgba($beige-tierra, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
     .pinterest-card-img {
@@ -537,9 +600,9 @@ h1, h2, h3, .font-serif, .font-brush {
       top: 0;
       background: linear-gradient(
         to top,
-        rgba(4, 93, 86, 0.95) 0%,
-        rgba(4, 93, 86, 0.5) 35%,
-        rgba(4, 93, 86, 0.1) 60%,
+        rgba(20, 126, 121, 0.95) 0%,
+        rgba(20, 126, 121, 0.55) 35%,
+        rgba(20, 126, 121, 0.15) 60%,
         transparent 100%
       );
       display: flex;
@@ -552,14 +615,14 @@ h1, h2, h3, .font-serif, .font-brush {
         font-family: $font-family-brush !important;
         font-size: 1.85rem;
         line-height: 1.15;
-        color: #FFFFFF !important;
+        color: $blanco-andino !important;
         text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         margin-bottom: 0.35rem;
         transition: transform 0.3s ease;
       }
 
       .pinterest-card-subtitle {
-        color: rgba(255, 255, 255, 0.9) !important;
+        color: $beige-tierra !important;
         font-size: 0.9rem;
         margin-bottom: 0;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -568,8 +631,8 @@ h1, h2, h3, .font-serif, .font-brush {
 
     &:hover {
       transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(4, 93, 86, 0.4);
-      border-color: rgba(45, 212, 191, 0.6);
+      box-shadow: 0 20px 40px rgba(20, 126, 121, 0.45);
+      border-color: $beige-tierra;
 
       .pinterest-card-img {
         transform: scale(1.06);
@@ -578,15 +641,15 @@ h1, h2, h3, .font-serif, .font-brush {
       .pinterest-card-overlay {
         background: linear-gradient(
           to top,
-          rgba(4, 93, 86, 0.98) 0%,
-          rgba(4, 93, 86, 0.65) 45%,
-          rgba(4, 93, 86, 0.2) 70%,
+          rgba(20, 126, 121, 0.98) 0%,
+          rgba(20, 126, 121, 0.7) 45%,
+          rgba(20, 126, 121, 0.25) 70%,
           transparent 100%
         );
 
         .pinterest-card-title {
           transform: translateY(-2px);
-          color: #2DD4BF !important;
+          color: $beige-tierra !important;
         }
       }
     }
@@ -597,10 +660,9 @@ h1, h2, h3, .font-serif, .font-brush {
    OPTIMIZACIÓN TÁCTIL MÓVIL Y ACCESIBILIDAD (WCAG 2.5.5 - 48px Touch Targets)
    ========================================================================== */
 @media (max-width: 767.98px) {
-  /* Botones principales y controles de formulario con área táctil ergonómica */
   .btn:not(.btn-sm):not(.dropdown-toggle), 
   .form-select, 
-  .custom-search-input,
+  .custom-search-input, 
   .custom-select-input {
     min-height: 48px !important;
   }
@@ -609,14 +671,12 @@ h1, h2, h3, .font-serif, .font-brush {
     min-height: 40px !important;
   }
 
-  /* Controles incrementales de pasajeros (+ / -) */
   .custom-modal-sidebar button,
   .pax-control-btn {
     min-width: 44px !important;
     min-height: 44px !important;
   }
 
-  /* Botón hamburguesa y botones de cierre modal */
   .navbar-toggler,
   .btn-close-custom,
   .modal-close-btn {
@@ -627,18 +687,15 @@ h1, h2, h3, .font-serif, .font-brush {
     justify-content: center !important;
   }
 
-  /* Iconos de redes sociales en footer con objetivo táctil seguro */
   .social-icon-wrapper {
     width: 44px !important;
     height: 44px !important;
     min-width: 44px !important;
   }
 
-  /* Refuerzo de contraste en textos atenuados para lectura bajo luz solar */
   .text-white-50, 
   .text-muted {
-    opacity: 0.9 !important;
-    color: rgba(255, 255, 255, 0.92) !important;
+    opacity: 0.92 !important;
+    color: $beige-tierra !important;
   }
 }
-
