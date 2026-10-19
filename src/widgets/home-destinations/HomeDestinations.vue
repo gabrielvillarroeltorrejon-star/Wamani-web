@@ -22,17 +22,16 @@ const searchPax = ref(1);
 const searchDifficulty = ref('');
 const searchCity = ref('');
 
-// Ciudades únicas para el selector (excluyendo Zona Norte según Manual de Marca)
+// Ciudades únicas para el selector
 const cities = computed(() => {
-  const allDestinations = contentStore.experiences
-    .filter(e => e.macroZone !== 'norte' && e.destinationId !== 'dest-atacama')
-    .map(e => e.destinationId);
+  const allDestinations = contentStore.experiences.map(e => e.destinationId);
   return [...new Set(allDestinations)];
 });
 
 const getCityName = (id: string) => {
   if (id === 'dest-pucon') return 'Pucón';
   if (id === 'dest-panguipulli') return 'Panguipulli';
+  if (id === 'dest-atacama') return 'San Pedro de Atacama';
   if (id === 'dest-patagonia') return 'Torres del Paine';
   if (id === 'dest-cajon-maipo') return 'Cajón del Maipo';
   return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -46,12 +45,9 @@ const resetFilters = () => {
   searchCity.value = '';
 };
 
-// Filtrado reactivo (Ocultando y desactivando Zona Norte según directriz oficial)
+// Filtrado reactivo
 const filteredExperiences = computed(() => {
   return contentStore.experiences.filter(exp => {
-    if (exp.macroZone === 'norte' || exp.destinationId === 'dest-atacama') {
-      return false; // Desactivar y ocultar Zona Norte
-    }
     const matchesSearch = searchQuery.value ? (
       exp.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
       exp.tags.some(t => t.toLowerCase().includes(searchQuery.value.toLowerCase()))
@@ -66,9 +62,7 @@ const displayedDestinations = computed(() => {
   if (searchQuery.value || searchDifficulty.value || searchCity.value) {
     return filteredExperiences.value;
   }
-  return contentStore.experiences
-    .filter(e => e.macroZone !== 'norte' && e.destinationId !== 'dest-atacama')
-    .slice(0, 6);
+  return contentStore.experiences.slice(0, 6);
 });
 
 // Modal Detalle y Reserva

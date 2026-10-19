@@ -2,13 +2,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import HomeHero from '@/widgets/home-hero/HomeHero.vue';
-import HomeWamaniSense from '@/widgets/home-sense/HomeWamaniSense.vue';
-import HomeFounders from '@/widgets/home-founders/HomeFounders.vue';
 import HomeServices from '@/widgets/home-services/HomeServices.vue';
 import HomeDestinations from '@/widgets/home-destinations/HomeDestinations.vue';
 import HomePackages from '@/widgets/home-packages/HomePackages.vue';
-import HomeGallery from '@/widgets/home-gallery/HomeGallery.vue';
-import HomeBookingForm from '@/widgets/home-booking/HomeBookingForm.vue';
 import ReviewsCarousel from '@/widgets/reviews/ReviewsCarousel.vue';
 import W3DCoverflowSlider from '@/shared/ui/W3DCoverflowSlider.vue';
 import { useContentStore } from '@/shared/stores/contentStore';
@@ -22,12 +18,7 @@ const cartStore = useCartStore();
 const todayDate = new Date().toISOString().split('T')[0];
 const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
-// Excluir Zona Norte según requerimiento oficial
-const featuredExperiences = computed(() => 
-  contentStore.experiences
-    .filter(e => e.macroZone !== 'norte' && e.destinationId !== 'dest-atacama')
-    .slice(0, 9)
-);
+const featuredExperiences = computed(() => contentStore.experiences.slice(0, 9));
 
 // Modal Detalle y Reserva
 const selectedExperience = ref<Experience | null>(null);
@@ -160,17 +151,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- 1. Hero Principal con Video Destino y enlace a página aparte -->
+    <!-- 1. Hero Principal con cumbres sobrepuestas en el borde inferior del video -->
     <HomeHero />
 
-    <!-- 2. Presentación DESTINOS WAMANI (El sentido Wamani + Cita complementaria) -->
-    <HomeWamaniSense />
-
-    <!-- 3. Presentación NOSOTROS (Fundadores Camilo Tamayo & Benjamín Meneses) -->
-    <HomeFounders />
-
-    <!-- 4. TOURS DESTACADOS (SLIDER 3D COVERFLOW) -->
-    <section class="featured-3d-section py-4 px-2 px-md-4" style="background-color: #FAF8F5;">
+    <!-- 2. TOURS DESTACADOS (SLIDER 3D COVERFLOW ARRIBA DE NUESTROS SERVICIOS) -->
+    <section class="featured-3d-section py-4 px-2 px-md-4">
       <div class="container-fluid px-lg-4">
         <W3DCoverflowSlider 
           :experiences="featuredExperiences" 
@@ -179,54 +164,51 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- 5. Nuestros Servicios -->
+    <!-- 3. Nuestros Servicios -->
     <HomeServices />
     
-    <!-- 6. Buscador y Destinos (Zona Norte Ocultada y Desactivada) -->
+    <!-- 4. Buscador y Destinos -->
     <HomeDestinations />
 
-    <!-- 7. Paquetes Promocionales -->
+    <!-- 4.5. Paquetes Promocionales -->
     <HomePackages />
 
-    <!-- 8. Galería Fotográfica Natural (8 Fotos auténticas sin posar) -->
-    <HomeGallery />
-
-    <!-- 9. Nuestros Guías Certificados SERNATUR -->
-    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="py-5" style="background-color: #FAF8F5;">
+    <!-- 4.8. Nuestros Guías Certificados -->
+    <section v-if="contentStore.content.about.advisors && contentStore.content.about.advisors.length > 0" id="guias" class="py-5">
       <div class="container py-4">
         <div class="text-center mb-5">
-          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(20, 126, 121, 0.08); border: 1px solid rgba(20, 126, 121, 0.2);">
-            <i class="bi bi-patch-check-fill" style="color: #147E79;"></i>
-            <span class="small text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem; color: #147E79;">Equipo & Guías SERNATUR</span>
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(4, 93, 86, 0.45); border: 1px solid rgba(45, 212, 191, 0.35);">
+            <i class="bi bi-patch-check-fill text-accent"></i>
+            <span class="small text-white text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem;">Equipo & Guías SERNATUR</span>
           </div>
-          <h2 class="display-5 font-sans fw-bold mb-2" style="color: #147E79;">
+          <h2 class="display-4 font-brush fw-bold mb-2 text-white" style="font-family: 'Caveat', cursive !important;">
             {{ contentStore.content.about.advisorsTitle || 'Nuestros Guías & Equipo' }}
           </h2>
-          <p class="lead fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #4C4C4C !important;">
+          <p class="lead text-white fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
             {{ contentStore.content.about.advisorsSubtitle }}
           </p>
         </div>
 
         <div class="row g-4 justify-content-center">
           <div v-for="adv in contentStore.content.about.advisors" :key="adv.id" class="col-12 col-md-6 col-lg-4">
-            <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-sm position-relative d-flex flex-column border-0" style="background-color: #FFFFFF;">
-              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #E7DCC3;">
+            <div class="advisor-card h-100 rounded-4 overflow-hidden shadow-lg position-relative d-flex flex-column">
+              <div class="advisor-img-wrapper position-relative overflow-hidden" style="height: 290px; background-color: #033E3B;">
                 <img 
                   :src="adv.image || 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'" 
                   :alt="adv.name" 
                   class="w-100 h-100 object-fit-cover transition-all hover-scale"
                   @error="(e: Event) => ((e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80')"
                 />
-                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(20, 126, 121, 0.95) 0%, rgba(20, 126, 121, 0.3) 50%, transparent 100%);"></div>
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(4, 93, 86, 0.95) 0%, rgba(4, 93, 86, 0.25) 50%, transparent 100%);"></div>
                 <div class="position-absolute bottom-0 start-0 p-4 w-100">
-                  <h3 class="h4 text-white mb-0 font-sans fw-bold">{{ adv.name }}</h3>
-                  <span class="font-sans text-uppercase tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #E7DCC3 !important; letter-spacing: 0.08em;">
+                  <h3 class="font-brush display-5 text-white mb-0 text-shadow" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">{{ adv.name }}</h3>
+                  <span class="font-sans text-uppercase text-accent tracking-wide small d-block mt-1 fw-bold" style="font-size: 0.78rem; color: #2DD4BF !important; letter-spacing: 0.08em;">
                     <i class="bi bi-patch-check-fill me-1"></i>{{ adv.role }}
                   </span>
                 </div>
               </div>
-              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
-                <p class="font-sans fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #4C4C4C !important;">
+              <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #045D56 0%, #033E3B 100%);">
+                <p class="font-sans text-white fw-medium lh-lg mb-0" style="font-size: 0.95rem; color: #FFFFFF !important;">
                   {{ adv.bio }}
                 </p>
               </div>
@@ -236,17 +218,13 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- 10. Opiniones y Social Proof -->
-    <section id="opiniones" class="py-5" style="background-color: #FFFFFF;">
+    <!-- 5. Opiniones y Social Proof -->
+    <section id="opiniones" class="py-5">
       <div class="container py-5" style="max-width: 1100px;">
         
         <div class="text-center mb-5">
-          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(20, 126, 121, 0.08); border: 1px solid rgba(20, 126, 121, 0.2);">
-            <i class="bi bi-star-fill" style="color: #147E79;"></i>
-            <span class="small text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.75rem; color: #147E79;">Testimonios Verificados</span>
-          </div>
-          <h2 class="display-5 font-sans fw-bold mb-3" style="color: #147E79;">{{ contentStore.content.home.reviews.title }}</h2>
-          <p class="lead fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #4C4C4C !important;">
+          <h2 class="display-4 font-brush fw-bold mb-3 text-white" style="font-family: 'Caveat', cursive !important;">{{ contentStore.content.home.reviews.title }}</h2>
+          <p class="lead text-white fw-medium max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
             {{ contentStore.content.home.reviews.description }}
           </p>
         </div>
@@ -259,9 +237,6 @@ onMounted(() => {
         <ReviewsCarousel v-else />
       </div>
     </section>
-
-    <!-- 11. Formulario Oficial de Reserva en 4 Pasos + WhatsApp -->
-    <HomeBookingForm />
 
     <!-- MODAL FLOTANTE DE COMPRA DIRECTO EN INICIO -->
     <Teleport to="body">

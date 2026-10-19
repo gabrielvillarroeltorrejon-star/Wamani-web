@@ -247,108 +247,104 @@ onUnmounted(() => {
     <footer v-if="route.name !== 'admin'" class="premium-footer text-white pt-5 pb-4 font-sans">
       <div class="container py-4">
         <div class="row g-4 justify-content-between">
-          
-          <!-- Columna 1: Brand & Propósito -->
-          <div class="col-12 col-md-4 col-lg-3">
-            <div class="mb-3 d-flex align-items-center gap-2">
-              <img src="/Logo Wamani.png" alt="Wamani Logo" height="48" width="48" class="d-block" />
-              <div>
-                <h4 class="font-sans fw-bold h5 mb-0 text-white">Wamani Experience</h4>
-                <span class="small brand-slogan text-white-50" style="font-size: 0.85rem;">Ecoturismo desde Chile.</span>
-              </div>
+          <!-- Columna 1: Brand -->
+          <div class="col-12 col-md-3">
+            <div class="mb-3">
+              <img src="/Logo Wamani.png" alt="Wamani Logo" height="55" width="55" class="mb-3 d-block" />
+              <h4 class="font-serif fw-bold h5 mb-0">Wamani Experience</h4>
             </div>
             
-            <!-- Logos de acreditación con verificación SERNATUR -->
+            <!-- Logos de acreditación directos con verificación SERNATUR -->
             <div class="d-flex align-items-center gap-3 mb-2 ps-1">
               <a :href="contentStore.content.legal.sernaturUrl" target="_blank" rel="noopener noreferrer" title="Verificar Registro Nacional de Prestadores Turísticos SERNATUR" class="d-inline-flex align-items-center text-decoration-none">
-                <img src="/sernatur.webp" alt="Sernatur" height="32" class="object-fit-contain" style="filter: brightness(0) invert(1); opacity: 0.95;" />
+                <img src="/sernatur.webp" alt="Sernatur" height="36" class="object-fit-contain" style="filter: brightness(0) invert(1); opacity: 0.95;" />
               </a>
-              <img src="/Logo_MarcaChile_Caja Roja.webp" alt="Marca Chile" height="32" class="object-fit-contain" />
+              <img src="/Logo_MarcaChile_Caja Roja.webp" alt="Marca Chile" height="36" class="object-fit-contain" />
             </div>
-            <p class="small text-white-50 mb-3" style="font-size: 0.8rem;">
-              <i class="bi bi-patch-check-fill me-1" style="color: #E7DCC3;"></i>Reg. SERNATUR N° {{ contentStore.content.legal.sernaturRegistry }}
+            <p class="small text-accent mb-3" style="font-size: 0.8rem;">
+              <i class="bi bi-patch-check-fill me-1"></i>Reg. SERNATUR N° {{ contentStore.content.legal.sernaturRegistry }}
             </p>
             
-            <p class="text-white-50 small pe-md-2 lh-lg mb-0">
-              Agencia boutique de ecoturismo y turismo aventura en Chile. Guiados por la cosmovisión andina que reconoce a la montaña como espíritu protector.
+            <p class="text-white-50 small pe-md-2 lh-lg">
+              Diseñando experiencias inolvidables en el sur del mundo. Ecoturismo y turismo aventura de excelencia para viajeros conscientes y exigentes.
             </p>
           </div>
           
-          <!-- Columna 2: Enlaces Rápidos -->
+          <!-- Columna 2: Quick Links -->
           <div class="col-6 col-md-2">
-            <h5 class="text-uppercase mb-3 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Enlaces Rápidos</h5>
-            <ul class="list-unstyled d-flex flex-column gap-2 mb-0 small">
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Explora</h5>
+            <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small">
               <li><router-link to="/" class="text-white-50 text-decoration-none nav-link-custom">Inicio</router-link></li>
-              <li><router-link to="/nosotros" class="text-white-50 text-decoration-none nav-link-custom">Nosotros</router-link></li>
+              <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Portafolio</router-link></li>
               <li><router-link :to="{ path: '/', hash: '#servicios' }" class="text-white-50 text-decoration-none nav-link-custom">Servicios</router-link></li>
-              <li><router-link :to="{ path: '/', hash: '#destinos' }" class="text-white-50 text-decoration-none nav-link-custom">Destinos</router-link></li>
-              <li><router-link :to="{ path: '/', hash: '#reserva' }" class="text-white-50 text-decoration-none nav-link-custom">Reservar</router-link></li>
-              <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Expediciones</router-link></li>
-            </ul>
-          </div>
-
-          <!-- Columna 3: Soporte & Legal -->
-          <div class="col-6 col-md-3">
-            <h5 class="text-uppercase mb-3 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Soporte & Legal</h5>
-            <ul class="list-unstyled d-flex flex-column gap-2 mb-0 small">
-              <li><router-link to="/terminos-y-condiciones" class="text-white-50 text-decoration-none nav-link-custom">Términos y Condiciones</router-link></li>
-              <li><router-link to="/politica-de-privacidad" class="text-white-50 text-decoration-none nav-link-custom">Política de Privacidad</router-link></li>
-              <li><router-link to="/politica-de-cookies" class="text-white-50 text-decoration-none nav-link-custom">Política de Cookies</router-link></li>
-              <li><router-link to="/politica-de-reembolsos" class="text-white-50 text-decoration-none nav-link-custom">Cambios y Cancelaciones</router-link></li>
-              <li><a :href="`mailto:${contentStore.content.contact.email}?subject=Preguntas%20Frecuentes%20-%20Ayuda`" class="text-white-50 text-decoration-none nav-link-custom">Preguntas Frecuentes (FAQ)</a></li>
-              <li><router-link :to="{ path: '/', hash: '#galeria' }" class="text-white-50 text-decoration-none nav-link-custom">Blog & Historias</router-link></li>
+              <li><router-link :to="{ path: '/', hash: '#guias' }" class="text-white-50 text-decoration-none nav-link-custom">Guías</router-link></li>
+              <li><router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white-50 text-decoration-none nav-link-custom">Reseñas</router-link></li>
+              <li><router-link to="/nosotros" class="text-white-50 text-decoration-none nav-link-custom">Nosotros</router-link></li>
             </ul>
           </div>
           
-          <!-- Columna 4: Contacto & Redes -->
-          <div class="col-12 col-md-3">
-            <h5 class="text-uppercase mb-3 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Contacto</h5>
-            <ul class="list-unstyled d-flex flex-column gap-2 mb-3 small text-white-50">
-              <li class="d-flex align-items-start gap-2">
-                <i class="fa-solid fa-location-dot mt-1" style="color: #E7DCC3; width: 16px;"></i>
-                <span>{{ contentStore.content.contact.address }}</span>
+          <!-- Columna 3: Contacto -->
+          <div class="col-6 col-md-3">
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Contacto</h5>
+            <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small text-white-50">
+              <li class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-location-dot text-accent" style="width: 16px; text-align: center;"></i> <span>{{ contentStore.content.contact.address }}</span>
               </li>
               <li class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-envelope" style="color: #E7DCC3; width: 16px;"></i>
-                <span>{{ contentStore.content.contact.email }}</span>
-              </li>
-              <li class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-phone" style="color: #E7DCC3; width: 16px;"></i>
-                <span>{{ contentStore.content.contact.phone }}</span>
+                <i class="fa-solid fa-envelope text-accent" style="width: 16px; text-align: center;"></i> <span>{{ contentStore.content.contact.email }}</span>
               </li>
             </ul>
-
-            <h6 class="text-uppercase mb-2 fw-bold small" style="font-size: 0.75rem; letter-spacing: 0.1em; color: #E7DCC3;">Redes Sociales</h6>
-            <div class="d-flex gap-2">
-              <a :href="`https://wa.me/${contentStore.content.contact.whatsappNumber}?text=${encodeURIComponent(contentStore.content.contact.whatsappMessage)}`" target="_blank" class="social-icon-box text-white" aria-label="WhatsApp">
-                <i class="fa-brands fa-whatsapp"></i>
-              </a>
-              <a :href="contentStore.content.contact.instagramUrl" target="_blank" class="social-icon-box text-white" aria-label="Instagram">
-                <i class="fa-brands fa-instagram"></i>
-              </a>
-              <a :href="contentStore.content.contact.tripadvisorUrl" target="_blank" class="social-icon-box text-white" aria-label="TripAdvisor">
-                <i class="fa-brands fa-tripadvisor"></i>
-              </a>
-              <a href="https://linkedin.com" target="_blank" class="social-icon-box text-white" aria-label="LinkedIn">
-                <i class="fa-brands fa-linkedin-in"></i>
-              </a>
-            </div>
           </div>
-
+          
+          <!-- Columna 4: Redes Sociales -->
+          <div class="col-12 col-md-4">
+            <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em;">Síguenos</h5>
+            <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small text-white-50">
+              <li>
+                <a :href="`https://wa.me/${contentStore.content.contact.whatsappNumber}?text=${encodeURIComponent(contentStore.content.contact.whatsappMessage)}`" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center gap-2 social-link-item py-1">
+                  <span class="d-flex align-items-center justify-content-center border border-white border-opacity-25 rounded-circle social-icon-wrapper" style="width: 44px; height: 44px; min-width: 44px; transition: all 0.25s;">
+                    <i class="fa-brands fa-whatsapp fs-6"></i>
+                  </span>
+                  <span class="text-nowrap">{{ contentStore.content.contact.phone }}</span>
+                </a>
+              </li>
+              <li>
+                <a :href="contentStore.content.contact.instagramUrl" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center gap-2 social-link-item py-1">
+                  <span class="d-flex align-items-center justify-content-center border border-white border-opacity-25 rounded-circle social-icon-wrapper" style="width: 44px; height: 44px; min-width: 44px; transition: all 0.25s;">
+                    <i class="fa-brands fa-instagram fs-6"></i>
+                  </span>
+                  <span class="text-nowrap">Instagram</span>
+                </a>
+              </li>
+              <li>
+                <a :href="contentStore.content.contact.tripadvisorUrl" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center gap-2 social-link-item py-1">
+                  <span class="d-flex align-items-center justify-content-center border border-white border-opacity-25 rounded-circle social-icon-wrapper" style="width: 44px; height: 44px; min-width: 44px; transition: all 0.25s;">
+                    <svg width="17" height="17" viewBox="0 0 512 512" fill="currentColor" style="transition: fill 0.2s;">
+                      <path d="M175.335 281.334c0 24.483-19.853 44.336-44.336 44.336-24.484 0-44.337-19.853-44.336-44.336 0-24.484 19.853-44.337 44.337-44.337 24.483 0 44.336 19.853 44.336 44.337zm205.554-44.337c-24.48 0-44.336 19.853-44.336 44.337 0 24.483 19.855 44.336 44.336 44.336 24.481 0 44.334-19.853 44.334-44.336-.006-24.47-19.839-44.31-44.309-44.323l-.025-.01v-.004zm125.002 44.337c0 68.997-55.985 124.933-124.999 124.933a124.466 124.466 0 01-84.883-33.252l-40.006 43.527-40.025-43.576a124.45 124.45 0 01-84.908 33.3c-68.968 0-124.933-55.937-124.933-124.932A124.586 124.586 0 0146.889 189L6 144.517h90.839c96.116-65.411 222.447-65.411 318.557 0H506l-40.878 44.484a124.574 124.574 0 0140.769 92.333zm-290.31 0c0-46.695-37.858-84.55-84.55-84.55-46.691 0-84.55 37.858-84.55 84.55 0 46.691 37.859 84.55 84.55 84.55 46.692 0 84.545-37.845 84.55-84.54v-.013.003zM349.818 155.1a244.01 244.01 0 00-187.666 0C215.532 175.533 256 223.254 256 278.893c0-55.634 40.463-103.362 93.826-123.786l-.005-.006h-.003zm115.64 126.224c0-46.694-37.858-84.55-84.55-84.55-46.691 0-84.552 37.859-84.552 84.55 0 46.692 37.855 84.55 84.553 84.55 46.697 0 84.55-37.858 84.55-84.55z" fill-rule="nonzero"/>
+                    </svg>
+                  </span>
+                  <span class="text-nowrap">TripAdvisor</span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
         
-        <!-- Línea Inferior Legal & Mensaje de Marca Final -->
-        <div class="border-top border-white border-opacity-20 mt-5 pt-4 text-center">
-          <p class="brand-slogan fs-4 text-white mb-2">
-            “Viaja con propósito. Vive Wamani Experience.”
-          </p>
-          <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3 pt-2 text-white-50 small" style="font-size: 0.75rem;">
-            <span>
-              © 2026 {{ contentStore.content.legal.businessName }} • RUT: {{ contentStore.content.legal.rut }} • {{ contentStore.content.legal.addressLegal }}, {{ contentStore.content.legal.city }}.
-            </span>
-            <span>
-              Todos los derechos reservados. Turismo sustentable y aventura en Chile.
-            </span>
+        <!-- Línea Inferior Legal (Decreto 6/2021 de Comercio Electrónico) -->
+        <div class="row border-top border-secondary border-opacity-25 mt-5 pt-4 align-items-center">
+          <div class="col-12 col-lg-7 text-center text-lg-start mb-3 mb-lg-0">
+            <p class="mb-1 small text-white-50 text-uppercase" style="letter-spacing: 0.08em; font-size: 0.76rem;">
+              © 2026 {{ contentStore.content.legal.businessName }} • RUT: {{ contentStore.content.legal.rut }}
+            </p>
+            <p class="mb-0 small text-white-50" style="font-size: 0.72rem;">
+              {{ contentStore.content.legal.addressLegal }}, {{ contentStore.content.legal.city }}, {{ contentStore.content.legal.region }}. Todos los derechos reservados.
+            </p>
+          </div>
+          <div class="col-12 col-lg-5 text-center text-lg-end">
+            <div class="d-flex gap-4 justify-content-center justify-content-lg-end small">
+              <router-link to="/politica-de-privacidad" class="text-white-50 text-decoration-none nav-link-custom">Políticas de Privacidad</router-link>
+              <router-link to="/terminos-y-condiciones" class="text-white-50 text-decoration-none nav-link-custom">Términos y Condiciones</router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -396,36 +392,16 @@ onUnmounted(() => {
 
 <style scoped>
 .premium-footer { 
-  background: linear-gradient(180deg, #147E79 0%, #0E5E5A 100%);
-  border-top: 1px solid rgba(231, 220, 195, 0.3);
+  background: linear-gradient(180deg, #045D56 0%, #033E3B 100%);
+  border-top: 1px solid rgba(45, 212, 191, 0.25);
 }
 
 .premium-footer .text-white-50 {
-  color: rgba(255, 255, 255, 0.88) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
 }
 
 .premium-footer a.text-white-50:hover {
-  color: #E7DCC3 !important;
-}
-
-.social-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(231, 220, 195, 0.4);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-
-  &:hover {
-    background-color: #E7DCC3;
-    color: #147E79 !important;
-    border-color: #E7DCC3;
-    transform: translateY(-2px);
-  }
+  color: #2DD4BF !important;
 }
 .app-layout {
   min-height: 100vh;

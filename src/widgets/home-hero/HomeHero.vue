@@ -57,23 +57,23 @@ onMounted(() => {
         <img src="/Logo Wamani.png" alt="Wamani Logo" class="hero-brand-logo" />
       </div>
 
-      <!-- Título principal con Montserrat Bold -->
-      <h1 class="hero-title mb-1 slide-up delay-1 text-white fw-bold font-sans">
+      <!-- Título principal gigante tipo Brush -->
+      <h1 class="font-brush hero-title mb-0 slide-up delay-1">
         {{ contentStore.content.home.hero.title }}
       </h1>
-      <!-- Eslogan en Playfair Display -->
-      <p class="brand-slogan fs-4 text-white mt-1 slide-up delay-2">
-        {{ contentStore.content.home.hero.subtitle || 'Ecoturismo desde Chile.' }}
+      <!-- Subtítulo pequeño tipo Sans-serif espaciado -->
+      <p class="hero-subtitle font-sans text-uppercase mt-2 slide-up delay-2">
+        {{ contentStore.content.home.hero.subtitle }}
       </p>
 
-      <!-- Botón de explorar hacia experiencias en una página aparte -->
+      <!-- CTA Button Principal con interacciones Kowalski -->
       <div class="mt-4 slide-up delay-3 d-flex flex-column align-items-center gap-3">
-        <router-link to="/experiencias" class="btn btn-primary-wamani px-5 py-3 fs-6 rounded-pill text-decoration-none shadow-sm fw-bold">
-          Explorar Experiencias <i class="bi bi-arrow-right ms-2"></i>
-        </router-link>
+        <a href="#destinos" class="btn btn-hero-glass px-5 py-3 fs-6 font-sans text-uppercase rounded-pill text-decoration-none shadow-sm fw-bold">
+          Ver Expediciones
+        </a>
         
-        <!-- Indicador sutil de scroll hacia la presentación de destinos -->
-        <a href="#sentido-wamani" class="hero-scroll-cue text-white text-decoration-none mt-2 d-inline-flex flex-column align-items-center gap-1" aria-label="Descubre el sentido Wamani">
+        <!-- Indicador sutil de scroll -->
+        <a href="#destinos" class="hero-scroll-cue text-white text-decoration-none mt-2 d-inline-flex flex-column align-items-center gap-1" aria-label="Explorar expediciones de Chile">
           <i class="bi bi-chevron-down fs-5 scroll-bounce text-white opacity-75"></i>
         </a>
       </div>
