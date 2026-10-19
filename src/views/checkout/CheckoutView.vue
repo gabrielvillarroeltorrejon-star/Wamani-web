@@ -925,7 +925,7 @@ const printVoucher = () => {
 
             <!-- Botones de Acción Posterior -->
             <div class="d-flex flex-wrap gap-3 justify-content-center pt-2">
-              <button type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain d-flex align-items-center gap-2 shadow" @click="startNextWebpayTest">
+              <button v-if="isTest50Active" type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain d-flex align-items-center gap-2 shadow" @click="startNextWebpayTest">
                 <i class="bi bi-lightning-charge-fill fs-5"></i> Iniciar Siguiente Prueba Webpay
               </button>
               <button class="btn btn-whatsapp-custom px-4 py-3 fw-bold d-flex align-items-center gap-2 shadow" @click="sendWhatsAppConfirmation">
@@ -1522,28 +1522,15 @@ const printVoucher = () => {
               </div>
             </div>
 
-            <!-- Código de Convenio / Producto de Prueba Transbank ($50 CLP) -->
-            <div class="mb-3">
-              <div class="input-group input-group-sm mb-2">
-                <input 
-                  v-model="promoCodeInput" 
-                  type="text" 
-                  class="form-control bg-dark text-white border-secondary font-monospace" 
-                  placeholder="Código convenio o prueba (ej: TBK50)"
-                  @keyup.enter="applyTestPromo"
-                >
-                <button type="button" class="btn btn-outline-accent fw-bold px-3" @click="applyTestPromo">
-                  Aplicar
-                </button>
-              </div>
+            <!-- Modo Prueba Transbank ($50 CLP) solo visible si se ingresa con ?test50=1 -->
+            <div v-if="isTest50Active" class="mb-3">
               <button 
                 type="button" 
-                class="btn btn-sm w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3"
-                :class="isTest50Active ? 'btn-success text-white' : 'btn-outline-accent'"
-                @click="isTest50Active = !isTest50Active; promoCodeInput = isTest50Active ? 'TBK50' : ''"
+                class="btn btn-sm btn-success text-white w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3"
+                @click="isTest50Active = false; promoCodeInput = ''"
               >
-                <i class="bi" :class="isTest50Active ? 'bi-check-circle-fill' : 'bi-lightning-charge-fill'"></i>
-                <span>{{ isTest50Active ? 'Producto Prueba $50 CLP Activado (Clic para quitar)' : 'Activar Producto de Prueba Transbank ($50 CLP)' }}</span>
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Modo Prueba $50 CLP Activo (Clic para volver a tarifa normal)</span>
               </button>
             </div>
 
@@ -1560,12 +1547,12 @@ const printVoucher = () => {
             <button 
               type="button" 
               class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow mb-3 d-flex align-items-center justify-content-center gap-2" 
-              @click="quickFillTransbankTest"
+              @click="isTest50Active ? quickFillTransbankTest() : (currentStep === 1 ? goToStep2() : handleInitiatePayment())"
               :disabled="isProcessing"
             >
               <span v-if="isProcessing" class="spinner-border spinner-border-sm"></span>
               <i v-else class="bi bi-credit-card-2-front-fill fs-5"></i>
-              <span>{{ isProcessing ? 'Conectando con Webpay...' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})` }}</span>
+              <span>{{ isProcessing ? 'Conectando con Webpay...' : (currentStep === 1 && !isTest50Active ? 'Continuar al Paso 2 (Pago)' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})`) }}</span>
             </button>
 
             <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #033E3B;">
