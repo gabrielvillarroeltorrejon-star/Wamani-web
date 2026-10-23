@@ -89,7 +89,8 @@ onUnmounted(() => {
     <!-- Navbar Fija Inteligente (Transparente al inicio, con fondo blur al hacer scroll) -->
     <header 
       v-if="route.name !== 'admin'" 
-      class="navbar-sticky-wrapper fixed-top w-100 z-3 transition-all"
+      class="navbar-sticky-wrapper fixed-top w-100 transition-all"
+      style="z-index: 1040 !important;"
       :class="{ 'navbar-scrolled': isScrolled, 'navbar-transparent py-3 py-lg-4': !isScrolled }"
     >
       <div class="container-fluid px-3 px-md-5 d-flex justify-content-between align-items-center position-relative">
@@ -107,9 +108,8 @@ onUnmounted(() => {
         <!-- Navegación Desktop Centrada -->
         <nav class="nav-pill d-none d-lg-flex align-items-center gap-4 gap-xl-5 text-uppercase font-sans fw-medium mx-auto px-4 py-2" style="font-size: 0.85rem; letter-spacing: 0.12em;">
           <router-link to="/" class="text-white text-decoration-none nav-link-custom">Inicio</router-link>
-          <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Expediciones</router-link>
-          <router-link :to="{ path: '/', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
-          <router-link :to="{ path: '/', hash: '#destinos' }" class="text-white text-decoration-none nav-link-custom">Destinos</router-link>
+          <router-link to="/experiencias" class="text-white text-decoration-none nav-link-custom">Expediciones & Destinos</router-link>
+          <router-link :to="{ path: '/experiencias', hash: '#servicios' }" class="text-white text-decoration-none nav-link-custom">Servicios</router-link>
           <router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white text-decoration-none nav-link-custom">Reseñas</router-link>
           <router-link to="/nosotros" class="text-white text-decoration-none nav-link-custom">Nosotros</router-link>
         </nav>
@@ -200,13 +200,10 @@ onUnmounted(() => {
                   <i class="bi bi-house-door me-2" style="color: #E7DCC3;"></i>Inicio
                 </router-link>
                 <router-link to="/experiencias" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-compass me-2" style="color: #E7DCC3;"></i>Expediciones & Tours
+                  <i class="bi bi-compass me-2" style="color: #E7DCC3;"></i>Expediciones & Destinos
                 </router-link>
-                <router-link :to="{ path: '/', hash: '#servicios' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-stars me-2" style="color: #E7DCC3;"></i>Nuestros Servicios
-                </router-link>
-                <router-link :to="{ path: '/', hash: '#destinos' }" class="mobile-nav-link" @click="closeMobileMenu">
-                  <i class="bi bi-geo-alt me-2" style="color: #E7DCC3;"></i>Destinos & Catálogo
+                <router-link :to="{ path: '/experiencias', hash: '#servicios' }" class="mobile-nav-link" @click="closeMobileMenu">
+                  <i class="bi bi-stars me-2" style="color: #E7DCC3;"></i>Servicios
                 </router-link>
                 <router-link :to="{ path: '/', hash: '#opiniones' }" class="mobile-nav-link" @click="closeMobileMenu">
                   <i class="bi bi-chat-heart me-2" style="color: #E7DCC3;"></i>Reseñas de Clientes
@@ -271,8 +268,8 @@ onUnmounted(() => {
             <h5 class="text-uppercase mb-4 fw-bold" style="font-size: 0.85rem; letter-spacing: 0.1em; color: #E7DCC3;">Explora</h5>
             <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small">
               <li><router-link to="/" class="text-white-50 text-decoration-none nav-link-custom">Inicio</router-link></li>
-              <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Portafolio</router-link></li>
-              <li><router-link :to="{ path: '/', hash: '#servicios' }" class="text-white-50 text-decoration-none nav-link-custom">Servicios</router-link></li>
+              <li><router-link to="/experiencias" class="text-white-50 text-decoration-none nav-link-custom">Expediciones & Destinos</router-link></li>
+              <li><router-link :to="{ path: '/experiencias', hash: '#servicios' }" class="text-white-50 text-decoration-none nav-link-custom">Servicios</router-link></li>
               <li><router-link :to="{ path: '/', hash: '#opiniones' }" class="text-white-50 text-decoration-none nav-link-custom">Reseñas</router-link></li>
               <li><router-link to="/nosotros" class="text-white-50 text-decoration-none nav-link-custom">Nosotros</router-link></li>
             </ul>

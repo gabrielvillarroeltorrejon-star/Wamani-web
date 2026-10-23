@@ -1,677 +1,337 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
-import { useCartStore } from '@/shared/stores/cartStore';
-import WCard from '@/shared/ui/WCard.vue';
-import WButton from '@/shared/ui/WButton.vue';
-import type { Experience } from '@/entities/experience/model/schemas';
 
 const router = useRouter();
 const contentStore = useContentStore();
-const cartStore = useCartStore();
 
-// Fecha de hoy mínima
-const todayDate = new Date().toISOString().split('T')[0];
-const defaultNextDay = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+interface DestinationSpot {
+  id: string;
+  name: string;
+  subtitle: string;
+  tag: string;
+  image: string;
+  description: string;
+  featured: boolean;
+}
 
-// Buscador
-const searchQuery = ref('');
-const searchDate = ref('');
-const searchPax = ref(1);
-const searchDifficulty = ref('');
-const searchCity = ref('');
-
-// Ciudades únicas para el selector
-const cities = computed(() => {
-  const allDestinations = contentStore.experiences.map(e => e.destinationId);
-  return [...new Set(allDestinations)];
-});
-
-const getCityName = (id: string) => {
-  if (id === 'dest-pucon') return 'Pucón';
-  if (id === 'dest-panguipulli') return 'Panguipulli';
-  if (id === 'dest-atacama') return 'San Pedro de Atacama';
-  if (id === 'dest-patagonia') return 'Torres del Paine';
-  if (id === 'dest-cajon-maipo') return 'Cajón del Maipo';
-  return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
-};
-
-const resetFilters = () => {
-  searchQuery.value = '';
-  searchDate.value = '';
-  searchPax.value = 1;
-  searchDifficulty.value = '';
-  searchCity.value = '';
-};
-
-// Filtrado reactivo
-const filteredExperiences = computed(() => {
-  return contentStore.experiences.filter(exp => {
-    const matchesSearch = searchQuery.value ? (
-      exp.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-      exp.tags.some(t => t.toLowerCase().includes(searchQuery.value.toLowerCase()))
-    ) : true;
-    const matchesDiff = searchDifficulty.value ? exp.difficulty === searchDifficulty.value : true;
-    const matchesCity = searchCity.value ? exp.destinationId === searchCity.value : true;
-    return matchesSearch && matchesDiff && matchesCity;
-  });
-});
-
-const displayedDestinations = computed(() => {
-  if (searchQuery.value || searchDifficulty.value || searchCity.value) {
-    return filteredExperiences.value;
+const destinations: DestinationSpot[] = [
+  {
+    id: 'dest-pucon',
+    name: 'Pucón & Volcán Villarrica',
+    subtitle: 'La Capital del Turismo Aventura',
+    tag: 'Lagos & Volcanes (Sur)',
+    image: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=80',
+    description: 'Ascensiones al cráter activo, termas geotérmicas naturales y bosques milenarios de araucarias.',
+    featured: true
+  },
+  {
+    id: 'dest-panguipulli',
+    name: 'Panguipulli & Huilo Huilo',
+    subtitle: 'Ruta de los Siete Lagos',
+    tag: 'Selva Valdiviana (Sur)',
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
+    description: 'Santuarios de biodiversidad virgen, saltos de agua cristalina y reservas biológicas protegidas.',
+    featured: false
+  },
+  {
+    id: 'dest-atacama',
+    name: 'San Pedro de Atacama',
+    subtitle: 'El Desierto Más Árido del Mundo',
+    tag: 'Norte Grande & Altiplano',
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    description: 'Geotermia viva en los Géiseres del Tatio, valles lunares y salares infinitos bajo cielos prístinos.',
+    featured: false
+  },
+  {
+    id: 'dest-patagonia',
+    name: 'Torres del Paine & Patagonia',
+    subtitle: 'Los Confines del Continente',
+    tag: 'Patagonia Austral',
+    image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80',
+    description: 'Trekking épico entre cuernos de granito, glaciares milenarios y estepa salvaje indómita.',
+    featured: true
+  },
+  {
+    id: 'dest-cajon-maipo',
+    name: 'Cajón del Maipo & Andes',
+    subtitle: 'Cordillera Central y Glaciares',
+    tag: 'Cordillera de Santiago',
+    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+    description: 'Embalse El Yeso, senderos de alta montaña y termas cordilleranas a pocas horas de la capital.',
+    featured: false
   }
-  return contentStore.experiences.slice(0, 6);
-});
+];
 
-// Modal Detalle y Reserva
-const selectedExperience = ref<Experience | null>(null);
-const modalDate = ref(defaultNextDay);
-const modalPax = ref(1);
-
-const openModal = (exp: Experience) => {
-  if (window.innerWidth < 768) {
-    router.push({ path: `/experiencias/${exp.slug}` });
-    return;
-  }
-  selectedExperience.value = exp;
-  modalDate.value = searchDate.value || defaultNextDay;
-  modalPax.value = searchPax.value || 1;
-  document.body.style.overflow = 'hidden';
+const getExperienceCount = (destId: string) => {
+  return contentStore.experiences.filter(e => e.destinationId === destId).length;
 };
 
-const closeModal = () => {
-  selectedExperience.value = null;
-  document.body.style.overflow = '';
-};
+const totalExperiences = computed(() => contentStore.experiences.length);
 
-const incrementPax = () => {
-  if (modalPax.value < 20) modalPax.value++;
-};
-
-const decrementPax = () => {
-  if (modalPax.value > 1) modalPax.value--;
-};
-
-const totalModalPriceCLP = computed(() => {
-  const base = selectedExperience.value?.pricing.basePrice || 50000;
-  return base * modalPax.value;
-});
-
-const totalModalPriceUSD = computed(() => totalModalPriceCLP.value * 0.0011);
-const totalModalPriceBRL = computed(() => totalModalPriceCLP.value * 0.0055);
-
-const formatCurrency = (val: number, currency: string) => {
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency, maximumFractionDigits: 0 }).format(val);
-};
-
-const formatDifficulty = (diff: string) => {
-  if (!diff) return 'Fácil';
-  const map: Record<string, string> = {
-    easy: 'Fácil',
-    moderate: 'Moderada',
-    hard: 'Exigente (Alta)',
-    expert: 'Desafiante'
-  };
-  return map[diff.toLowerCase()] || diff;
-};
-
-const goToWhatsApp = (expTitle: string) => {
-  const formattedTotal = formatCurrency(totalModalPriceCLP.value, 'CLP');
-  const msg = encodeURIComponent(
-    `Hola Wamani Experience, deseo reservar el tour: *${expTitle}*\n` +
-    `📅 Fecha de excursión: *${modalDate.value}*\n` +
-    `👥 Pasajeros: *${modalPax.value} personas*\n` +
-    `💰 Monto Total Estimado: *${formattedTotal}*\n\n` +
-    `¿Me podrían confirmar disponibilidad y los datos para transferir? Muchas gracias.`
-  );
-  const wa = contentStore.content.contact.whatsappNumber || '56985673376';
-  window.open(`https://wa.me/${wa}?text=${msg}`, '_blank');
-};
-
-const addToCartAction = () => {
-  if (!selectedExperience.value) return;
-  cartStore.addToCart({
-    tourId: selectedExperience.value.id,
-    tourTitle: selectedExperience.value.title,
-    scheduleId: `sched-${modalDate.value}`,
-    scheduleDate: modalDate.value,
-    scheduleTime: selectedExperience.value.schedule || '08:00',
-    tickets: [{
-      type: 'adult',
-      quantity: modalPax.value,
-      unitPrice: selectedExperience.value.pricing.basePrice
-    }]
-  });
-  closeModal();
-};
-
-const goToWebpay = () => {
-  if (!selectedExperience.value) return;
-  const slug = selectedExperience.value.slug;
-  const date = modalDate.value;
-  const pax = modalPax.value.toString();
-  closeModal();
+const goToDestination = (destId: string) => {
   router.push({
-    path: '/checkout',
-    query: {
-      slug,
-      date,
-      pax,
-      method: 'webpay'
-    }
+    path: '/experiencias',
+    query: { city: destId }
   });
+};
+
+const goToAllExperiences = () => {
+  router.push('/experiencias');
 };
 </script>
 
 <template>
-  <section id="destinos" class="home-destinations py-5">
-    <div class="container py-5">
+  <section id="destinos" class="home-destinations py-5 position-relative">
+    <div class="container py-4">
       
-      <!-- ENCABEZADO Y BUSCADOR CENTRADO ESTILO WAMANI DE LUJO -->
-      <div class="catalog-header-container text-center mb-5">
-        <h2 class="display-4 font-brush text-white fw-bold mb-2" style="font-family: 'Caveat', cursive !important; text-shadow: 0 3px 10px rgba(0,0,0,0.35);">
-          Explorar Todas las Experiencias
+      <!-- ENCABEZADO EDITORIAL DE DESTINOS -->
+      <div class="text-center mb-5">
+        <span class="text-uppercase tracking-wider small fw-bold" style="color: #E7DCC3; letter-spacing: 0.15em;">
+          Territorios de Expedición
+        </span>
+        <h2 class="display-4 font-brush fw-bold mb-3 text-white" style="font-family: 'Caveat', cursive !important; text-shadow: 0 3px 10px rgba(0,0,0,0.35);">
+          Nuestros Destinos Emblemáticos
         </h2>
-        <p class="lead text-white fw-medium mb-4" style="font-size: 1.2rem; color: #FFFFFF !important; text-shadow: 0 1px 4px rgba(0,0,0,0.3);">
-          Descubre aventuras únicas en los paisajes más imponentes del sur de Chile, define tu fecha y cotiza en vivo
+        <p class="lead text-white opacity-90 max-w-700 mx-auto" style="font-size: 1.15rem; color: #FFFFFF !important;">
+          De norte a sur, recorremos los paisajes más sobrecogedores de Chile. Elige tu próximo territorio y conoce sus expediciones guiadas.
         </p>
+      </div>
 
-        <!-- CONTENEDOR BUSCADOR EN VERDE WAMANI #147E79 -->
-        <div class="search-filter-box mx-auto p-3 p-md-4 rounded-4 shadow-lg">
-          <div class="row g-3 align-items-center">
+      <!-- GRILLA VISUAL DE DESTINOS (BENTO MODERNO) -->
+      <div class="row g-4 mb-5">
+        
+        <!-- Tarjeta Grande 1: Pucón (Destacado) -->
+        <div class="col-12 col-lg-7">
+          <div 
+            class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg h-100" 
+            style="min-height: 380px;"
+            @click="goToDestination(destinations[0].id)"
+          >
+            <img :src="destinations[0].image" :alt="destinations[0].name" class="dest-card-img position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+            <div class="dest-card-overlay position-absolute top-0 start-0 w-100 h-100"></div>
             
-            <!-- 1. Input de Búsqueda -->
-            <div class="col-12 col-md-4">
-              <div class="input-icon-wrapper position-relative">
-                <i class="bi bi-search search-icon"></i>
-                <input 
-                  v-model="searchQuery" 
-                  type="search" 
-                  class="form-control custom-search-input text-white fw-medium" 
-                  placeholder="Tour, volcán o actividad..."
-                  aria-label="Buscar tour, volcán o actividad"
-                >
+            <div class="dest-card-content position-relative z-2 p-4 p-md-5 d-flex flex-column justify-content-between h-100 text-white">
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="badge rounded-pill bg-dark bg-opacity-75 text-accent px-3 py-2 text-uppercase fw-bold border border-secondary border-opacity-40" style="color: #E7DCC3 !important; font-size: 0.75rem;">
+                  <i class="bi bi-geo-alt-fill me-1"></i> {{ destinations[0].tag }}
+                </span>
+                <span class="badge rounded-pill px-3 py-1 small fw-semibold" style="background: rgba(0, 0, 0, 0.65); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px);">
+                  {{ getExperienceCount(destinations[0].id) }} Expediciones
+                </span>
               </div>
-            </div>
 
-            <!-- 2. Selector de Fecha de Viaje -->
-            <div class="col-12 col-sm-6 col-md-3">
-              <div class="input-icon-wrapper position-relative">
-                <i class="bi bi-calendar3 select-icon"></i>
-                <input 
-                  v-model="searchDate" 
-                  type="date" 
-                  :min="todayDate" 
-                  class="form-control custom-select-input text-white fw-medium" 
-                  title="Fecha estimada de excursión"
-                  aria-label="Seleccionar fecha"
-                >
-              </div>
-            </div>
-
-            <!-- 3. Selector de Pasajeros -->
-            <div class="col-12 col-sm-6 col-md-2">
-              <div class="input-icon-wrapper position-relative">
-                <i class="bi bi-people-fill select-icon"></i>
-                <select v-model="searchPax" class="form-select custom-select-input text-white fw-medium" aria-label="Número de personas">
-                  <option :value="1">1 Persona</option>
-                  <option :value="2">2 Personas</option>
-                  <option :value="3">3 Personas</option>
-                  <option :value="4">4 Personas</option>
-                  <option :value="5">5 Personas</option>
-                  <option :value="6">6 Personas</option>
-                  <option :value="8">8 Personas</option>
-                  <option :value="10">10+ Grupo</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 4. Selector de Ciudad -->
-            <div class="col-12 col-sm-6" :class="searchQuery || searchCity || searchDifficulty || searchDate ? 'col-md-2' : 'col-md-3'">
-              <div class="input-icon-wrapper position-relative">
-                <i class="bi bi-geo-alt-fill select-icon"></i>
-                <select v-model="searchCity" class="form-select custom-select-input text-white fw-medium" aria-label="Seleccionar destino">
-                  <option value="">Destinos</option>
-                  <option v-for="city in cities" :key="city" :value="city">{{ getCityName(city) }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Botón Limpiar Filtros -->
-            <div class="col-12 col-md-1 d-flex align-items-center justify-content-center" v-if="searchQuery || searchCity || searchDifficulty || searchDate">
-              <button 
-                class="btn btn-outline-light btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center fw-bold" 
-                @click="resetFilters" 
-                title="Limpiar filtros"
-                style="width: 42px; height: 42px;"
-              >
-                <i class="bi bi-x-lg"></i>
-              </button>
-            </div>
-
-          </div>
-
-          <!-- Contador de Resultados & Configuración de Viaje -->
-          <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top border-light border-opacity-25 px-1 gap-2">
-            <span class="small text-white fw-semibold">
-              <i class="bi bi-compass me-1" style="color: #E7DCC3 !important;"></i> Mostrando <strong class="text-white fw-bold">{{ filteredExperiences.length }}</strong> experiencias disponibles
-            </span>
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-dark bg-opacity-75 text-white border border-secondary border-opacity-50 small px-3 py-1 fw-bold">
-                <i class="bi bi-person-fill me-1" style="color: #E7DCC3;"></i> Cotizando para <strong class="text-white">{{ searchPax }} {{ searchPax === 1 ? 'persona' : 'personas' }}</strong>
-              </span>
-              <span v-if="searchDate" class="badge bg-dark bg-opacity-75 border border-secondary border-opacity-50 small px-3 py-1 fw-bold" style="color: #E7DCC3;">
-                <i class="bi bi-calendar-event me-1"></i> {{ searchDate }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-4">
-        <div v-for="(exp, index) in displayedDestinations" :key="exp.id" class="col-12 col-md-6 col-lg-4 fade-in-up" :style="{ animationDelay: `${0.1 * index}s` }">
-          <WCard no-padding class="h-100 cursor-pointer catalog-card border-0" @click="openModal(exp)">
-            <div class="position-relative overflow-hidden card-img-wrapper">
-              <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" width="400" height="220" loading="lazy" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
-              <div class="card-image-overlay"></div>
-              <span class="badge bg-dark bg-opacity-85 position-absolute top-0 start-0 m-3 px-3 py-2 text-uppercase tracking-wide fw-bold border border-secondary border-opacity-40" style="font-size: 0.72rem; color: #E7DCC3 !important;">
-                <i class="bi bi-geo-alt-fill me-1"></i>{{ getCityName(exp.destinationId) }}
-              </span>
-            </div>
-            <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
               <div>
-                <p class="small text-accent mb-1 text-uppercase fw-bold" style="font-size: 0.78rem; letter-spacing: 0.08em; color: #147E79 !important;">{{ exp.tags ? exp.tags[0] : 'EXPERIENCIA' }}</p>
-                <h3 class="h5 fw-bold mb-2">{{ exp.title }}</h3>
-                <p class="small mb-3 text-truncate fw-medium" style="color: #4C4C4C !important;">{{ exp.summary }}</p>
-              </div>
-              
-              <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
-                <div>
-                  <span class="small d-block fw-semibold" style="color: #4C4C4C !important;">{{ searchPax > 1 ? `Total (${searchPax} pax)` : 'Por persona' }}</span>
-                  <span class="fw-bold fs-5" style="color: #147E79 !important;">{{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}</span>
+                <span class="text-uppercase tracking-wider small fw-bold d-block mb-1" style="color: #E7DCC3; letter-spacing: 0.1em;">
+                  {{ destinations[0].subtitle }}
+                </span>
+                <h3 class="display-6 fw-bold font-serif mb-2 text-white">{{ destinations[0].name }}</h3>
+                <p class="mb-3 text-white opacity-90 max-w-500 d-none d-sm-block small">{{ destinations[0].description }}</p>
+                <div class="d-inline-flex align-items-center gap-2 text-uppercase tracking-wide fw-bold border-bottom border-accent pb-1" style="font-size: 0.8rem; color: #E7DCC3;">
+                  <span>Explorar Expediciones en Pucón</span>
+                  <i class="bi bi-arrow-right"></i>
                 </div>
-                <WButton variant="primary" size="sm" class="px-3 py-2 fw-bold">Ver y Reservar</WButton>
               </div>
             </div>
-          </WCard>
+          </div>
+        </div>
+
+        <!-- Tarjeta Grande 2: Torres del Paine (Destacado) -->
+        <div class="col-12 col-lg-5">
+          <div 
+            class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg h-100" 
+            style="min-height: 380px;"
+            @click="goToDestination(destinations[3].id)"
+          >
+            <img :src="destinations[3].image" :alt="destinations[3].name" class="dest-card-img position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+            <div class="dest-card-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+            
+            <div class="dest-card-content position-relative z-2 p-4 p-md-5 d-flex flex-column justify-content-between h-100 text-white">
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="badge rounded-pill bg-dark bg-opacity-75 text-accent px-3 py-2 text-uppercase fw-bold border border-secondary border-opacity-40" style="color: #E7DCC3 !important; font-size: 0.75rem;">
+                  <i class="bi bi-geo-alt-fill me-1"></i> {{ destinations[3].tag }}
+                </span>
+                <span class="badge rounded-pill px-3 py-1 small fw-semibold" style="background: rgba(0, 0, 0, 0.65); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px);">
+                  {{ getExperienceCount(destinations[3].id) }} Expediciones
+                </span>
+              </div>
+
+              <div>
+                <span class="text-uppercase tracking-wider small fw-bold d-block mb-1" style="color: #E7DCC3; letter-spacing: 0.1em;">
+                  {{ destinations[3].subtitle }}
+                </span>
+                <h3 class="h2 fw-bold font-serif mb-2 text-white">{{ destinations[3].name }}</h3>
+                <p class="mb-3 text-white opacity-90 d-none d-sm-block small">{{ destinations[3].description }}</p>
+                <div class="d-inline-flex align-items-center gap-2 text-uppercase tracking-wide fw-bold border-bottom border-accent pb-1" style="font-size: 0.8rem; color: #E7DCC3;">
+                  <span>Explorar Patagonia</span>
+                  <i class="bi bi-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Tarjetas Inferiores: Panguipulli, Atacama, Cajón del Maipo -->
+        <div class="col-12 col-md-4">
+          <div 
+            class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg" 
+            style="height: 300px;"
+            @click="goToDestination(destinations[1].id)"
+          >
+            <img :src="destinations[1].image" :alt="destinations[1].name" class="dest-card-img position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+            <div class="dest-card-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+            
+            <div class="dest-card-content position-relative z-2 p-4 d-flex flex-column justify-content-between h-100 text-white">
+              <div>
+                <span class="badge rounded-pill bg-dark bg-opacity-75 text-accent px-2 py-1 small fw-bold mb-2 border border-secondary border-opacity-40" style="color: #E7DCC3 !important; font-size: 0.68rem;">
+                  {{ destinations[1].tag }}
+                </span>
+                <h4 class="h5 fw-bold font-serif mb-1 text-white">{{ destinations[1].name }}</h4>
+                <span class="small opacity-85 d-block" style="font-size: 0.78rem;">{{ destinations[1].subtitle }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top border-white border-opacity-25">
+                <span class="small opacity-90">{{ getExperienceCount(destinations[1].id) }} Tours</span>
+                <span class="small fw-bold text-accent" style="color: #E7DCC3;">Ver destino <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div 
+            class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg" 
+            style="height: 300px;"
+            @click="goToDestination(destinations[2].id)"
+          >
+            <img :src="destinations[2].image" :alt="destinations[2].name" class="dest-card-img position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+            <div class="dest-card-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+            
+            <div class="dest-card-content position-relative z-2 p-4 d-flex flex-column justify-content-between h-100 text-white">
+              <div>
+                <span class="badge rounded-pill bg-dark bg-opacity-75 text-accent px-2 py-1 small fw-bold mb-2 border border-secondary border-opacity-40" style="color: #E7DCC3 !important; font-size: 0.68rem;">
+                  {{ destinations[2].tag }}
+                </span>
+                <h4 class="h5 fw-bold font-serif mb-1 text-white">{{ destinations[2].name }}</h4>
+                <span class="small opacity-85 d-block" style="font-size: 0.78rem;">{{ destinations[2].subtitle }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top border-white border-opacity-25">
+                <span class="small opacity-90">{{ getExperienceCount(destinations[2].id) }} Tours</span>
+                <span class="small fw-bold text-accent" style="color: #E7DCC3;">Ver destino <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div 
+            class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg" 
+            style="height: 300px;"
+            @click="goToDestination(destinations[4].id)"
+          >
+            <img :src="destinations[4].image" :alt="destinations[4].name" class="dest-card-img position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+            <div class="dest-card-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+            
+            <div class="dest-card-content position-relative z-2 p-4 d-flex flex-column justify-content-between h-100 text-white">
+              <div>
+                <span class="badge rounded-pill bg-dark bg-opacity-75 text-accent px-2 py-1 small fw-bold mb-2 border border-secondary border-opacity-40" style="color: #E7DCC3 !important; font-size: 0.68rem;">
+                  {{ destinations[4].tag }}
+                </span>
+                <h4 class="h5 fw-bold font-serif mb-1 text-white">{{ destinations[4].name }}</h4>
+                <span class="small opacity-85 d-block" style="font-size: 0.78rem;">{{ destinations[4].subtitle }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top border-white border-opacity-25">
+                <span class="small opacity-90">{{ getExperienceCount(destinations[4].id) }} Tours</span>
+                <span class="small fw-bold text-accent" style="color: #E7DCC3;">Ver destino <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA BANNER INTEGRAL: ACCESO DIRECTO AL CATÁLOGO UNIFICADO -->
+      <div class="unified-catalog-cta-box p-4 p-md-5 rounded-4 shadow-xl text-center text-white position-relative overflow-hidden">
+        <div class="position-relative z-2 max-w-700 mx-auto">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3 shadow-sm" style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(231, 220, 195, 0.5); backdrop-filter: blur(8px);">
+          <i class="bi bi-compass" style="color: #E7DCC3; font-size: 0.85rem;"></i>
+          <span class="fw-bold text-white small" style="letter-spacing: 0.05em; font-size: 0.8rem;">Catálogo Wamani Experience</span>
+        </div>
+          <h3 class="display-6 fw-bold mb-3 font-brush" style="font-family: 'Caveat', cursive !important;">
+            ¿Buscas una fecha, tour o cotización inmediata?
+          </h3>
+          <p class="mb-4 opacity-95 lead" style="font-size: 1.05rem;">
+            Accede a nuestras más de {{ totalExperiences }} expediciones activas. Cotiza según el número de pasajeros, filtra por nivel de dificultad o modalidad privada/grupal y reserva en segundos.
+          </p>
+          <div class="d-flex flex-wrap justify-content-center gap-3">
+            <button 
+              class="btn btn-accent-custom py-3 px-5 fw-bold text-uppercase rounded-pill shadow-lg d-inline-flex align-items-center gap-2"
+              @click="goToAllExperiences"
+            >
+              <i class="bi bi-grid-3x3-gap-fill"></i>
+              <span>Ver Catálogo Completo & Reservar</span>
+            </button>
+          </div>
         </div>
       </div>
-      
-      <div class="text-center mt-5 d-flex justify-content-center flex-wrap gap-3">
-        <!-- Botón Principal Oficial (Verde Wamani + texto Blanco Andino) -->
-        <router-link to="/experiencias" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm" style="letter-spacing: 0.1em;">
-          Ver Todas las Expediciones
-        </router-link>
-        <!-- Botón Secundario Oficial (Beige Tierra + texto Gris Piedra) -->
-        <router-link to="/experiencias#paquetes" class="btn btn-secondary rounded-pill px-5 py-3 fw-bold text-uppercase shadow-sm d-inline-flex align-items-center gap-2" style="letter-spacing: 0.1em;">
-          <i class="bi bi-box-seam-fill"></i> Paquetes & Combos de Expedición
-        </router-link>
-      </div>
-      
+
     </div>
   </section>
-
-  <!-- MODAL FLOTANTE DE COMPRA DIRECTO EN INICIO -->
-  <Teleport to="body">
-    <Transition name="fade">
-      <div v-if="selectedExperience" class="custom-modal-backdrop" @click="closeModal">
-        <div class="custom-modal-content" @click.stop>
-          <button class="modal-close-btn" @click="closeModal" aria-label="Cerrar modal">
-            <i class="bi bi-x-lg"></i>
-          </button>
-
-          <div class="row g-0 modal-main-row">
-            <!-- COLUMNA IZQUIERDA: INFORMACIÓN -->
-            <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
-              
-              <!-- Galería -->
-              <div class="modal-gallery mb-4">
-                <div class="row g-2">
-                  <div class="col-12">
-                    <img :src="selectedExperience.coverImage.url" class="w-100 rounded-4 object-fit-cover shadow-sm" width="800" height="280" style="height: 280px;" alt="Principal">
-                  </div>
-                  <div class="col-6 col-sm-4" v-for="(img, idx) in selectedExperience.gallery" :key="idx">
-                    <img :src="img.url" class="w-100 rounded-3 object-fit-cover shadow-sm" width="300" height="110" loading="lazy" style="height: 110px;" :alt="img.alt">
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="badge px-3 py-2 rounded-pill font-sans text-uppercase tracking-wide fw-bold" style="background-color: #147E79; color: #E7DCC3; font-size: 0.75rem;">
-                  {{ selectedExperience.categories ? selectedExperience.categories[0] : 'EXPERIENCIA' }}
-                </span>
-                <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-clock me-1" style="color: #E7DCC3;"></i> {{ selectedExperience.duration.value }} {{ selectedExperience.duration.unit === 'hours' ? 'horas' : 'días' }}</span>
-                <span class="small ms-2 fw-semibold" style="color: #147E79 !important;"><i class="bi bi-bar-chart-fill me-1" style="color: #E7DCC3;"></i> {{ formatDifficulty(selectedExperience.difficulty) }}</span>
-              </div>
-              
-              <h2 class="font-brush fw-bold display-5 mb-2 mt-2" style="color: #147E79 !important; font-family: 'Caveat', cursive !important;">{{ selectedExperience.title }}</h2>
-              <p class="lead mb-3 fw-semibold" style="color: #232323 !important; font-size: 1.15rem;">{{ selectedExperience.subtitle }}</p>
-
-              <!-- Acceso Directo de Reserva para Móviles/Tablets Verticales -->
-              <div class="d-lg-none mb-4 p-3 rounded-4" style="background-color: #147E79;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="text-white small">Desde</span>
-                  <strong class="fs-5" style="color: #E7DCC3;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }} / pax</strong>
-                </div>
-                <a href="#modal-reservation-box" class="btn btn-secondary rounded-pill w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none">
-                  <i class="bi bi-calendar2-check-fill fs-5"></i> Configurar Fecha y Reservar
-                </a>
-              </div>
-
-              <div class="mb-4">
-                <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Descripción</h4>
-                <p class="lh-lg fw-medium" style="color: #4C4C4C !important; font-size: 1rem;">{{ selectedExperience.description }}</p>
-              </div>
-
-              <div class="mb-4" v-if="selectedExperience.itinerary && selectedExperience.itinerary.length">
-                <h4 class="fw-bold h5 mb-3" style="color: #147E79 !important;">Itinerario</h4>
-                <div class="itinerary-timeline">
-                  <div v-for="(item, idx) in selectedExperience.itinerary" :key="idx" class="itinerary-item">
-                    <div class="itinerary-time fw-bold" style="color: #147E79 !important;">{{ item.dayOrTime }}</div>
-                    <div class="itinerary-content pb-3">
-                      <h5 class="fw-bold h6 mb-1" style="color: #147E79 !important;">{{ item.title }}</h5>
-                      <p class="small mb-0 fw-medium" style="color: #4C4C4C !important;">{{ item.description }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row mb-4">
-                <div class="col-md-6">
-                  <h4 class="fw-bold h6 mb-3 text-success"><i class="bi bi-check-circle-fill me-2"></i>Qué incluye</h4>
-                  <ul class="list-unstyled">
-                    <li v-for="(inc, i) in selectedExperience.included" :key="i" class="mb-2 small fw-semibold" style="color: #147E79 !important;">
-                      <i class="bi bi-check-circle-fill text-success me-2"></i> {{ inc }}
-                    </li>
-                  </ul>
-                </div>
-                <div class="col-md-6 mt-3 mt-md-0">
-                  <h4 class="fw-bold h6 mb-3 text-danger"><i class="bi bi-x-circle-fill me-2"></i>Qué no incluye</h4>
-                  <ul class="list-unstyled">
-                    <li v-for="(ninc, i) in selectedExperience.notIncluded" :key="i" class="mb-2 small fw-semibold" style="color: #4C4C4C !important;">
-                      <i class="bi bi-x-circle-fill text-danger me-2"></i> {{ ninc }}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="pt-3 border-top border-secondary border-opacity-25">
-                <p class="small mb-1 fw-semibold" style="color: #4C4C4C !important;"><strong>Punto de encuentro:</strong> {{ selectedExperience.meetingPoint || 'Oficina Wamani, Centro de Pucón' }}</p>
-                <p class="small mb-0 fw-semibold" style="color: #4C4C4C !important;"><strong>Cancelación:</strong> {{ selectedExperience.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.' }}</p>
-              </div>
-
-            </div>
-
-            <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-            <div id="modal-reservation-box" class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
-              
-              <div>
-                <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
-                  Área de Reserva Segura
-                </span>
-                <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
-
-                <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
-                  <!-- Selector de Fecha -->
-                  <div class="mb-3">
-                    <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
-                      <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha de Excursión
-                    </label>
-                    <input 
-                      v-model="modalDate" 
-                      type="date" 
-                      :min="todayDate" 
-                      class="form-control form-control-sm text-white fw-bold" 
-                      style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
-                      required
-                    >
-                  </div>
-
-                  <!-- Selector de Pasajeros (+ / -) -->
-                  <div>
-                    <label class="form-label small fw-bold text-white mb-1 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
-                      <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
-                      <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
-                    </label>
-                    <div class="d-flex align-items-center gap-2">
-                      <button 
-                        type="button" 
-                        class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                        style="width: 44px; height: 44px;"
-                        @click="decrementPax"
-                        :disabled="modalPax <= 1"
-                        aria-label="Reducir pasajeros"
-                      >
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <input 
-                        v-model.number="modalPax" 
-                        type="number" 
-                        min="1" 
-                        max="20" 
-                        class="form-control form-control-sm text-center fw-bold text-white" 
-                        style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
-                      >
-                      <button 
-                        type="button" 
-                        class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                        style="width: 44px; height: 44px;"
-                        @click="incrementPax"
-                        aria-label="Aumentar pasajeros"
-                      >
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
-                  <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                    <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Tarifa por persona</span>
-                    <span class="fw-bold text-white" style="color: #FFFFFF !important;">{{ formatCurrency(selectedExperience.pricing.basePrice, 'CLP') }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                    <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Cantidad de viajeros</span>
-                    <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
-                  </div>
-                  
-                  <div class="d-flex justify-content-between align-items-end mt-3 mb-2">
-                    <div>
-                      <span class="d-block text-white small text-uppercase tracking-wide fw-bold" style="font-size: 0.72rem; color: #FFFFFF !important;">Total a Pagar</span>
-                      <span class="fw-bold text-white fs-2 lh-1" style="color: #FFFFFF !important;">{{ formatCurrency(totalModalPriceCLP, 'CLP') }}</span>
-                    </div>
-                    <div class="text-end">
-                      <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem; color: #FFFFFF !important;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
-                      <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ACCIONES DE COMPRA -->
-              <div class="d-flex flex-column gap-3">
-                <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
-                  <i class="bi bi-cart-plus-fill fs-5"></i> Agregar al Carrito
-                </button>
-                <button class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
-                  <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
-                </button>
-                <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="goToWhatsApp(selectedExperience.title)">
-                  <i class="bi bi-whatsapp fs-5"></i> Reservar vía Transferencia / WhatsApp
-                </button>
-                <div class="d-flex align-items-center justify-content-center gap-2 text-white small mt-1 fw-medium" style="color: #FFFFFF !important;">
-                  <i class="bi bi-shield-lock-fill" style="color: #E7DCC3;"></i>
-                  <span>Transacción protegida por cifrado SSL 256-bit</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
 </template>
 
 <style scoped lang="scss">
 @import '@/assets/styles/variables';
 
-.max-w-700 {
-  max-width: 700px;
-}
+.max-w-700 { max-width: 700px; }
+.max-w-500 { max-width: 500px; }
 
-.card-image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent 50%, rgba(26, 26, 26, 0.4) 100%);
-  transition: all 0.4s ease;
-  pointer-events: none;
-  z-index: 1;
-}
+.destination-showcase-card {
+  border: 1px solid rgba(231, 220, 195, 0.35);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
 
-// Grid Tarjetas Catalog (Taste & Emil Kowalski)
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .dest-card-img {
+    transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-}
 
-.catalog-card {
-  background-color: #FFFFFF !important; /* Taste: Off-white/White premium background */
-  border-radius: 22px !important; 
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.03); /* Taste: Soft diffuse shadow */
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  color: var(--bs-body-color);
-  
+  .dest-card-overlay {
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(13, 91, 87, 0.95) 85%);
+    transition: background 0.4s ease;
+  }
+
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.08); /* Lift shadow */
-    
-    .transition-transform {
-      transform: scale(1.04); /* Kowalski subtle zoom */
+    transform: translateY(-8px);
+    border-color: #E7DCC3;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+
+    .dest-card-img {
+      transform: scale(1.08);
     }
-  }
-  
-  &:active {
-    transform: scale(0.97) translateY(0); /* Kowalski micro-interaction */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
-  
-  .transition-transform {
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  .card-img-wrapper {
-    border-top-left-radius: 22px;
-    border-top-right-radius: 22px;
-  }
-  
-  /* Ajustar textos internos para alto contraste en fondo claro (Impeccable) */
-  h3, .h5 {
-    color: #1C1C1E !important; 
-    font-family: var(--bs-font-sans-serif) !important; /* Sans-serif modern */
-    font-weight: 800 !important;
-  }
-  
-  .text-muted, p:not(.text-accent) {
-    color: #64748B !important; 
-  }
-  
-  .text-accent {
-    color: #147E79 !important; /* Verde Wamani */
-  }
-  
-  .border-top {
-    border-top-color: rgba(0, 0, 0, 0.08) !important;
-  }
-  
-  .text-dark {
-    color: #1C1C1E !important; 
-  }
-}
 
-// Modal Flotante
-.custom-modal-content {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba($primary, 0.4);
-    border-radius: 10px;
-    
-    &:hover {
-      background: rgba($primary, 0.8);
+    .dest-card-overlay {
+      background: linear-gradient(180deg, rgba(20, 126, 121, 0.25) 0%, rgba(13, 91, 87, 0.98) 85%);
     }
   }
 }
 
-.itinerary-timeline {
-  position: relative;
-  padding-left: 1rem;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #eee;
-  }
-  
-  .itinerary-item {
-    position: relative;
-    padding-left: 1.5rem;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      left: -5px;
-      top: 5px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: $primary;
-      border: 3px solid white;
-    }
+.unified-catalog-cta-box {
+  background: linear-gradient(135deg, #0D5B57 0%, #147E79 50%, #0D5B57 100%);
+  border: 1px solid #E7DCC3;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.btn-accent-custom {
+  background-color: #E7DCC3;
+  color: #0D5B57;
+  border: none;
+  letter-spacing: 0.08em;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #ffffff;
+    color: #0D5B57;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(231, 220, 195, 0.4);
   }
 }
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
 </style>

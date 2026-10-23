@@ -484,10 +484,10 @@ const goToWhatsApp = () => {
               <i class="bi bi-x-lg"></i>
             </button>
 
-            <div class="row g-0 modal-main-row">
+            <div class="modal-single-flow">
               
-              <!-- COLUMNA IZQUIERDA: DETALLES DE LOS TOURS INCLUIDOS -->
-              <div class="col-lg-7 custom-modal-info p-4 p-md-5 custom-scrollbar" style="background-color: #FFFFFF !important; color: #147E79 !important;">
+              <!-- SECCIÓN 1: DETALLES DE LOS TOURS INCLUIDOS -->
+              <div class="custom-modal-info p-4 p-md-5" style="background-color: #FFFFFF !important; color: #147E79 !important;">
                 
                 <!-- Encabezado del Paquete -->
                 <div class="mb-4">
@@ -581,7 +581,7 @@ const goToWhatsApp = () => {
               </div>
 
               <!-- COLUMNA DERECHA: SIDEBAR DE RESERVA DIRECTA -->
-              <div class="col-lg-5 custom-modal-sidebar p-4 p-md-5 d-flex flex-column justify-content-between" style="background-color: #147E79 !important; color: #FFFFFF !important;">
+              <div class="custom-modal-sidebar p-4 p-md-5" style="background-color: #147E79 !important; color: #FFFFFF !important;">
                 
                 <div>
                   <span class="badge fw-bold px-3 py-1 mb-2 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.1em; background-color: #E7DCC3; color: #0D5B57;">
@@ -589,85 +589,88 @@ const goToWhatsApp = () => {
                   </span>
                   <h3 class="font-brush fw-bold display-6 mb-3 text-white" style="font-family: 'Caveat', cursive !important; color: #FFFFFF !important;">Configura tu Viaje</h3>
 
-                  <!-- CONTROLES DE FECHA Y PASAJEROS -->
-                  <div class="p-3 rounded-4 mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
-                    <!-- Selector de Fecha inicial -->
-                    <div class="mb-3">
-                      <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
-                        <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha Estimada de Inicio
-                      </label>
-                      <input 
-                        v-model="modalDate" 
-                        type="date" 
-                        :min="todayDate" 
-                        class="form-control form-control-sm text-white fw-bold" 
-                        style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
-                        required
-                      >
-                      <span class="small opacity-75 d-block mt-1" style="font-size: 0.72rem;">* La fecha exacta de cada excursión la coordinamos contigo según el clima.</span>
-                    </div>
-
-                    <!-- Selector de Pasajeros (+ / -) -->
-                    <div>
-                      <label class="form-label small fw-bold text-white mb-1 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
-                        <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
-                        <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
-                      </label>
-                      <div class="d-flex align-items-center gap-2">
-                        <button 
-                          type="button" 
-                          class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 44px; height: 44px;"
-                          @click="decrementPax"
-                          :disabled="modalPax <= 1"
-                          aria-label="Reducir pasajeros"
-                        >
-                          <i class="bi bi-dash"></i>
-                        </button>
+                  <!-- CONTROLES Y PRECIO EN FILA RESPONSIVA -->
+                  <div class="row g-3 g-md-4 mb-4 align-items-stretch">
+                    <!-- Columna Izquierda: Fecha y Pasajeros -->
+                    <div class="col-md-6 d-flex flex-column gap-3">
+                      <!-- Selector de Fecha inicial -->
+                      <div class="p-3 rounded-4" style="background-color: #0A4744; border: 1px solid rgba(231, 220, 195, 0.35);">
+                        <label class="form-label small fw-bold text-white mb-1 d-flex align-items-center" style="color: #FFFFFF !important;">
+                          <i class="bi bi-calendar-event me-2" style="color: #E7DCC3;"></i>Fecha Estimada de Inicio
+                        </label>
                         <input 
-                          v-model.number="modalPax" 
-                          type="number" 
-                          min="1" 
-                          max="20" 
-                          class="form-control form-control-sm text-center fw-bold text-white" 
-                          style="background-color: #0A4744; border-color: rgba(231, 220, 195, 0.4); max-width: 70px; color: #FFFFFF !important;"
+                          v-model="modalDate" 
+                          type="date" 
+                          :min="todayDate" 
+                          class="form-control text-white fw-bold" 
+                          style="background-color: #073330; border-color: rgba(231, 220, 195, 0.4); color: #FFFFFF !important;"
+                          required
                         >
-                        <button 
-                          type="button" 
-                          class="btn btn-sm btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center" 
-                          style="width: 44px; height: 44px;"
-                          @click="incrementPax"
-                          aria-label="Aumentar pasajeros"
-                        >
-                          <i class="bi bi-plus"></i>
-                        </button>
+                        <span class="small opacity-75 d-block mt-2" style="font-size: 0.72rem; color: #E7DCC3 !important;">* La fecha de cada excursión la coordinamos según el clima.</span>
                       </div>
-                    </div>
-                  </div>
 
-                  <!-- DESGLOSE DE PRECIOS CALCULADOS EN VIVO -->
-                  <div class="price-box-card rounded-4 p-4 shadow-sm mb-4" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
-                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                      <span class="small text-white fw-semibold">Tarifa Combo por persona</span>
-                      <span class="fw-bold text-white">{{ formatCurrency(selectedPackage.bundlePrice, 'CLP') }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                      <span class="small text-white fw-semibold">Cantidad de viajeros</span>
-                      <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                      <span class="small text-white opacity-75">Ahorro total combo</span>
-                      <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">- {{ formatCurrency(totalSavingsCLP, 'CLP') }}</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-end mt-3 mb-2">
-                      <div>
-                        <span class="d-block text-white small text-uppercase tracking-wide fw-bold" style="font-size: 0.72rem;">Total a Pagar</span>
-                        <span class="fw-bold text-white fs-2 lh-1">{{ formatCurrency(totalModalPriceCLP, 'CLP') }}</span>
+                      <!-- Selector de Pasajeros (+ / -) -->
+                      <div class="p-3 rounded-4" style="background-color: #0A4744; border: 1px solid rgba(231, 220, 195, 0.35);">
+                        <label class="form-label small fw-bold text-white mb-2 d-flex justify-content-between align-items-center" style="color: #FFFFFF !important;">
+                          <span><i class="bi bi-people-fill me-2" style="color: #E7DCC3;"></i>Número de Pasajeros</span>
+                          <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">{{ modalPax }} {{ modalPax === 1 ? 'persona' : 'personas' }}</span>
+                        </label>
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center shadow-sm" 
+                            style="width: 44px; height: 44px;"
+                            @click="decrementPax"
+                            :disabled="modalPax <= 1"
+                            aria-label="Reducir pasajeros"
+                          >
+                            <i class="bi bi-dash fs-5"></i>
+                          </button>
+                          <div class="text-center flex-grow-1">
+                            <span class="fs-2 fw-bold text-white lh-1">{{ modalPax }}</span>
+                            <span class="d-block small text-white text-opacity-75" style="font-size: 0.75rem;">{{ modalPax === 1 ? 'viajero' : 'viajeros' }}</span>
+                          </div>
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-light rounded-circle fw-bold d-flex align-items-center justify-content-center shadow-sm" 
+                            style="width: 44px; height: 44px;"
+                            @click="incrementPax"
+                            aria-label="Aumentar pasajeros"
+                          >
+                            <i class="bi bi-plus fs-5"></i>
+                          </button>
+                        </div>
                       </div>
-                      <div class="text-end">
-                        <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
-                        <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
+                    </div>
+
+                    <!-- Columna Derecha: Tarifa y Ahorros -->
+                    <div class="col-md-6">
+                      <div class="price-box-card rounded-4 p-4 shadow-sm h-100 d-flex flex-column justify-content-between" style="background-color: #0D5B57; border: 1px solid rgba(231, 220, 195, 0.35);">
+                        <div>
+                          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-white border-opacity-15">
+                            <span class="small text-white fw-semibold">Tarifa Combo por persona</span>
+                            <span class="fw-bold text-white">{{ formatCurrency(selectedPackage.bundlePrice, 'CLP') }}</span>
+                          </div>
+                          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-white border-opacity-15">
+                            <span class="small text-white fw-semibold">Cantidad de viajeros</span>
+                            <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
+                          </div>
+                          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-white border-opacity-15">
+                            <span class="small text-white opacity-75">Ahorro total combo</span>
+                            <span class="badge fw-bold" style="background-color: #E7DCC3; color: #0D5B57;">- {{ formatCurrency(totalSavingsCLP, 'CLP') }}</span>
+                          </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-end mt-3 pt-2 border-top border-white border-opacity-15">
+                          <div>
+                            <span class="d-block text-white small text-uppercase tracking-wide fw-bold" style="font-size: 0.72rem;">Total a Pagar</span>
+                            <span class="fw-bold text-white fs-2 lh-1">{{ formatCurrency(totalModalPriceCLP, 'CLP') }}</span>
+                          </div>
+                          <div class="text-end">
+                            <span class="d-block small text-white fw-semibold" style="font-size: 0.78rem;">USD {{ formatCurrency(totalModalPriceUSD, 'USD') }}</span>
+                            <span class="d-block small fw-bold" style="font-size: 0.78rem; color: #E7DCC3;">BRL {{ formatCurrency(totalModalPriceBRL, 'BRL') }}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

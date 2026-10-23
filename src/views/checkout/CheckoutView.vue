@@ -217,39 +217,7 @@ const retryAfterRejection = () => {
   });
 };
 
-const fillDefaultPassengerIfEmpty = () => {
-  if (!name.value.trim()) name.value = 'Camilo';
-  if (!lastname.value.trim()) lastname.value = 'Wamani';
-  if (docType.value === 'rut' && (!rut.value.trim() || !validateRut(rut.value))) {
-    rut.value = '11.111.111-1';
-    docError.value = false;
-  }
-  if (!titularAge.value) titularAge.value = 30;
-  if (!phone.value.trim()) phone.value = '+56 9 8567 3376';
-  if (!email.value.trim()) email.value = 'contacto@wamani.cl';
-  accompanyingPassengers.value.forEach((comp, idx) => {
-    if (!comp.fullName.trim()) comp.fullName = `Pasajero Acompañante ${idx + 2}`;
-    if (!comp.documentNumber.trim() || (comp.documentType === 'rut' && !validateRut(comp.documentNumber))) {
-      comp.documentType = 'rut';
-      comp.documentNumber = '11.111.111-1';
-    }
-    if (!comp.age) comp.age = 28;
-  });
-  termsAccepted.value = true;
-  paymentMethod.value = 'webpay';
-  currentStep.value = 2;
-};
 
-const quickFillTransbankTest = async () => {
-  fillDefaultPassengerIfEmpty();
-  await handleInitiatePayment();
-};
-
-const startNextWebpayTest = async () => {
-  retryAfterRejection();
-  fillDefaultPassengerIfEmpty();
-  await handleInitiatePayment();
-};
 
 
 const currentDocumentNumber = computed(() => {
@@ -869,9 +837,6 @@ const printVoucher = () => {
 
             <!-- Botones de Acción Posterior -->
             <div class="d-flex flex-wrap gap-3 justify-content-center pt-2">
-              <button v-if="isTest50Active" type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain d-flex align-items-center gap-2 shadow" @click="startNextWebpayTest">
-                <i class="bi bi-lightning-charge-fill fs-5"></i> Iniciar Siguiente Prueba Webpay
-              </button>
               <button class="btn btn-whatsapp-custom px-4 py-3 fw-bold d-flex align-items-center gap-2 shadow" @click="sendWhatsAppConfirmation">
                 <i class="bi bi-whatsapp fs-5"></i> Enviar Comprobante a WhatsApp
               </button>
@@ -932,9 +897,6 @@ const printVoucher = () => {
             </div>
 
             <div class="d-flex flex-wrap gap-3 justify-content-center">
-              <button type="button" class="btn btn-accent px-4 py-3 fw-bold text-dark-mountain" @click="startNextWebpayTest">
-                <i class="bi bi-lightning-charge-fill me-1"></i> Iniciar Siguiente Prueba Webpay (Directo)
-              </button>
               <button type="button" class="btn btn-outline-accent px-4 py-3 fw-bold" @click="retryAfterRejection">
                 <i class="bi bi-arrow-repeat me-1"></i> Volver al Checkout
               </button>
@@ -951,9 +913,6 @@ const printVoucher = () => {
         
         <!-- ENCABEZADO -->
         <div class="col-12 text-center mb-2">
-          <span class="badge bg-accent text-dark-mountain px-3 py-1 mb-2 fw-bold text-uppercase" style="letter-spacing: 0.1em; font-size: 0.75rem;">
-            <i class="bi bi-shield-check me-1"></i> Checkout Seguro 256-Bit SSL
-          </span>
           <h1 class="display-4 fw-bold text-white font-brush mb-1" style="font-family: 'Caveat', cursive !important;">Finalizar Reserva</h1>
           <p class="text-white opacity-85">Estás a un solo paso de asegurar tus cupos para esta gran aventura en el sur de Chile.</p>
         </div>
@@ -1025,10 +984,6 @@ const printVoucher = () => {
                   <i class="bi bi-person-circle fs-4"></i> 1. Pasajero Titular (Responsable de la Reserva)
                 </h3>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                  <button type="button" class="btn btn-sm btn-accent fw-bold text-dark-mountain d-flex align-items-center gap-1 shadow-sm" @click="quickFillTransbankTest" :disabled="isProcessing">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                    <span>{{ isProcessing ? 'Redirigiendo a Webpay...' : 'Autocompletar e Ir a Webpay Plus' }}</span>
-                  </button>
                   <span class="badge bg-dark text-accent border border-accent border-opacity-25 px-3 py-2 font-monospace">
                     <i class="bi bi-people-fill me-1"></i> Total: {{ effectivePaxCount }} {{ effectivePaxCount === 1 ? 'PAX' : 'PAX' }}
                   </span>
@@ -1048,7 +1003,7 @@ const printVoucher = () => {
                 <!-- Selector de Documento de Identidad (RUT vs Pasaporte) -->
                 <div class="col-12">
                   <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                    <label class="form-label small fw-bold text-white mb-0">Documento de Identificación * (Seguro SERNATUR)</label>
+                    <label class="form-label small fw-bold text-white mb-0">Documento de Identificación *</label>
                     <div class="btn-group btn-group-sm">
                       <button 
                         type="button" 
@@ -1082,9 +1037,6 @@ const printVoucher = () => {
                     <div v-if="docError" class="small text-danger mt-1">
                       <i class="bi bi-exclamation-triangle-fill me-1"></i> El RUT ingresado no es válido (verifica el dígito verificador).
                     </div>
-                    <div v-else-if="rut.length >= 8" class="small text-accent mt-1">
-                      <i class="bi bi-check-circle-fill me-1"></i> RUT verificado conforme al algoritmo oficial Módulo 11.
-                    </div>
                   </div>
                   <div v-else>
                     <input 
@@ -1109,8 +1061,18 @@ const printVoucher = () => {
                   <input v-model="phone" type="tel" class="form-control admin-input text-dark fw-medium" placeholder="+56 9 1234 5678" required autocomplete="tel">
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label small fw-bold text-white">Correo Electrónico (Voucher) *</label>
+                  <label class="form-label small fw-bold text-white">Correo Electrónico *</label>
                   <input v-model="email" type="email" class="form-control admin-input text-dark fw-medium" placeholder="juan@ejemplo.com" required autocomplete="email">
+                </div>
+                
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-white mb-1">Ficha Médica / Alergias Relevantes (Opcional)</label>
+                  <input 
+                    v-model="medicalConditions" 
+                    type="text" 
+                    class="form-control admin-input text-dark fw-medium" 
+                    placeholder="Alergias severas a medicamentos/picaduras, afecciones médicas, asma o 'Ninguna'"
+                  >
                 </div>
 
                 <!-- NÓMINA DE PASAJEROS ACOMPAÑANTES (SI PAX > 1) -->
@@ -1206,16 +1168,7 @@ const printVoucher = () => {
                           >
                         </div>
 
-                        <div class="col-md-6">
-                          <label class="form-label small fw-bold text-white mb-1">Contacto de Emergencia Propio (Opcional)</label>
-                          <input 
-                            v-model="comp.emergencyContactName" 
-                            type="text" 
-                            class="form-control admin-input text-dark fw-medium" 
-                            placeholder="Nombre y Teléfono (o usa el del titular)"
-                          >
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-12">
                           <label class="form-label small fw-bold text-white mb-1">Ficha Médica / Alergias Relevantes (Opcional)</label>
                           <input 
                             v-model="comp.medicalConditions" 
@@ -1258,27 +1211,23 @@ const printVoucher = () => {
                 <span class="badge bg-dark text-accent border border-secondary border-opacity-25 small">Paso 2 de 2</span>
               </div>
 
-              <!-- 2. FICHA DE SEGURIDAD EN TERRENO & CONTACTO DE EMERGENCIA (SERNATUR) -->
+              <!-- 2. CONTACTO DE EMERGENCIA -->
               <div class="checkout-card p-4 p-md-5 rounded-4 shadow-sm text-white" style="background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
                 <h3 class="h5 fw-bold text-accent mb-2 d-flex align-items-center gap-2">
-                  <i class="bi bi-heart-pulse-fill fs-4"></i> 2. Ficha de Seguridad en Montaña & Contacto de Emergencia
+                  <i class="bi bi-telephone-plus-fill fs-4"></i> 2. Contacto de Emergencia
                 </h3>
                 <p class="small text-white opacity-85 mb-4" style="font-size: 0.85rem;">
-                  Requerido por los estándares de seguridad de SERNATUR y pólizas de turismo aventura para coordinar protocolos de asistencia médica y primeros auxilios en terreno agreste.
+                  Datos de contacto en caso de emergencia durante la excursión.
                 </p>
                 
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Nombre de Contacto de Emergencia</label>
-                    <input v-model="emergencyName" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: María Pérez (Familiar / Pareja)">
+                    <input v-model="emergencyName" type="text" class="form-control admin-input text-dark fw-medium" placeholder="Ej: María Pérez">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label small fw-bold text-white">Teléfono de Contacto de Emergencia</label>
                     <input v-model="emergencyPhone" type="tel" class="form-control admin-input text-dark fw-medium" placeholder="+56 9 8765 4321">
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label small fw-bold text-white">Declaración de Salud / Condiciones Médicas Relevantes</label>
-                    <textarea v-model="medicalConditions" class="form-control admin-input text-dark fw-medium" rows="2" placeholder="Indica alergias severas a picaduras/fármacos, afecciones cardíacas, asma o intervenciones recientes. Si no tienes, déjalo en blanco."></textarea>
                   </div>
                 </div>
               </div>
@@ -1411,7 +1360,7 @@ const printVoucher = () => {
 
         <!-- COLUMNA DERECHA: RESUMEN DE COMPRA CON TRANSPARENCIA TOTAL -->
         <div class="col-12 col-lg-4">
-          <div class="checkout-summary-card p-4 rounded-4 shadow-sm text-white sticky-top" style="top: 100px; background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
+          <div class="checkout-summary-card p-4 rounded-4 shadow-sm text-white sticky-top" style="top: 110px; z-index: 20; background: linear-gradient(145deg, #147E79 0%, #0D5B57 100%); border: 1px solid rgba(231, 220, 195, 0.35);">
             
             <h3 class="h5 fw-bold text-accent mb-4 pb-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
               <i class="bi bi-bag-check-fill"></i> Resumen de la Orden
@@ -1452,17 +1401,9 @@ const printVoucher = () => {
                 <span class="fw-bold text-accent">$50 CLP</span>
               </div>
 
-              <div class="d-flex justify-content-between mb-2 small">
+              <div class="d-flex justify-content-between mb-0 small">
                 <span class="text-white opacity-75">Impuestos e IVA (19%):</span>
                 <span class="text-success fw-bold">Incluido</span>
-              </div>
-              <div class="d-flex justify-content-between mb-2 small">
-                <span class="text-white opacity-75">Seguro de accidentes:</span>
-                <span class="text-success fw-bold">Incluido SERNATUR</span>
-              </div>
-              <div class="d-flex justify-content-between mb-0 small pt-2 border-top border-secondary border-opacity-25">
-                <span class="text-white opacity-75">Entradas Parques CONAF:</span>
-                <span class="text-white-50" style="font-size: 0.76rem;">No incluidas</span>
               </div>
             </div>
 
@@ -1491,18 +1432,18 @@ const printVoucher = () => {
             <button 
               type="button" 
               class="btn btn-accent w-100 py-3 fw-bold text-dark-mountain shadow mb-3 d-flex align-items-center justify-content-center gap-2" 
-              @click="isTest50Active ? quickFillTransbankTest() : (currentStep === 1 ? goToStep2() : handleInitiatePayment())"
+              @click="currentStep === 1 ? goToStep2() : handleInitiatePayment()"
               :disabled="isProcessing"
             >
               <span v-if="isProcessing" class="spinner-border spinner-border-sm"></span>
               <i v-else class="bi bi-credit-card-2-front-fill fs-5"></i>
-              <span>{{ isProcessing ? 'Conectando con Webpay...' : (currentStep === 1 && !isTest50Active ? 'Continuar al Paso 2 (Pago)' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})`) }}</span>
+              <span>{{ isProcessing ? 'Conectando con Webpay...' : (currentStep === 1 ? 'Continuar al Paso 2 (Pago)' : `Pagar con Webpay Plus (${formatPrice(totalPrice)})`) }}</span>
             </button>
 
             <div class="security-guarantees p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: #0D5B57;">
               <ul class="list-unstyled mb-0 small text-white opacity-90 lh-lg" style="font-size: 0.78rem;">
-                <li><i class="bi bi-patch-check-fill text-accent me-2"></i>Guías registrados SERNATUR (Reg. {{ contentStore.content.legal.sernaturRegistry }})</li>
-                <li><i class="bi bi-shield-lock-fill text-accent me-2"></i>Pasarela Transbank Webpay Plus (SSL 256-Bit)</li>
+                <li><i class="bi bi-patch-check-fill text-accent me-2"></i>Guías registrados SERNATUR</li>
+                <li><i class="bi bi-shield-lock-fill text-accent me-2"></i>Transbank Webpay Plus</li>
                 <li><i class="bi bi-arrow-counterclockwise text-accent me-2"></i>Cancelación y reprogramación garantizada</li>
               </ul>
             </div>
