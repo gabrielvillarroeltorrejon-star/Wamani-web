@@ -70,6 +70,8 @@ export const ExperienceSchema = z.object({
     width: z.number().optional(),
     height: z.number().optional()
   }),
+  heroBannerUrl: z.string().optional(),
+  guarantees: z.array(z.string()).optional(),
   itinerary: z.array(z.object({
     dayOrTime: z.string(),
     title: z.string(),

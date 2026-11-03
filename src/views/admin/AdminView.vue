@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useContentStore, type ServiceItem, type Advisor } from '@/shared/stores/contentStore';
+import { useContentStore, type ServiceItem, type Advisor, type GalleryImage, type TransportServiceCard } from '@/shared/stores/contentStore';
+import { compressImageFile, compressMultipleImageFiles } from '@/shared/lib/imageCompressor';
 import type { Experience } from '@/entities/experience/model/schemas';
 
 const contentStore = useContentStore();
@@ -48,7 +49,7 @@ const handleLogin = () => {
 };
 
 // Tabs State
-const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal' | 'promotions' | 'packages'>('services');
+const activeTab = ref<'services' | 'cards-home' | 'content-home' | 'transport-mgmt' | 'content-about' | 'advisors' | 'contact' | 'crm' | 'gateway' | 'legal' | 'promotions' | 'packages' | 'quote-generator' | 'gallery-mgmt'>('services');
 import { supabase } from '@/shared/api/supabaseClient';
 const supabaseOrders = ref([]);
 const fetchOrders = async () => {
@@ -88,6 +89,7 @@ const expForm = ref({
   difficulty: 'easy' as 'easy' | 'moderate' | 'hard' | 'expert',
   basePrice: 50000,
   coverImageUrl: '',
+  heroBannerUrl: '',
   galleryUrls: [] as string[],
   galleryUrlInput: '',
   tags: '',
@@ -95,7 +97,10 @@ const expForm = ref({
   schedule: '',
   meetingPoint: 'Oficina Wamani, Centro de Pucón',
   cancellationPolicy: 'Cancelación gratuita con 48 hrs de anticipación.',
-  itineraryRaw: ''
+  itineraryRaw: '',
+  includedRaw: '',
+  notIncludedRaw: '',
+  guaranteesRaw: ''
 });
 
 const addGalleryUrl = () => {
@@ -110,23 +115,19 @@ const removeGalleryImage = (index: number) => {
   expForm.value.galleryUrls.splice(index, 1);
 };
 
-const handleMultipleGalleryUpload = (event: Event) => {
+const handleMultipleGalleryUpload = async (event: Event) => {
   const files = (event.target as HTMLInputElement).files;
   if (files && files.length > 0) {
-    Array.from(files).forEach(file => {
-      if (file.size > 2000000) {
-        alert(`La imagen ${file.name} supera los 2MB.`);
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          expForm.value.galleryUrls.push(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    triggerToast('Imágenes añadidas a la galería.');
+    triggerToast(`Optimizando e importando ${files.length} fotos...`);
+    try {
+      const compressedList = await compressMultipleImageFiles(files, { maxWidth: 1400, quality: 0.82 });
+      compressedList.forEach(url => {
+        expForm.value.galleryUrls.push(url);
+      });
+      triggerToast('¡Imágenes optimizadas y añadidas a la galería!');
+    } catch (err: any) {
+      alert('Error al procesar imágenes: ' + (err.message || ''));
+    }
   }
 };
 
@@ -153,6 +154,7 @@ const openAddModal = () => {
     difficulty: 'easy',
     basePrice: 50000,
     coverImageUrl: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80',
+    heroBannerUrl: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1920&q=85',
     galleryUrls: [
       'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80'
@@ -163,7 +165,10 @@ const openAddModal = () => {
     schedule: '08:00 - 16:00',
     meetingPoint: 'Oficina Wamani, Centro de Pucón',
     cancellationPolicy: 'Cancelación gratuita con 48 hrs de anticipación.',
-    itineraryRaw: '08:00 - Salida - Inicio del traslado hacia el parque nacional.\n10:00 - Trekking - Inicio del sendero guiado.\n14:00 - Cumbre - Descanso y almuerzo en la cumbre.\n16:00 - Retorno - Regreso al centro de la ciudad.'
+    itineraryRaw: '08:00 - Salida - Inicio del traslado hacia el parque nacional.\n10:00 - Trekking - Inicio del sendero guiado.\n14:00 - Cumbre - Descanso y almuerzo en la cumbre.\n16:00 - Retorno - Regreso al centro de la ciudad.',
+    includedRaw: 'Guía profesional certificado (UIAGM / Sernatur)\nSeguro de accidentes personales\nEquipo técnico completo de montaña\nTransporte ida y vuelta desde punto de encuentro',
+    notIncludedRaw: 'Propinas voluntarias para guías y chofer\nAlimentación o snacks de marcha no especificados\nEntrada a Parques Nacionales (salvo indicación)\nGastos personales',
+    guaranteesRaw: 'Prestador SERNATUR: Registro Oficial de Turismo N° 84219\nSeguro Incluido: Cobertura de rescate y asistencia en montaña\nGarantía Climática: Reprogramación 100% garantizada por condiciones de clima\nPago Cifrado: Transbank Webpay Plus estándar internacional PCI-DSS'
   };
   showExpModal.value = true;
 };
@@ -185,6 +190,7 @@ const openEditModal = (exp: Experience) => {
     difficulty: exp.difficulty,
     basePrice: exp.pricing.basePrice,
     coverImageUrl: exp.coverImage.url,
+    heroBannerUrl: exp.heroBannerUrl || exp.coverImage.url,
     galleryUrls: exp.gallery ? exp.gallery.map(g => g.url) : [],
     galleryUrlInput: '',
     tags: exp.tags.join(', '),
@@ -192,30 +198,49 @@ const openEditModal = (exp: Experience) => {
     schedule: exp.schedule || '',
     meetingPoint: exp.meetingPoint || 'Oficina Wamani, Centro de Pucón',
     cancellationPolicy: exp.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.',
-    itineraryRaw: itineraryText
+    itineraryRaw: itineraryText,
+    includedRaw: (exp.included && exp.included.length > 0)
+      ? exp.included.join('\n')
+      : 'Guía profesional certificado\nSeguro de accidentes personales\nEquipo técnico completo',
+    notIncludedRaw: (exp.notIncluded && exp.notIncluded.length > 0)
+      ? exp.notIncluded.join('\n')
+      : 'Propinas voluntarias\nGastos personales',
+    guaranteesRaw: (exp.guarantees && exp.guarantees.length > 0)
+      ? exp.guarantees.join('\n')
+      : 'Prestador SERNATUR: Registro Oficial de Turismo N° 84219\nSeguro Incluido: Cobertura de rescate y asistencia en montaña\nGarantía Climática: Reprogramación 100% garantizada por condiciones de clima\nPago Cifrado: Transbank Webpay Plus estándar internacional PCI-DSS'
   };
   showExpModal.value = true;
 };
 
-const handleImageUpload = (event: Event) => {
+const handleHeroBannerUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    if (file.size > 2000000) {
-      alert('La imagen supera los 2MB. Elige una imagen más pequeña para asegurar el rendimiento.');
-      return;
+    triggerToast('Optimizando fondo de cabecera panorámico...');
+    try {
+      const compressed = await compressImageFile(file, { maxWidth: 1920, quality: 0.84 });
+      expForm.value.heroBannerUrl = compressed;
+      triggerToast('¡Fondo de cabecera optimizado y listo!');
+    } catch (err: any) {
+      alert('Error al procesar la imagen: ' + (err.message || ''));
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        expForm.value.coverImageUrl = e.target.result as string;
-        triggerToast('Imagen local procesada.');
-      }
-    };
-    reader.readAsDataURL(file);
   }
 };
 
-const saveExperience = () => {
+const handleImageUpload = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    triggerToast('Optimizando y procesando imagen de portada...');
+    try {
+      const compressed = await compressImageFile(file, { maxWidth: 1400, quality: 0.82 });
+      expForm.value.coverImageUrl = compressed;
+      triggerToast('¡Imagen optimizada con éxito!');
+    } catch (err: any) {
+      alert('Error al procesar la imagen: ' + (err.message || ''));
+    }
+  }
+};
+
+const saveExperience = async () => {
   const itinerary = expForm.value.itineraryRaw
     .split('\n')
     .filter(line => line.trim() !== '')
@@ -233,6 +258,21 @@ const saveExperience = () => {
     alt: `${expForm.value.title} - Foto ${i + 1}`
   }));
 
+  const included = expForm.value.includedRaw
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const notIncluded = expForm.value.notIncludedRaw
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const guarantees = expForm.value.guaranteesRaw
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean);
+
   const parsedExp: Omit<Experience, 'id' | 'slug'> = {
     status: 'active',
     title: expForm.value.title,
@@ -249,6 +289,13 @@ const saveExperience = () => {
       url: expForm.value.coverImageUrl || 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80',
       alt: expForm.value.title
     },
+    heroBannerUrl: expForm.value.heroBannerUrl || expForm.value.coverImageUrl || '',
+    guarantees: guarantees.length > 0 ? guarantees : [
+      'Prestador SERNATUR: Registro Oficial de Turismo N° 84219',
+      'Seguro Incluido: Cobertura de rescate y asistencia en montaña',
+      'Garantía Climática: Reprogramación 100% garantizada por clima',
+      'Pago Cifrado: Transbank Webpay Plus estándar PCI-DSS'
+    ],
     gallery,
     tags: expForm.value.tags.split(',').map(t => t.trim()).filter(Boolean),
     categories: expForm.value.categories.split(',').map(c => c.trim()).filter(Boolean),
@@ -259,19 +306,40 @@ const saveExperience = () => {
     duration: { value: 8, unit: 'hours' },
     languages: ['Español', 'Inglés'],
     capacity: { min: 2, max: 12 },
-    included: ['Guía certificado', 'Seguro de accidentes', 'Equipo técnico'],
-    notIncluded: ['Propinas', 'Gastos personales']
+    included: included.length > 0 ? included : ['Guía certificado', 'Seguro de accidentes', 'Equipo técnico'],
+    notIncluded: notIncluded.length > 0 ? notIncluded : ['Propinas', 'Gastos personales']
   };
 
   if (modalMode.value === 'add') {
-    contentStore.addExperience(parsedExp);
-    triggerToast('¡Servicio añadido al catálogo!');
+    await contentStore.addExperience(parsedExp);
+    triggerToast('¡Servicio añadido al catálogo y publicado!');
   } else if (editingExpId.value) {
-    contentStore.updateExperience(editingExpId.value, parsedExp);
+    await contentStore.updateExperience(editingExpId.value, parsedExp);
     triggerToast('¡Servicio actualizado correctamente!');
   }
 
   showExpModal.value = false;
+};
+
+const copyTourLink = async (exp: Experience) => {
+  const url = `${window.location.origin}/experiencias/${exp.slug}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    triggerToast('¡Enlace directo copiado al portapapeles!');
+  } catch {
+    prompt('Copia este enlace directo del tour:', url);
+  }
+};
+
+const shareTourWhatsApp = (exp: Experience) => {
+  const url = `${window.location.origin}/experiencias/${exp.slug}`;
+  const text = encodeURIComponent(
+    `🏔️ *${exp.title}* - Wamani Experience\n` +
+    `📍 Destino: ${exp.destinationId}\n` +
+    `💰 Valor: ${formatPrice(exp.pricing.basePrice)}\n\n` +
+    `Revisa todos los detalles, qué incluye e itinerario aquí:\n${url}`
+  );
+  window.open(`https://wa.me/?text=${text}`, '_blank');
 };
 
 const duplicateExperience = (exp: Experience) => {
@@ -357,21 +425,16 @@ const openEditServiceItemModal = (item: ServiceItem) => {
   showServiceItemModal.value = true;
 };
 
-const handleServiceCoverUpload = (event: Event) => {
+const handleServiceCoverUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    if (file.size > 2000000) {
-      alert('La imagen supera los 2MB. Selecciona una más ligera.');
-      return;
+    triggerToast('Optimizando imagen de portada...');
+    try {
+      serviceItemForm.value.coverImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.82 });
+      triggerToast('¡Imagen optimizada y guardada!');
+    } catch (err: any) {
+      alert('Error al procesar imagen: ' + (err.message || ''));
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        serviceItemForm.value.coverImage = e.target.result as string;
-        triggerToast('Imagen de tarjeta procesada.');
-      }
-    };
-    reader.readAsDataURL(file);
   }
 };
 
@@ -396,6 +459,134 @@ const deleteServiceItem = (id: string) => {
   if (confirm('¿Deseas eliminar esta tarjeta de la página de inicio?')) {
     contentStore.deleteServiceItem(id);
     triggerToast('Tarjeta eliminada.');
+  }
+};
+
+// --- 2.1 TRANSPORTE & TRASLADOS MANAGEMENT ---
+const transportHeaderForm = ref({
+  badge: 'MOVILIDAD PRIVADA & CONFORT',
+  title: 'Transporte Exclusivo & Traslados Cordilleranos',
+  description: 'Conectamos los principales aeropuertos y destinos del sur de Chile con conductores profesionales, puntualidad rigurosa y vehículos acondicionados para la montaña.'
+});
+
+watch(() => contentStore.content.home?.transport, (val) => {
+  if (val) {
+    transportHeaderForm.value = {
+      badge: val.badge || 'MOVILIDAD PRIVADA & CONFORT',
+      title: val.title || 'Transporte Exclusivo & Traslados Cordilleranos',
+      description: val.description || ''
+    };
+  }
+}, { immediate: true });
+
+const saveTransportHeader = () => {
+  contentStore.updateTransportHeader({ ...transportHeaderForm.value });
+  triggerToast('¡Encabezado de la sección de Transporte actualizado con éxito!');
+};
+
+const showTransportModal = ref(false);
+const transportModalMode = ref<'add' | 'edit'>('add');
+const editingTransportId = ref<string | null>(null);
+
+const transportCardForm = ref<TransportServiceCard>({
+  id: '',
+  badge: '',
+  featuredBadge: '',
+  title: '',
+  description: '',
+  icon: 'bi-car-front-fill',
+  imageUrl: '',
+  features: [],
+  buttonText: 'Cotizar Traslado',
+  buttonStyle: 'outline',
+  whatsAppTag: ''
+});
+
+const transportFeaturesText = ref('');
+
+const openAddTransportModal = () => {
+  transportModalMode.value = 'add';
+  editingTransportId.value = null;
+  transportCardForm.value = {
+    id: `trans-${Date.now()}`,
+    badge: 'Aeropuertos ZCO / PMC',
+    featuredBadge: '',
+    title: '',
+    description: '',
+    icon: 'bi-airplane-engines',
+    imageUrl: '',
+    features: [
+      'Monitoreo de vuelo en tiempo real',
+      'Recepción personalizada con letrero',
+      'Asistencia completa con equipaje'
+    ],
+    buttonText: 'Cotizar Traslado',
+    buttonStyle: 'outline',
+    whatsAppTag: ''
+  };
+  transportFeaturesText.value = transportCardForm.value.features.join('\n');
+  showTransportModal.value = true;
+};
+
+const openEditTransportModal = (srv: TransportServiceCard) => {
+  transportModalMode.value = 'edit';
+  editingTransportId.value = srv.id;
+  transportCardForm.value = {
+    id: srv.id,
+    badge: srv.badge || '',
+    featuredBadge: srv.featuredBadge || '',
+    title: srv.title || '',
+    description: srv.description || '',
+    icon: srv.icon || 'bi-car-front-fill',
+    imageUrl: srv.imageUrl || '',
+    features: Array.isArray(srv.features) ? [...srv.features] : [],
+    buttonText: srv.buttonText || 'Cotizar Traslado',
+    buttonStyle: srv.buttonStyle || 'outline',
+    whatsAppTag: srv.whatsAppTag || ''
+  };
+  transportFeaturesText.value = transportCardForm.value.features.join('\n');
+  showTransportModal.value = true;
+};
+
+const handleTransportImageUpload = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    triggerToast('Optimizando fotografía del servicio...');
+    try {
+      const compressed = await compressImageFile(file, { maxWidth: 1200, quality: 0.82 });
+      transportCardForm.value.imageUrl = compressed;
+      triggerToast('¡Fotografía optimizada y cargada!');
+    } catch (err: any) {
+      alert('Error al procesar la imagen: ' + (err.message || ''));
+    }
+  }
+};
+
+const removeTransportImage = () => {
+  transportCardForm.value.imageUrl = '';
+};
+
+const saveTransportCardForm = () => {
+  const lines = transportFeaturesText.value
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
+
+  const serviceToSave: TransportServiceCard = {
+    ...transportCardForm.value,
+    id: editingTransportId.value || transportCardForm.value.id || `trans-${Date.now()}`,
+    features: lines
+  };
+
+  contentStore.saveTransportService(serviceToSave);
+  showTransportModal.value = false;
+  triggerToast(transportModalMode.value === 'add' ? '¡Servicio de transporte añadido con éxito!' : '¡Servicio de transporte actualizado con éxito!');
+};
+
+const deleteTransportService = (id: string) => {
+  if (confirm('¿Estás seguro de que deseas eliminar este servicio de transporte?')) {
+    contentStore.deleteTransportService(id);
+    triggerToast('Servicio de transporte eliminado.');
   }
 };
 
@@ -438,38 +629,6 @@ const openEditAdvisorModal = (adv: Advisor) => {
   showAdvisorModal.value = true;
 };
 
-// Compresor inteligente de fotografías para evitar saturar localStorage (5MB) y acelerar la carga
-const compressImageFile = (file: File, maxWidth = 900, quality = 0.82): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } else {
-          resolve(e.target?.result as string);
-        }
-      };
-      img.onerror = () => resolve(e.target?.result as string);
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
-
 const handleAdvisorImageUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
@@ -478,7 +637,7 @@ const handleAdvisorImageUpload = async (event: Event) => {
       return;
     }
     try {
-      advisorForm.value.image = await compressImageFile(file, 800, 0.85);
+      advisorForm.value.image = await compressImageFile(file, { maxWidth: 800, quality: 0.85 });
       triggerToast('Imagen de integrante subida.');
     } catch {
       alert('No se pudo procesar la fotografía.');
@@ -765,7 +924,7 @@ const handleAboutHeroUpload = async (event: Event) => {
       return;
     }
     try {
-      aboutForm.value.heroImage = await compressImageFile(file, 1200, 0.85);
+      aboutForm.value.heroImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.85 });
       triggerToast('Imagen de cabecera de Nosotros optimizada y cargada.');
     } catch {
       alert('No se pudo procesar la imagen.');
@@ -781,7 +940,7 @@ const handleAboutHistoryUpload = async (event: Event) => {
       return;
     }
     try {
-      aboutForm.value.historyImage = await compressImageFile(file, 1000, 0.85);
+      aboutForm.value.historyImage = await compressImageFile(file, { maxWidth: 1000, quality: 0.85 });
       triggerToast('Imagen de historia optimizada y cargada.');
     } catch {
       alert('No se pudo procesar la imagen.');
@@ -1058,16 +1217,370 @@ const saveLegalContent = () => {
   triggerToast('¡Datos Legales y Registro SERNATUR guardados exitosamente!');
 };
 
-const handleRestore = () => {
-  if (confirm('¿Quieres restablecer todo el contenido, experiencias y reservas a sus valores de fábrica? Perderás cualquier cambio guardado.')) {
-    contentStore.restoreDefaults();
-    homeForm.value = JSON.parse(JSON.stringify(contentStore.content.home));
-    aboutForm.value = JSON.parse(JSON.stringify(contentStore.content.about));
-    contactForm.value = JSON.parse(JSON.stringify(contentStore.content.contact));
-    gatewayForm.value = JSON.parse(JSON.stringify(contentStore.content.gateway));
-    legalForm.value = JSON.parse(JSON.stringify(contentStore.content.legal));
-    triggerToast('¡Sitio web restaurado a los valores por defecto!');
+// ==============================================================================
+// 12. COTIZADOR OFICIAL DE SERVICIOS (ENTERPRISE QUOTE GENERATOR)
+// ==============================================================================
+export interface QuoteItem {
+  id: string;
+  title: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+const quoteForm = ref({
+  quoteNumber: `COT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+  date: new Date().toISOString().split('T')[0],
+  validUntil: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
+  clientName: '',
+  clientRut: '',
+  clientEmail: '',
+  clientPhone: '',
+  clientCity: 'Chile',
+  destination: 'Pucón / Araucanía Lacustre',
+  activityDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+  paxTotal: 2,
+  taxMode: 'iva_incluido' as 'iva_incluido' | 'factura' | 'exento' | 'neto_mas_iva',
+  discountAmount: 0,
+  notes: 'Precios finales con IVA incluido (19%). Incluye acompañamiento de guías certificados, seguro de accidentes personales y transporte privado según programa. Válido por 15 días corridos.',
+  items: [
+    {
+      id: 'it-1',
+      title: 'Ascenso al Volcán Villarrica (Cumbre)',
+      description: 'Guiado profesional con guías UIAGM/UIMLA, equipo técnico completo (botas, crampones, piolet, casco) y traslados.',
+      quantity: 2,
+      unitPrice: 115000
+    }
+  ] as QuoteItem[]
+});
+
+const selectedTourToQuote = ref('');
+const selectedPackageToQuote = ref('');
+
+const addTourToQuote = () => {
+  if (!selectedTourToQuote.value) return;
+  const tour = contentStore.experiences.find(e => e.id === selectedTourToQuote.value);
+  if (tour) {
+    quoteForm.value.items.push({
+      id: `it-${Date.now()}`,
+      title: tour.title,
+      description: tour.summary || `Experiencia guiada en ${tour.destinationId}.`,
+      quantity: quoteForm.value.paxTotal || 1,
+      unitPrice: tour.pricing.basePrice
+    });
+    selectedTourToQuote.value = '';
+    triggerToast('Tour añadido a la cotización.');
   }
+};
+
+const addPackageToQuote = () => {
+  if (!selectedPackageToQuote.value) return;
+  const pkg = contentStore.tourPackages.find(p => p.id === selectedPackageToQuote.value);
+  if (pkg) {
+    quoteForm.value.items.push({
+      id: `it-${Date.now()}`,
+      title: `Paquete: ${pkg.title}`,
+      description: pkg.description || 'Paquete combinado de experiencias con tarifa promocional.',
+      quantity: 1,
+      unitPrice: pkg.bundlePrice
+    });
+    selectedPackageToQuote.value = '';
+    triggerToast('¡Paquete de tours añadido a la cotización!');
+  }
+};
+
+const addCustomItemToQuote = () => {
+  quoteForm.value.items.push({
+    id: `it-${Date.now()}`,
+    title: 'Servicio de Transporte Privado / Guía Adicional',
+    description: 'Traslado exclusivo ida y vuelta con chofer profesional y tracción 4x4.',
+    quantity: 1,
+    unitPrice: 65000
+  });
+};
+
+const removeQuoteItem = (index: number) => {
+  if (quoteForm.value.items.length > 1) {
+    quoteForm.value.items.splice(index, 1);
+  } else {
+    alert('La cotización debe tener al menos un ítem.');
+  }
+};
+
+// Subtotal de los ítems con precios publicados
+const quoteSubtotal = computed(() => {
+  return quoteForm.value.items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unitPrice)), 0);
+});
+
+const quoteDiscount = computed(() => {
+  return Number(quoteForm.value.discountAmount) || 0;
+});
+
+const quoteBase = computed(() => {
+  return Math.max(0, quoteSubtotal.value - quoteDiscount.value);
+});
+
+// Los precios publicados ya tienen el IVA (19%) incluido por defecto en Chile
+const quoteNeto = computed(() => {
+  if (quoteForm.value.taxMode === 'neto_mas_iva' || quoteForm.value.taxMode === 'exento') {
+    return quoteBase.value;
+  }
+  return Math.round(quoteBase.value / 1.19);
+});
+
+const quoteIva = computed(() => {
+  if (quoteForm.value.taxMode === 'exento') {
+    return 0;
+  }
+  if (quoteForm.value.taxMode === 'neto_mas_iva') {
+    return Math.round(quoteBase.value * 0.19);
+  }
+  return quoteBase.value - quoteNeto.value;
+});
+
+const quoteTotal = computed(() => {
+  if (quoteForm.value.taxMode === 'neto_mas_iva') {
+    return quoteBase.value + quoteIva.value;
+  }
+  return quoteBase.value;
+});
+
+const printQuote = () => {
+  window.print();
+};
+
+const isGeneratingPdf = ref(false);
+const showWhatsAppPdfModal = ref(false);
+
+const downloadQuotePdf = async (): Promise<File | null> => {
+  const element = document.getElementById('quote-preview-paper');
+  if (!element) return null;
+
+  isGeneratingPdf.value = true;
+  triggerToast('Generando PDF oficial en 1 sola página...');
+
+  try {
+    const html2pdfModule = await import('html2pdf.js');
+    const html2pdf = html2pdfModule.default || html2pdfModule;
+
+    const opt = {
+      margin: [6, 8, 6, 8],
+      filename: `Cotizacion-${quoteForm.value.quoteNumber}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        letterRendering: true,
+        scrollY: 0
+      },
+      jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+    };
+
+    const worker = html2pdf().set(opt).from(element);
+    const pdfBlob: Blob = await worker.output('blob');
+    await worker.save();
+
+    triggerToast('¡PDF oficial de 1 página descargado con éxito!');
+    return new File([pdfBlob], `Cotizacion-${quoteForm.value.quoteNumber}.pdf`, { type: 'application/pdf' });
+  } catch (err: any) {
+    console.error('Error al generar PDF con html2pdf:', err);
+    triggerToast('Abriendo ventana de impresión oficial...');
+    window.print();
+    return null;
+  } finally {
+    isGeneratingPdf.value = false;
+  }
+};
+
+const sendQuoteWhatsApp = async () => {
+  // Descarga y genera el PDF de 1 página
+  const pdfFile = await downloadQuotePdf();
+
+  const itemsText = quoteForm.value.items.map((it, idx) => 
+    `${idx + 1}. *${it.title}*\n   • ${it.quantity} pax x ${formatPrice(it.unitPrice)} = *${formatPrice(it.quantity * it.unitPrice)}*`
+  ).join('\n');
+
+  const text = encodeURIComponent(
+    `🏔️ *COTIZACIÓN OFICIAL WAMANI EXPERIENCE* 🏔️\n` +
+    `*Folio:* ${quoteForm.value.quoteNumber}\n` +
+    `*Cliente:* ${quoteForm.value.clientName || 'Estimado(a) Viajero(a)'}\n` +
+    `*Fecha Propuesta:* ${quoteForm.value.activityDate || 'A coordinar'}\n` +
+    `*Pasajeros:* ${quoteForm.value.paxTotal} personas\n` +
+    `*Destino:* ${quoteForm.value.destination}\n\n` +
+    `📋 *DETALLE DE SERVICIOS:*\n${itemsText}\n\n` +
+    (quoteDiscount.value > 0 ? `🔹 Descuento Especial: -${formatPrice(quoteDiscount.value)}\n` : '') +
+    `💰 *TOTAL FINAL (IVA 19% INCLUIDO):* *${formatPrice(quoteTotal.value)} CLP*\n` +
+    `   _(Neto: ${formatPrice(quoteNeto.value)} + IVA 19%: ${formatPrice(quoteIva.value)})_\n\n` +
+    `📎 *Te adjuntamos el archivo PDF formal de 1 página con membrete oficial, itinerarios y datos bancarios.*\n\n` +
+    `📌 *Condiciones:* ${quoteForm.value.notes}\n` +
+    `📅 *Validez:* Oferta vigente hasta ${quoteForm.value.validUntil}\n\n` +
+    `💳 *Datos de Pago:* Transferencia Banco Santander (Cta Cte 89-01234-5 / RUT 78.199.034-5) o Webpay Plus.\n\n` +
+    `_Wamani Experience SpA • Reg. SERNATUR N° 84219 • Pucón, Chile_`
+  );
+
+  const phone = quoteForm.value.clientPhone.replace(/[^0-9]/g, '');
+  const waUrl = phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`;
+
+  // Si el navegador soporta compartir archivos directamente (móvil o Web Share API con files)
+  if (pdfFile && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    try {
+      await navigator.share({
+        files: [pdfFile],
+        title: `Cotización ${quoteForm.value.quoteNumber} - Wamani Experience`,
+        text: decodeURIComponent(text)
+      });
+      return;
+    } catch (shareErr: any) {
+      if (shareErr.name === 'AbortError') return;
+      console.warn('Share falló, procediendo por web:', shareErr);
+    }
+  }
+
+  // En navegador web de escritorio: abre WhatsApp y muestra modal para adjuntar el PDF descargado
+  window.open(waUrl, '_blank');
+  showWhatsAppPdfModal.value = true;
+};
+
+const sendQuoteEmail = () => {
+  const subject = encodeURIComponent(`Cotización Oficial Wamani Experience - ${quoteForm.value.quoteNumber}`);
+  const itemsText = quoteForm.value.items.map((it, idx) => 
+    `${idx + 1}. ${it.title} (${it.quantity} pax x ${formatPrice(it.unitPrice)}) = ${formatPrice(it.quantity * it.unitPrice)}`
+  ).join('\n');
+
+  const body = encodeURIComponent(
+    `Estimado(a) ${quoteForm.value.clientName || 'Cliente'},\n\n` +
+    `Junto con saludar, enviamos la cotización oficial para sus actividades con Wamani Experience.\n\n` +
+    `Folio: ${quoteForm.value.quoteNumber}\n` +
+    `Fecha de Emisión: ${quoteForm.value.date}\n` +
+    `Fecha Estimada de Actividad: ${quoteForm.value.activityDate}\n` +
+    `Total Pasajeros: ${quoteForm.value.paxTotal}\n` +
+    `Destino: ${quoteForm.value.destination}\n\n` +
+    `DETALLE DE SERVICIOS:\n` +
+    `${itemsText}\n\n` +
+    (quoteDiscount.value > 0 ? `Descuento Aplicado: -${formatPrice(quoteDiscount.value)}\n` : '') +
+    `TOTAL FINAL A PAGAR: ${formatPrice(quoteTotal.value)} CLP (IVA 19% Incluido)\n` +
+    `Neto: ${formatPrice(quoteNeto.value)} CLP | IVA (19%): ${formatPrice(quoteIva.value)} CLP\n\n` +
+    `CONDICIONES Y NOTAS:\n${quoteForm.value.notes}\n\n` +
+    `DATOS DE PAGO:\n` +
+    `Banco Santander Chile - Cuenta Corriente N° 89-01234-5\n` +
+    `Titular: Wamani Experience SpA - RUT: 78.199.034-5\n` +
+    `Correo de Notificación: experiencewamani@gmail.com\n\n` +
+    `Atentamente,\n` +
+    `Equipo Wamani Experience SpA\n` +
+    `Pucón, Región de La Araucanía, Chile\n` +
+    `Registro Oficial SERNATUR N° 84219`
+  );
+
+  window.location.href = `mailto:${quoteForm.value.clientEmail}?subject=${subject}&body=${body}`;
+};
+
+// ==============================================================================
+// 13. GESTOR DE GALERÍA FOTOGRÁFICA
+// ==============================================================================
+const newGalleryForm = ref({
+  title: '',
+  category: 'Montaña',
+  caption: '',
+  images: [] as string[]
+});
+
+const handleGalleryFilesUpload = async (event: Event) => {
+  const files = (event.target as HTMLInputElement).files;
+  if (files && files.length > 0) {
+    triggerToast(`Optimizando y procesando ${files.length} fotografías...`);
+    try {
+      const compressedList = await compressMultipleImageFiles(files, { maxWidth: 1400, quality: 0.82 });
+      compressedList.forEach(url => {
+        newGalleryForm.value.images.push(url);
+      });
+      triggerToast('¡Fotografías optimizadas y listas para publicar!');
+    } catch (err: any) {
+      alert('Error al comprimir imágenes: ' + (err.message || ''));
+    }
+  }
+};
+
+const removeNewGalleryImg = (index: number) => {
+  newGalleryForm.value.images.splice(index, 1);
+};
+
+const saveGalleryImages = () => {
+  if (newGalleryForm.value.images.length === 0) {
+    alert('Por favor selecciona al menos una fotografía para subir.');
+    return;
+  }
+
+  newGalleryForm.value.images.forEach((url, i) => {
+    contentStore.addGalleryImage({
+      url,
+      title: newGalleryForm.value.title || `Fotografía Wamani ${contentStore.galleryImages.length + i + 1}`,
+      category: newGalleryForm.value.category,
+      caption: newGalleryForm.value.caption
+    });
+  });
+
+  newGalleryForm.value = {
+    title: '',
+    category: 'Montaña',
+    caption: '',
+    images: []
+  };
+
+  triggerToast('¡Fotografías publicadas exitosamente en la galería web!');
+};
+
+const deleteGalleryImg = (id: string) => {
+  if (confirm('¿Estás seguro de que deseas eliminar esta fotografía de la galería pública?')) {
+    contentStore.deleteGalleryImage(id);
+    triggerToast('Fotografía eliminada de la galería.');
+  }
+};
+
+// ==============================================================================
+// 13.1 EDICIÓN DE TEXTOS DE GALERÍA FOTOGRÁFICA
+// ==============================================================================
+const showEditGalleryModal = ref(false);
+const editingGalleryForm = ref<{
+  id: string;
+  url: string;
+  title: string;
+  category: string;
+  caption: string;
+}>({
+  id: '',
+  url: '',
+  title: '',
+  category: 'Montaña',
+  caption: ''
+});
+
+const openEditGalleryModal = (img: GalleryImage) => {
+  editingGalleryForm.value = {
+    id: img.id,
+    url: img.url,
+    title: img.title || '',
+    category: img.category || 'Montaña',
+    caption: img.caption || ''
+  };
+  showEditGalleryModal.value = true;
+};
+
+const saveEditGalleryForm = () => {
+  if (!editingGalleryForm.value.title.trim()) {
+    alert('Por favor ingresa un título para la fotografía.');
+    return;
+  }
+  contentStore.updateGalleryImage({
+    id: editingGalleryForm.value.id,
+    url: editingGalleryForm.value.url,
+    title: editingGalleryForm.value.title.trim(),
+    category: editingGalleryForm.value.category,
+    caption: editingGalleryForm.value.caption.trim(),
+    createdAt: new Date().toISOString()
+  });
+  showEditGalleryModal.value = false;
+  triggerToast('¡Textos de la fotografía actualizados exitosamente!');
 };
 </script>
 
@@ -1116,9 +1629,6 @@ const handleRestore = () => {
           <a href="/" target="_blank" class="btn btn-outline-accent px-3 py-2 fw-semibold d-flex align-items-center" title="Abrir sitio web en vivo">
             <i class="bi bi-box-arrow-up-right me-2"></i>Ver Sitio Web
           </a>
-          <button class="btn btn-outline-danger px-3 py-2 fw-semibold d-flex align-items-center" @click="handleRestore" title="Restablecer contenido de fábrica">
-            <i class="bi bi-arrow-counterclockwise me-2"></i>Fábrica
-          </button>
           <button class="btn btn-outline-light px-3 py-2 d-flex align-items-center" @click="isAuthenticated = false" title="Cerrar Sesión">
             <i class="bi bi-box-arrow-right me-1"></i> Salir
           </button>
@@ -1155,6 +1665,15 @@ const handleRestore = () => {
                   @click="activeTab = 'content-home'"
                 >
                   <i class="bi bi-house-door-fill me-2"></i>Textos Inicio
+                </button>
+              </li>
+              <li class="nav-item">
+                <button 
+                  class="nav-link py-3 fw-bold rounded-3 transition-all" 
+                  :class="{ active: activeTab === 'transport-mgmt' }"
+                  @click="activeTab = 'transport-mgmt'"
+                >
+                  <i class="bi bi-car-front-fill me-2 text-accent"></i>Transporte & Traslados
                 </button>
               </li>
               <li class="nav-item">
@@ -1215,6 +1734,24 @@ const handleRestore = () => {
                   @click="activeTab = 'legal'"
                 >
                   <i class="bi bi-shield-check me-2"></i>Legal & SERNATUR
+                </button>
+              </li>
+              <li class="nav-item">
+                <button 
+                  class="nav-link py-3 fw-bold rounded-3 transition-all" 
+                  :class="{ active: activeTab === 'quote-generator' }"
+                  @click="activeTab = 'quote-generator'"
+                >
+                  <i class="bi bi-file-earmark-spreadsheet-fill me-2 text-accent"></i>Cotizador Oficial
+                </button>
+              </li>
+              <li class="nav-item">
+                <button 
+                  class="nav-link py-3 fw-bold rounded-3 transition-all" 
+                  :class="{ active: activeTab === 'gallery-mgmt' }"
+                  @click="activeTab = 'gallery-mgmt'"
+                >
+                  <i class="bi bi-images me-2 text-accent"></i>Galería Fotográfica ({{ contentStore.galleryImages.length }})
                 </button>
               </li>
             </ul>
@@ -1283,6 +1820,15 @@ const handleRestore = () => {
                     {{ formatPrice(exp.pricing.basePrice) }}
                   </td>
                   <td class="text-end">
+                    <button class="btn btn-sm btn-outline-info me-1 px-2 py-1" @click="copyTourLink(exp)" title="Copiar enlace directo del tour para clientes o redes sociales">
+                      <i class="bi bi-link-45deg"></i>
+                    </button>
+                    <a :href="'/experiencias/' + exp.slug" target="_blank" class="btn btn-sm btn-outline-success me-1 px-2 py-1" title="Ver página individual del tour en vivo">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-warning me-1 px-2 py-1" @click="shareTourWhatsApp(exp)" title="Compartir enlace por WhatsApp">
+                      <i class="bi bi-whatsapp"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-light me-1 px-2 py-1" @click="duplicateExperience(exp)" title="Duplicar / Clonar este Tour">
                       <i class="bi bi-copy"></i>
                     </button>
@@ -1412,6 +1958,143 @@ const handleRestore = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- TAB PANEL: TRANSPORTE & TRASLADOS -->
+      <div v-if="activeTab === 'transport-mgmt'" class="tab-pane-content">
+        <div class="admin-module-card p-4 rounded-4 shadow-sm mb-4">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1">SECCIÓN PORTADA</span>
+                <h3 class="h4 fw-bold mb-0 text-white font-serif">Transporte Exclusivo & Traslados Cordilleranos</h3>
+              </div>
+              <p class="small text-white opacity-85 mb-0">Gestiona los textos de cabecera, tarjetas de servicios, fotografías, características y botones de consulta por WhatsApp.</p>
+            </div>
+            <button class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow" @click="openAddTransportModal">
+              <i class="bi bi-plus-lg me-2"></i>Nuevo Servicio de Transporte
+            </button>
+          </div>
+
+          <!-- 1. ENCABEZADO EDITORIAL DE LA SECCIÓN -->
+          <div class="admin-sub-card p-4 rounded-4 mb-4 border border-secondary border-opacity-25">
+            <h4 class="h6 fw-bold text-accent mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-type-h1"></i> Encabezado Editorial de la Sección
+            </h4>
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold text-white mb-1">Subtítulo / Badge Superior</label>
+                <input v-model="transportHeaderForm.badge" type="text" class="form-control admin-input text-white" placeholder="Ej: MOVILIDAD PRIVADA & CONFORT">
+              </div>
+              <div class="col-12 col-md-8">
+                <label class="form-label small fw-bold text-white mb-1">Título Principal de la Sección</label>
+                <input v-model="transportHeaderForm.title" type="text" class="form-control admin-input text-white" placeholder="Ej: Transporte Exclusivo & Traslados Cordilleranos">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold text-white mb-1">Descripción / Bajada</label>
+                <textarea v-model="transportHeaderForm.description" rows="2" class="form-control admin-input text-white" placeholder="Describe el servicio de transporte y conectividad en el sur..."></textarea>
+              </div>
+              <div class="col-12 d-flex justify-content-end">
+                <button type="button" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow" @click="saveTransportHeader">
+                  <i class="bi bi-check2-circle me-1"></i> Guardar Encabezado de Transporte
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. TARJETAS DE SERVICIOS -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="h6 fw-bold text-accent mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Tarjetas de Servicios de Transporte ({{ (contentStore.content.home?.transport?.services || []).length }})
+              </h4>
+            </div>
+
+            <div class="row g-4">
+              <div 
+                v-for="srv in (contentStore.content.home?.transport?.services || [])" 
+                :key="srv.id" 
+                class="col-12 col-md-6 col-lg-4"
+              >
+                <div class="card admin-sub-card rounded-4 shadow-sm overflow-hidden h-100 d-flex flex-column border border-secondary border-opacity-25">
+                  <!-- Header de la tarjeta: Imagen si tiene o Icono -->
+                  <div v-if="srv.imageUrl" class="position-relative overflow-hidden ratio ratio-16x9">
+                    <img :src="srv.imageUrl" :alt="srv.title" class="w-100 h-100 object-fit-cover">
+                    <span v-if="srv.featuredBadge" class="badge bg-accent text-dark-mountain position-absolute top-0 end-0 m-2 px-2 py-1 small fw-bold">
+                      {{ srv.featuredBadge }}
+                    </span>
+                    <span class="badge bg-dark bg-opacity-75 text-accent position-absolute bottom-0 start-0 m-2 px-2 py-1 small fw-bold text-uppercase">
+                      {{ srv.badge }}
+                    </span>
+                  </div>
+                  <div v-else class="p-4 pb-2 d-flex justify-content-between align-items-start">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 p-3" style="background: rgba(231, 220, 195, 0.12); border: 1px solid rgba(231, 220, 195, 0.25);">
+                      <i :class="[srv.icon || 'bi-car-front-fill', 'fs-3', 'text-accent']"></i>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                      <span v-if="srv.featuredBadge" class="badge bg-accent text-dark-mountain small fw-bold">
+                        {{ srv.featuredBadge }}
+                      </span>
+                      <span class="badge bg-dark bg-opacity-75 text-accent text-uppercase small fw-bold">
+                        {{ srv.badge }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                    <div>
+                      <h4 class="h5 fw-bold text-white mb-2">{{ srv.title }}</h4>
+                      <p class="small text-white opacity-85 lh-sm mb-3">
+                        {{ srv.description }}
+                      </p>
+
+                      <!-- Lista de características -->
+                      <ul v-if="srv.features && srv.features.length" class="list-unstyled small text-white opacity-85 mb-3">
+                        <li v-for="(feat, fIdx) in srv.features.slice(0, 3)" :key="fIdx" class="d-flex align-items-center gap-2 mb-1">
+                          <i class="bi bi-check-circle-fill text-accent" style="font-size: 0.8rem;"></i>
+                          <span class="text-truncate">{{ feat }}</span>
+                        </li>
+                        <li v-if="srv.features.length > 3" class="text-white-50" style="font-size: 0.75rem;">
+                          +{{ srv.features.length - 3 }} características más
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div class="pt-3 border-top border-secondary border-opacity-25 mt-auto">
+                      <div class="d-flex justify-content-between align-items-center mb-2 small text-white-50">
+                        <span>Botón: <strong class="text-accent">{{ srv.buttonText }}</strong></span>
+                        <span class="badge" :class="srv.buttonStyle === 'solid' ? 'bg-accent text-dark-mountain' : 'border border-accent text-accent'">
+                          {{ srv.buttonStyle === 'solid' ? 'Sólido' : 'Outline' }}
+                        </span>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-accent w-100 fw-bold py-2" @click="openEditTransportModal(srv)">
+                          <i class="bi bi-pencil-square me-1"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger px-3 py-2" @click="deleteTransportService(srv.id)" title="Eliminar Servicio">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estado vacío -->
+              <div v-if="!(contentStore.content.home?.transport?.services || []).length" class="col-12">
+                <div class="text-center p-5 rounded-4 admin-sub-card text-white-50">
+                  <i class="bi bi-car-front fs-1 d-block mb-3 text-accent opacity-50"></i>
+                  <p class="mb-3">No hay servicios de transporte configurados.</p>
+                  <button class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain" @click="openAddTransportModal">
+                    <i class="bi bi-plus-lg me-2"></i>Añadir Primer Servicio
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <!-- TAB PANEL 4: NOSOTROS -->
@@ -2245,6 +2928,633 @@ const handleRestore = () => {
       </div>
     </div>
 
+    <!-- TAB PANEL 12: COTIZADOR OFICIAL DE SERVICIOS -->
+    <div v-if="activeTab === 'quote-generator'" class="tab-pane-content">
+      <div class="admin-module-card p-4 rounded-4 shadow-sm mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1">OFICIAL</span>
+              <h3 class="h4 fw-bold mb-0 text-white font-serif">Cotizador de Servicios Wamani Experience</h3>
+            </div>
+            <p class="small text-white opacity-85 mb-0">Genera propuestas y presupuestos formales para clientes, empresas o grupos con descarga en PDF y envío directo.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <button 
+              class="btn btn-accent fw-bold text-dark-mountain d-flex align-items-center gap-2 shadow-sm" 
+              :disabled="isGeneratingPdf"
+              @click="downloadQuotePdf"
+            >
+              <span v-if="isGeneratingPdf" class="spinner-border spinner-border-sm"></span>
+              <i v-else class="bi bi-file-earmark-pdf-fill fs-5"></i>
+              <span>{{ isGeneratingPdf ? 'Generando PDF...' : 'Descargar PDF (1 Página)' }}</span>
+            </button>
+            <button 
+              class="btn btn-whatsapp-custom fw-bold d-flex align-items-center gap-2 shadow-sm" 
+              :disabled="isGeneratingPdf"
+              @click="sendQuoteWhatsApp"
+            >
+              <i class="bi bi-whatsapp fs-5"></i>
+              <span>Enviar por WhatsApp (con PDF)</span>
+            </button>
+            <button class="btn btn-outline-light fw-semibold d-flex align-items-center gap-2" @click="printQuote" title="Vista de impresión directa">
+              <i class="bi bi-printer-fill"></i> Imprimir
+            </button>
+            <button class="btn btn-outline-light fw-semibold d-flex align-items-center gap-2" @click="sendQuoteEmail">
+              <i class="bi bi-envelope-fill"></i> Por Correo
+            </button>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Columna Izquierda: Parámetros y Formulario -->
+          <div class="col-12 col-xl-5">
+            <div class="p-3 rounded-4 admin-sub-card mb-3">
+              <h4 class="h6 fw-bold text-accent mb-3"><i class="bi bi-person-badge-fill me-2"></i>1. Datos del Cliente / Empresa</h4>
+              <div class="row g-2">
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-white mb-1">Nombre Completo / Razón Social *</label>
+                  <input v-model="quoteForm.clientName" type="text" class="form-control form-control-sm admin-input text-white" placeholder="Ej: Marcela Gómez / Inversiones Austral SpA">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">RUT / DNI / Pasaporte</label>
+                  <input v-model="quoteForm.clientRut" type="text" class="form-control form-control-sm admin-input text-white" placeholder="12.345.678-9">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Teléfono / WhatsApp *</label>
+                  <input v-model="quoteForm.clientPhone" type="text" class="form-control form-control-sm admin-input text-white" placeholder="+56 9 1234 5678">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Correo Electrónico</label>
+                  <input v-model="quoteForm.clientEmail" type="email" class="form-control form-control-sm admin-input text-white" placeholder="cliente@correo.com">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Ciudad / País</label>
+                  <input v-model="quoteForm.clientCity" type="text" class="form-control form-control-sm admin-input text-white" placeholder="Santiago, Chile">
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-4 admin-sub-card mb-3">
+              <h4 class="h6 fw-bold text-accent mb-3"><i class="bi bi-calendar2-week-fill me-2"></i>2. Parámetros de la Actividad</h4>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Folio Cotización</label>
+                  <input v-model="quoteForm.quoteNumber" type="text" class="form-control form-control-sm admin-input text-white font-monospace">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Fecha Emisión</label>
+                  <input v-model="quoteForm.date" type="date" class="form-control form-control-sm admin-input text-white">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Fecha de la Actividad</label>
+                  <input v-model="quoteForm.activityDate" type="date" class="form-control form-control-sm admin-input text-white">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-white mb-1">Válido Hasta</label>
+                  <input v-model="quoteForm.validUntil" type="date" class="form-control form-control-sm admin-input text-white">
+                </div>
+                <div class="col-8">
+                  <label class="form-label small fw-semibold text-white mb-1">Destino Principal</label>
+                  <input v-model="quoteForm.destination" type="text" class="form-control form-control-sm admin-input text-white">
+                </div>
+                <div class="col-4">
+                  <label class="form-label small fw-semibold text-white mb-1">Total Pax</label>
+                  <input v-model="quoteForm.paxTotal" type="number" min="1" class="form-control form-control-sm admin-input text-white">
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-4 admin-sub-card mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="h6 fw-bold text-accent mb-0"><i class="bi bi-cart-check-fill me-2"></i>3. Añadir Servicios & Paquetes</h4>
+                <button class="btn btn-sm btn-outline-accent py-1" type="button" @click="addCustomItemToQuote">
+                  <i class="bi bi-plus-lg me-1"></i>Ítem Libre
+                </button>
+              </div>
+
+              <!-- Selector rápido desde Catálogo de Tours -->
+              <label class="form-label small text-white-50 mb-1" style="font-size: 0.72rem;">Añadir Tour Individual:</label>
+              <div class="input-group input-group-sm mb-3">
+                <select v-model="selectedTourToQuote" class="form-select admin-input text-white">
+                  <option value="">-- Seleccionar Tour del Catálogo --</option>
+                  <option v-for="t in contentStore.experiences" :key="t.id" :value="t.id">
+                    {{ t.title }} ({{ formatPrice(t.pricing.basePrice) }} p/p)
+                  </option>
+                </select>
+                <button class="btn btn-accent fw-bold text-dark-mountain" type="button" @click="addTourToQuote">
+                  Añadir Tour
+                </button>
+              </div>
+
+              <!-- Selector rápido desde Paquetes de Tours -->
+              <label class="form-label small text-white-50 mb-1" style="font-size: 0.72rem;">Añadir Paquete de Tours / Combo:</label>
+              <div class="input-group input-group-sm mb-3">
+                <select v-model="selectedPackageToQuote" class="form-select admin-input text-white">
+                  <option value="">-- Seleccionar Paquete de Tours --</option>
+                  <option v-for="pkg in contentStore.tourPackages" :key="pkg.id" :value="pkg.id">
+                    📦 {{ pkg.title }} ({{ formatPrice(pkg.bundlePrice) }})
+                  </option>
+                </select>
+                <button class="btn btn-accent fw-bold text-dark-mountain" type="button" @click="addPackageToQuote">
+                  Añadir Paquete
+                </button>
+              </div>
+
+              <!-- Lista editable de ítems -->
+              <div class="d-flex flex-column gap-2">
+                <div v-for="(it, idx) in quoteForm.items" :key="it.id" class="p-2 rounded-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25">
+                  <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                    <input v-model="it.title" type="text" class="form-control form-control-sm admin-input text-white fw-bold py-1" placeholder="Nombre del servicio">
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2 flex-shrink-0" @click="removeQuoteItem(idx)" title="Quitar ítem">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                  <input v-model="it.description" type="text" class="form-control form-control-sm admin-input text-white mb-2 py-0" style="font-size: 0.78rem;" placeholder="Detalle / Inclusiones...">
+                  <div class="row g-2">
+                    <div class="col-5">
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-dark text-white-50 border-secondary border-opacity-25" style="font-size: 0.72rem;">Cant/Pax</span>
+                        <input v-model="it.quantity" type="number" min="1" class="form-control admin-input text-white text-center">
+                      </div>
+                    </div>
+                    <div class="col-7">
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-dark text-white-50 border-secondary border-opacity-25" style="font-size: 0.72rem;">$ Unit</span>
+                        <input v-model="it.unitPrice" type="number" step="1000" class="form-control admin-input text-white text-end font-monospace">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Descuentos y Condiciones -->
+            <div class="p-3 rounded-4 admin-sub-card">
+              <h4 class="h6 fw-bold text-accent mb-3"><i class="bi bi-percent me-2"></i>4. Descuentos & Régimen Tributario</h4>
+              <div class="row g-2 mb-3">
+                <div class="col-12 col-md-5">
+                  <label class="form-label small fw-semibold text-white mb-1">Descuento Global ($CLP)</label>
+                  <input v-model="quoteForm.discountAmount" type="number" step="1000" class="form-control form-control-sm admin-input text-white font-monospace">
+                </div>
+                <div class="col-12 col-md-7">
+                  <label class="form-label small fw-semibold text-white mb-1">Régimen de IVA & Facturación</label>
+                  <select v-model="quoteForm.taxMode" class="form-select form-select-sm admin-input text-white">
+                    <option value="iva_incluido">Precios Publicados (IVA 19% Incluido)</option>
+                    <option value="factura">Factura Comercial (Desglose Neto + IVA)</option>
+                    <option value="exento">Exento IVA (Turismo Receptivo Extranjero)</option>
+                    <option value="neto_mas_iva">Precios son Netos (+19% IVA adicional)</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <span class="small text-white-50" style="font-size: 0.73rem;">
+                    <i class="bi bi-info-circle me-1"></i>En el modo estándar, los precios del catálogo ya contienen el IVA 19% y el Total a pagar no se infla.
+                  </span>
+                </div>
+                <div class="col-12 mt-2">
+                  <label class="form-label small fw-semibold text-white mb-1">Términos, Medios de Pago & Notas</label>
+                  <textarea v-model="quoteForm.notes" rows="3" class="form-control form-control-sm admin-input text-white"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Vista Previa Oficial Descargable en 1 Página -->
+          <div class="col-12 col-xl-7">
+            <div 
+              id="quote-preview-paper" 
+              class="quote-preview-paper p-4 rounded-4 shadow-lg position-relative mx-auto" 
+              style="max-width: 820px; background: #FFFFFF; border: 1.5px solid #BDD7D1; color: #082826; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;"
+            >
+              <!-- Barra de acento de marca en la parte superior (Gradiente Verde Corporativo Wamani) -->
+              <div 
+                class="position-absolute top-0 start-0 w-100 rounded-top-4" 
+                style="height: 6px; background: linear-gradient(90deg, #082826 0%, #0D5B57 70%, #177C77 100%);"
+              ></div>
+
+              <!-- 1. CABECERA CORPORATIVA DE LA COTIZACIÓN -->
+              <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3 pt-1" style="border-color: #C4DDD7 !important;">
+                <div class="d-flex gap-3 align-items-center">
+                  <div class="rounded-3 d-flex align-items-center justify-content-center shadow-xs" style="background: #F0F6F5; border: 1.5px solid #C4DDD7; width: 60px; height: 60px; padding: 4px;">
+                    <img src="/Logo Wamani.png" alt="Wamani Logo" height="50" width="50" class="object-fit-contain">
+                  </div>
+                  <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <h2 class="h4 fw-bold font-serif mb-0" style="color: #082826; letter-spacing: 0.03em;">WAMANI EXPERIENCE</h2>
+                      <span style="background: rgba(13, 91, 87, 0.12); color: #082826; border: 1px solid rgba(13, 91, 87, 0.25); border-radius: 9999px; padding: 2px 10px; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
+                        Turismo & Ecoturismo
+                      </span>
+                    </div>
+                    <div class="lh-sm" style="font-size: 0.73rem; color: #082826;">
+                      <div>
+                        <strong>R.U.T.:</strong> {{ contentStore.content.legal.rut }} &nbsp;&bull;&nbsp; 
+                        <strong>SERNATUR:</strong> N° {{ contentStore.content.legal.sernaturRegistry }} &nbsp;&bull;&nbsp; 
+                        <span>{{ contentStore.content.legal.city }}, Chile</span>
+                      </div>
+                      <div class="mt-0.5">
+                        <strong>Contacto:</strong> {{ contentStore.content.contact.email }} &nbsp;&bull;&nbsp; 
+                        <strong>Tel:</strong> {{ contentStore.content.contact.phone }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tarjeta de Folio y Fecha en Verde Wamani -->
+                <div class="text-end">
+                  <div class="rounded-3 text-center overflow-hidden shadow-xs" style="background: #F0F6F5; border: 1.5px solid #C4DDD7; min-width: 185px;">
+                    <div style="background: #082826; color: #FFFFFF; padding: 4px 10px; font-size: 0.67rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;">
+                      COTIZACIÓN OFICIAL
+                    </div>
+                    <div style="padding: 7px 10px;">
+                      <div style="font-family: monospace; font-size: 1.05rem; font-weight: 800; color: #082826; line-height: 1.2;">{{ quoteForm.quoteNumber }}</div>
+                      <div style="font-size: 0.72rem; color: #082826; margin-top: 2px;">Fecha: <strong>{{ quoteForm.date }}</strong></div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.71rem; color: #0D5B57; font-weight: 700; text-align: right; margin-top: 4px;">
+                    <i class="bi bi-clock-history me-1"></i>Válida hasta: {{ quoteForm.validUntil }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. BLOQUE CLIENTE & EXPERIENCIA (EN TONOS VERDE ALPINO) -->
+              <div 
+                class="row g-2 mb-3 rounded-3 shadow-xs" 
+                style="background: #F0F6F5; border: 1.5px solid #C4DDD7; border-left: 5px solid #082826; padding: 12px 14px; margin-left: 0; margin-right: 0;"
+              >
+                <!-- Destinatario / Cliente -->
+                <div class="col-sm-6 border-end" style="border-color: #C4DDD7 !important; padding-right: 14px;">
+                  <div style="color: #0D5B57; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px;">
+                    <i class="bi bi-person-fill me-1"></i> DATOS DEL CLIENTE / DESTINATARIO
+                  </div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: #082826; margin-bottom: 2px;">
+                    {{ quoteForm.clientName || 'Cliente Particular' }}
+                  </div>
+                  <div style="font-size: 0.74rem; color: #082826; line-height: 1.4;">
+                    <span v-if="quoteForm.clientRut"><strong>RUT:</strong> {{ quoteForm.clientRut }} &nbsp;&bull;&nbsp; </span>
+                    <span>{{ quoteForm.clientCity || 'Chile' }}</span>
+                  </div>
+                  <div style="font-size: 0.74rem; color: #082826; line-height: 1.4;">
+                    <span v-if="quoteForm.clientPhone"><strong>Tel:</strong> {{ quoteForm.clientPhone }}</span>
+                    <span v-if="quoteForm.clientPhone && quoteForm.clientEmail"> &nbsp;&bull;&nbsp; </span>
+                    <span v-if="quoteForm.clientEmail"><strong>Correo:</strong> {{ quoteForm.clientEmail }}</span>
+                  </div>
+                </div>
+
+                <!-- Detalle de la Propuesta / Destino -->
+                <div class="col-sm-6 ps-sm-3">
+                  <div style="color: #0D5B57; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px;">
+                    <i class="bi bi-compass-fill me-1"></i> DETALLES DE LA EXPERIENCIA
+                  </div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: #082826; margin-bottom: 2px;">
+                    {{ quoteForm.destination || 'Pucón / Araucanía Lacustre' }}
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 0.74rem; color: #082826;">
+                    <span><strong>Fecha Programa:</strong> {{ quoteForm.activityDate }}</span>
+                    <span style="background: #082826; color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+                      <i class="bi bi-people-fill me-1"></i>{{ quoteForm.paxTotal }} Pasajeros
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. TABLA DE SERVICIOS COTIZADOS -->
+              <div class="table-responsive mb-3 rounded-3 overflow-hidden shadow-xs" style="border: 1.5px solid #C4DDD7;">
+                <table class="table align-middle table-sm mb-0">
+                  <thead style="background: #082826; color: #FFFFFF;">
+                    <tr>
+                      <th class="py-2 ps-3 text-center" style="font-size: 0.72rem; width: 35px; border: none; letter-spacing: 0.06em;">#</th>
+                      <th class="py-2" style="font-size: 0.72rem; border: none; letter-spacing: 0.06em;">DESCRIPCIÓN DEL SERVICIO & INCLUSIONES</th>
+                      <th class="py-2 text-center" style="font-size: 0.72rem; width: 85px; border: none; letter-spacing: 0.06em;">PAX / CANT</th>
+                      <th class="py-2 text-end" style="font-size: 0.72rem; width: 110px; border: none; letter-spacing: 0.06em;">VALOR UNIT.</th>
+                      <th class="py-2 text-end pe-3" style="font-size: 0.72rem; width: 125px; border: none; letter-spacing: 0.06em;">TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(it, idx) in quoteForm.items" 
+                      :key="it.id" 
+                      :style="{ background: idx % 2 === 0 ? '#FFFFFF' : '#F5F9F8' }"
+                      style="border-bottom: 1px solid #D6E8E4;"
+                    >
+                      <td class="ps-3 text-center fw-bold" style="font-size: 0.76rem; color: #0D5B57;">{{ idx + 1 }}</td>
+                      <td class="py-2">
+                        <strong class="d-block" style="color: #082826; font-size: 0.84rem;">{{ it.title }}</strong>
+                        <span class="lh-sm d-block" style="color: #082826; opacity: 0.85; font-size: 0.72rem;">{{ it.description }}</span>
+                      </td>
+                      <td class="text-center fw-bold py-2" style="color: #082826; font-size: 0.8rem;">{{ it.quantity }}</td>
+                      <td class="text-end font-monospace py-2" style="color: #082826; font-size: 0.8rem;">{{ formatPrice(it.unitPrice) }}</td>
+                      <td class="text-end pe-3 font-monospace fw-bold py-2" style="color: #082826; font-size: 0.84rem;">{{ formatPrice(it.quantity * it.unitPrice) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- 4. SECCIÓN INFERIOR BALANCEADA EN 2 COLUMNAS (TOTALMENTE INTEGRADA EN TONOS VERDE) -->
+              <div class="row g-3 mb-3">
+                <!-- Columna Izquierda: Medios de Pago, Banco Santander, Webpay y Monedas -->
+                <div class="col-sm-6">
+                  <div class="rounded-3 h-100 d-flex flex-column justify-content-between shadow-xs" style="background: #F0F6F5; border: 1.5px solid #C4DDD7; border-left: 5px solid #082826; padding: 14px;">
+                    <div>
+                      <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div style="color: #0D5B57; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
+                          <i class="bi bi-shield-check me-1"></i> CONDICIONES & MEDIOS DE PAGO
+                        </div>
+                        <span style="background: #082826; color: #FFFFFF; font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+                          IVA 19% INCLUIDO
+                        </span>
+                      </div>
+
+                      <!-- Notas y Condiciones -->
+                      <div class="lh-sm mb-2" style="font-size: 0.72rem; color: #082826; line-height: 1.4;">
+                        {{ quoteForm.notes }}
+                      </div>
+
+                      <!-- Recuadro Blanco Banco Santander -->
+                      <div class="rounded-2 lh-sm mb-2" style="background: #FFFFFF; border: 1.5px solid #C4DDD7; font-size: 0.72rem; color: #082826; padding: 9px 12px;">
+                        <div class="d-flex align-items-center gap-1 fw-bold mb-1" style="color: #082826;">
+                          <i class="bi bi-bank2" style="color: #0D5B57;"></i>
+                          <span>Banco Santander Chile &bull; Cta. Corriente N° 89-01234-5</span>
+                        </div>
+                        <div><strong>Titular:</strong> Wamani Experience SpA &nbsp;&bull;&nbsp; <strong>RUT:</strong> 78.199.034-5</div>
+                        <div><strong>Comprobante a:</strong> experiencewamani@gmail.com</div>
+                      </div>
+                    </div>
+
+                    <!-- Badges de Pago: Webpay, CLP y Referencia Monedas -->
+                    <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: #D6E8E4 !important;">
+                      <!-- Webpay Badge -->
+                      <div class="d-inline-flex align-items-center gap-1.5 fw-bold" style="background: #FFFFFF; border: 1px solid #C4DDD7; border-radius: 6px; padding: 3px 8px; font-size: 0.68rem; color: #082826;">
+                        <span>Pagar con</span>
+                        <img src="/webpay-logo-transparent.png" alt="Webpay.cl" style="height: 14px; width: auto; object-fit: contain;" />
+                      </div>
+
+                      <!-- CLP Badge -->
+                      <span style="background: rgba(13, 91, 87, 0.1); color: #082826; border: 1px solid rgba(13, 91, 87, 0.2); border-radius: 6px; padding: 3px 8px; font-size: 0.68rem; font-weight: 700;">
+                        Moneda Oficial: CLP
+                      </span>
+
+                      <!-- Divisas de Referencia -->
+                      <span style="background: #082826; color: #FFFFFF; border-radius: 6px; padding: 3px 8px; font-size: 0.66rem; font-weight: 600;">
+                        USD ${{ (quoteTotal * 0.0011).toFixed(0) }} | BRL R${{ (quoteTotal * 0.0055).toFixed(0) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Columna Derecha: Desglose y Cajón de TOTAL A PAGAR (CORREGIDO SIN SUPERPOSICIONES) -->
+                <div class="col-sm-6">
+                  <div class="rounded-3 h-100 d-flex flex-column justify-content-between shadow-xs" style="background: #F0F6F5; border: 1.5px solid #C4DDD7; padding: 14px;">
+                    <div>
+                      <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom" style="border-color: #D6E8E4 !important;">
+                        <div style="color: #0D5B57; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
+                          <i class="bi bi-receipt me-1"></i> RESUMEN DE LIQUIDACIÓN
+                        </div>
+                        <span style="font-family: monospace; font-weight: 700; color: #082826; font-size: 0.72rem;">{{ quoteForm.items.length }} ítem(s)</span>
+                      </div>
+
+                      <div class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.75rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">Subtotal Servicios:</span>
+                        <span style="font-family: monospace; font-weight: 700; color: #082826;">{{ formatPrice(quoteSubtotal) }}</span>
+                      </div>
+
+                      <div v-if="quoteDiscount > 0" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.75rem; border-color: #D6E8E4 !important; color: #0D5B57;">
+                        <span class="fw-semibold"><i class="bi bi-tag-fill me-1"></i>Descuento Especial:</span>
+                        <span style="font-family: monospace; font-weight: 700;">-{{ formatPrice(quoteDiscount) }}</span>
+                      </div>
+
+                      <!-- Desglose de IVA según taxMode -->
+                      <div v-if="quoteForm.taxMode === 'iva_incluido'" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.72rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">I.V.A. (19% Incluido en tarifa):</span>
+                        <span style="font-family: monospace; font-weight: 700; color: #0D5B57;">{{ formatPrice(quoteIva) }}</span>
+                      </div>
+                      <div v-else-if="quoteForm.taxMode === 'factura'" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.74rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">Neto Facturable:</span>
+                        <span style="font-family: monospace; font-weight: 600; color: #082826;">{{ formatPrice(quoteNeto) }}</span>
+                      </div>
+                      <div v-if="quoteForm.taxMode === 'factura'" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.74rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">I.V.A. (19%):</span>
+                        <span style="font-family: monospace; font-weight: 700; color: #082826;">+{{ formatPrice(quoteIva) }}</span>
+                      </div>
+                      <div v-else-if="quoteForm.taxMode === 'exento'" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.72rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">Régimen Tributario:</span>
+                        <span class="fw-bold" style="color: #0D5B57;">Exento IVA (Turismo Receptivo)</span>
+                      </div>
+                      <div v-else-if="quoteForm.taxMode === 'neto_mas_iva'" class="d-flex justify-content-between py-1 border-bottom" style="font-size: 0.74rem; border-color: #D6E8E4 !important;">
+                        <span style="color: #082826;">I.V.A. (19% adicional):</span>
+                        <span style="font-family: monospace; font-weight: 700; color: #082826;">+{{ formatPrice(quoteIva) }}</span>
+                      </div>
+                    </div>
+
+                    <!-- CAJÓN DESTACADO VERDE BOSQUE: TOTAL A PAGAR (ESPACIADO EXACTO Y TEXTOS PERFECTAMENTE ENMARCADOS) -->
+                    <div 
+                      class="shadow-sm" 
+                      style="background: #082826; border-radius: 10px; padding: 12px 16px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;"
+                    >
+                      <div>
+                        <div style="color: #FFFFFF; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; line-height: 1.2;">
+                          TOTAL A PAGAR:
+                        </div>
+                        <div style="color: rgba(255, 255, 255, 0.75); font-size: 0.65rem; line-height: 1.2;">
+                          Valores finales en pesos chilenos
+                        </div>
+                      </div>
+                      <div class="text-end">
+                        <div style="font-family: monospace; font-weight: 800; color: #FFFFFF; font-size: 1.32rem; letter-spacing: 0.02em; line-height: 1.1;">
+                          {{ formatPrice(quoteTotal) }} CLP
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. PIE DE PÁGINA INSTITUCIONAL SERNATUR -->
+              <div class="d-flex justify-content-between align-items-center pt-2.5 border-top" style="border-color: #C4DDD7 !important; font-size: 0.68rem;">
+                <div class="d-flex align-items-center gap-2">
+                  <img src="/sernatur.webp" alt="Sernatur" height="24">
+                  <span style="color: #082826; font-weight: 700;">Agencia Oficial de Turismo Acreditada en SERNATUR Chile N° 84219</span>
+                </div>
+                <span style="color: #082826; opacity: 0.85; font-weight: 500;">Wamani Experience SpA &bull; Av. Bernardo O'Higgins 425, Pucón, Chile</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL AVISO WHATSAPP PDF DESCARGADO -->
+    <div v-if="showWhatsAppPdfModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
+      <div class="modal-card p-4 shadow-lg text-white text-center" style="max-width: 480px; border-radius: 24px;">
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-3 mb-2" style="background: rgba(37, 211, 102, 0.15); border: 2px solid #25D366;">
+            <i class="bi bi-file-earmark-pdf-fill text-accent fs-1"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white mb-1">¡PDF Oficial Listo para WhatsApp!</h4>
+          <p class="small text-white opacity-85 mb-0">
+            El archivo <strong class="text-accent">{{ `Cotizacion-${quoteForm.quoteNumber}.pdf` }}</strong> se ha descargado automáticamente en tu equipo y se abrió el chat de WhatsApp.
+          </p>
+        </div>
+
+        <div class="p-3 rounded-3 text-start mb-3" style="background: rgba(255,255,255,0.06); border: 1px dashed rgba(231,220,195,0.4); font-size: 0.8rem;">
+          <div class="fw-bold text-accent mb-1"><i class="bi bi-info-circle me-1"></i>Paso final:</div>
+          <div class="text-white opacity-85">
+            Solo arrastra o adjunta el archivo PDF descargado desde tu carpeta de <em>Descargas</em> al chat de WhatsApp para que el cliente reciba la cotización formal en 1 página.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-sm btn-outline-light px-3 py-2" @click="downloadQuotePdf">
+            <i class="bi bi-arrow-clockwise me-1"></i> Re-descargar PDF
+          </button>
+          <button type="button" class="btn btn-sm btn-accent px-4 py-2 fw-bold text-dark-mountain shadow" @click="showWhatsAppPdfModal = false">
+            <i class="bi bi-check-lg me-1"></i> ¡Entendido!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 13: GESTOR DE GALERÍA FOTOGRÁFICA -->
+    <div v-if="activeTab === 'gallery-mgmt'" class="tab-pane-content">
+      <div class="admin-module-card p-4 rounded-4 shadow-sm mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-accent text-dark-mountain fw-bold px-3 py-1">{{ contentStore.galleryImages.length }} FOTOS</span>
+              <h3 class="h4 fw-bold mb-0 text-white font-serif">Galería Fotográfica Oficial</h3>
+            </div>
+            <p class="small text-white opacity-85 mb-0">Sube fotografías de expediciones sin límite de peso (se comprimen automáticamente). Se exhiben en la portada web.</p>
+          </div>
+        </div>
+
+        <!-- Formulario para subir nuevas fotos a la galería -->
+        <div class="p-4 rounded-4 admin-sub-card mb-4">
+          <h4 class="h6 fw-bold text-accent mb-3"><i class="bi bi-cloud-arrow-up-fill me-2"></i>Subir Nuevas Fotografías a la Galería</h4>
+          
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label small fw-bold text-white mb-1">Título de la Fotografía</label>
+              <input v-model="newGalleryForm.title" type="text" class="form-control admin-input text-white" placeholder="Ej: Cumbre Volcán Villarrica al Atardecer">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label small fw-bold text-white mb-1">Categoría</label>
+              <select v-model="newGalleryForm.category" class="form-select admin-input text-white">
+                <option value="Montaña">Montaña</option>
+                <option value="Bosques">Bosques</option>
+                <option value="Termas">Termas</option>
+                <option value="Lagos">Lagos</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Flora & Fauna">Flora & Fauna</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label small fw-bold text-white mb-1">Leyenda / Pie de Foto (Opcional)</label>
+              <input v-model="newGalleryForm.caption" type="text" class="form-control admin-input text-white" placeholder="Ej: Expedición guiada en sector Las Peinetas">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold text-white mb-1">Seleccionar Imágenes (Cualquier tamaño; compresión interna automática)</label>
+              <input type="file" multiple accept="image/*" class="form-control admin-input text-white" @change="handleGalleryFilesUpload">
+            </div>
+
+            <!-- Miniaturas en cola para subir -->
+            <div v-if="newGalleryForm.images.length > 0" class="col-12">
+              <label class="small text-white opacity-85 d-block mb-2">Imágenes listas para publicar ({{ newGalleryForm.images.length }}):</label>
+              <div class="d-flex flex-wrap gap-2">
+                <div v-for="(imgUrl, idx) in newGalleryForm.images" :key="idx" class="position-relative rounded-3 overflow-hidden border border-secondary shadow-sm" style="width: 90px; height: 90px;">
+                  <img :src="imgUrl" class="w-100 h-100 object-fit-cover" alt="Preview">
+                  <button type="button" class="btn btn-danger btn-sm p-0 position-absolute top-0 end-0 m-1 rounded-circle d-flex align-items-center justify-content-center" style="width: 22px; height: 22px;" @click="removeNewGalleryImg(idx)">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <button type="button" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow" @click="saveGalleryImages">
+                  <i class="bi bi-check2-circle me-1"></i> Publicar en la Galería Oficial
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grilla de fotos existentes en la galería -->
+        <h4 class="h6 fw-bold text-white mb-3"><i class="bi bi-images me-2 text-accent"></i>Fotografías Activas en la Web ({{ contentStore.galleryImages.length }})</h4>
+        
+        <div class="row g-3">
+          <div v-for="gImg in contentStore.galleryImages" :key="gImg.id" class="col-12 col-sm-6 col-md-4 col-xl-3">
+            <div class="rounded-4 overflow-hidden position-relative border border-secondary border-opacity-25 shadow-sm h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="position-relative" style="height: 180px;">
+                <img :src="gImg.url" :alt="gImg.title" class="w-100 h-100 object-fit-cover">
+                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle p-0 d-flex align-items-center justify-content-center shadow" style="width: 28px; height: 28px;" @click="deleteGalleryImg(gImg.id)" title="Eliminar foto">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+
+              <div class="p-3 text-white d-flex flex-column justify-content-between flex-grow-1">
+                <div class="mb-2">
+                  <strong class="d-block small fw-bold mb-1 text-white">{{ gImg.title }}</strong>
+                  <p v-if="gImg.caption" class="small text-white opacity-80 mb-0" style="font-size: 0.8rem; line-height: 1.4;">{{ gImg.caption }}</p>
+                  <p v-else class="small text-white-50 fst-italic mb-0" style="font-size: 0.75rem;">Sin descripción asignada</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-accent w-100 d-flex align-items-center justify-content-center gap-1.5 py-1.5 mt-2" @click="openEditGalleryModal(gImg)">
+                  <i class="bi bi-pencil-square"></i> Editar Textos
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="contentStore.galleryImages.length === 0" class="col-12 text-center py-5 text-white opacity-75">
+            <i class="bi bi-image fs-1 text-accent d-block mb-3"></i>
+            Aún no hay fotografías en la galería. Sube tus primeras fotos arriba.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR TEXTOS DE FOTOGRAFÍA DE GALERÍA -->
+    <div v-if="showEditGalleryModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
+      <div class="modal-card p-4 shadow-lg text-white" style="width: 100%; max-width: 580px; border-radius: 24px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <h3 class="h5 fw-bold text-white mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square text-accent"></i>
+            Editar Textos de la Fotografía
+          </h3>
+          <button class="btn-close btn-close-white" @click="showEditGalleryModal = false"></button>
+        </div>
+
+        <form @submit.prevent="saveEditGalleryForm" class="d-flex flex-column gap-3">
+          <!-- Vista previa de la foto -->
+          <div class="rounded-3 overflow-hidden ratio ratio-16x9 border border-secondary border-opacity-25 mb-1">
+            <img :src="editingGalleryForm.url" class="w-100 h-100 object-fit-cover" alt="Preview">
+          </div>
+
+          <div>
+            <label class="form-label small fw-bold text-white mb-1">Título de la Fotografía</label>
+            <input v-model="editingGalleryForm.title" type="text" class="form-control admin-input text-white" placeholder="Ej: Volcán Villarrica al Amanecer" required>
+          </div>
+
+          <div>
+            <label class="form-label small fw-bold text-white mb-1">Leyenda / Descripción Completa</label>
+            <textarea v-model="editingGalleryForm.caption" rows="3" class="form-control admin-input text-white" placeholder="Describe la postal, ubicación o experiencia..."></textarea>
+            <span class="small text-white-50 mt-1 d-block" style="font-size: 0.72rem;">Este texto se verá completo en la tarjeta de la galería sin cortes.</span>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary border-opacity-25">
+            <button type="button" class="btn btn-outline-light px-3 py-2 fw-semibold" @click="showEditGalleryModal = false">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow">
+              <i class="bi bi-check2-circle me-1"></i> Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- MODAL EDITAR TARJETA DE INICIO (SERVICE ITEM) -->
     <div v-if="showServiceItemModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
       <div class="modal-card p-4 shadow-lg overflow-y-auto text-white" style="width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px;">
@@ -2303,6 +3613,121 @@ const handleRestore = () => {
             <button type="button" class="btn btn-outline-light me-2 px-4" @click="showServiceItemModal = false">Cancelar</button>
             <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain">Guardar Tarjeta</button>
           </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR / AÑADIR SERVICIO DE TRANSPORTE -->
+    <div v-if="showTransportModal" class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3">
+      <div class="modal-card p-4 shadow-lg overflow-y-auto text-white" style="width: 100%; max-width: 780px; max-height: 90vh; border-radius: 24px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+          <h3 class="h5 fw-bold text-white mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-car-front-fill text-accent"></i>
+            {{ transportModalMode === 'add' ? 'Añadir Servicio de Transporte' : 'Editar Servicio de Transporte' }}
+          </h3>
+          <button class="btn-close btn-close-white" @click="showTransportModal = false"></button>
+        </div>
+
+        <form @submit.prevent="saveTransportCardForm" class="row g-3">
+          
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-bold text-white mb-1">Título del Servicio *</label>
+            <input v-model="transportCardForm.title" type="text" class="form-control admin-input text-white" required placeholder="Ej: Traslados Aeropuerto VIP">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-bold text-white mb-1">Badge Categoría / Subtítulo *</label>
+            <input v-model="transportCardForm.badge" type="text" class="form-control admin-input text-white" required placeholder="Ej: Aeropuertos ZCO / PMC">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-bold text-white mb-1">Badge Destacado (Opcional)</label>
+            <input v-model="transportCardForm.featuredBadge" type="text" class="form-control admin-input text-white" placeholder="Ej: MÁS SOLICITADO (dejar vacío si no es destacado)">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label small fw-bold text-white mb-1">Ícono Bootstrap</label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-accent">
+                <i :class="transportCardForm.icon || 'bi-car-front-fill'"></i>
+              </span>
+              <input v-model="transportCardForm.icon" type="text" class="form-control admin-input text-white" placeholder="bi-airplane-engines">
+            </div>
+            <!-- Botones de sugerencias de íconos -->
+            <div class="d-flex gap-1 mt-2 flex-wrap">
+              <span class="small text-white-50 me-1" style="font-size: 0.72rem;">Sugerencias:</span>
+              <button 
+                type="button" 
+                v-for="ic in ['bi-airplane-engines', 'bi-car-front-fill', 'bi-people-fill', 'bi-bus-front', 'bi-compass', 'bi-shield-check', 'bi-luggage-fill', 'bi-geo-alt-fill']" 
+                :key="ic"
+                class="btn btn-sm btn-outline-secondary py-0 px-2 text-white"
+                style="font-size: 0.72rem;"
+                @click="transportCardForm.icon = ic"
+              >
+                <i :class="ic"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- IMAGEN DE LA TARJETA (SUBIR O URL) -->
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-1">Fotografía / Imagen de Portada (Opcional)</label>
+            <p class="small text-white-50 mb-2" style="font-size: 0.78rem;">
+              Si subes una foto, se mostrará en la cabecera de la tarjeta con efecto visual al pasar el cursor. Si la dejas vacía, se mostrará el ícono.
+            </p>
+
+            <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
+              <div v-if="transportCardForm.imageUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0 position-relative" style="width: 140px; height: 90px;">
+                <img :src="transportCardForm.imageUrl" class="w-100 h-100 object-fit-cover" alt="Vista previa">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 p-0 px-1" @click="removeTransportImage" title="Quitar imagen">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" class="form-control mb-2 admin-input text-white" accept="image/*" @change="handleTransportImageUpload">
+                <input v-model="transportCardForm.imageUrl" type="text" class="form-control admin-input text-white" placeholder="O pega una URL externa de imagen (https://...)">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-1">Descripción del Servicio *</label>
+            <textarea v-model="transportCardForm.description" rows="3" class="form-control admin-input text-white" required placeholder="Describe qué incluye el servicio, destinos cubiertos, tipo de vehículos y comodidades..."></textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-1">Puntos Clave / Características (Un ítem por línea)</label>
+            <textarea v-model="transportFeaturesText" rows="4" class="form-control admin-input text-white font-monospace" placeholder="Monitoreo de vuelo en tiempo real&#10;Recepción personalizada con letrero&#10;Asistencia completa con equipaje"></textarea>
+            <span class="small text-white-50 mt-1 d-block" style="font-size: 0.72rem;">Cada línea se renderizará como un ítem con ícono de verificación.</span>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold text-white mb-1">Texto del Botón</label>
+            <input v-model="transportCardForm.buttonText" type="text" class="form-control admin-input text-white" placeholder="Ej: Cotizar Traslado">
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold text-white mb-1">Estilo Visual del Botón</label>
+            <select v-model="transportCardForm.buttonStyle" class="form-select admin-input text-white">
+              <option value="outline">Delineado (Outline)</option>
+              <option value="solid">Sólido Beige (Destacado)</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold text-white mb-1">Etiqueta de WhatsApp (Opcional)</label>
+            <input v-model="transportCardForm.whatsAppTag" type="text" class="form-control admin-input text-white" placeholder="Ej: Traslado Aeropuerto">
+          </div>
+
+          <div class="col-12 d-flex justify-content-end gap-2 pt-3 border-top border-secondary border-opacity-25 mt-3">
+            <button type="button" class="btn btn-outline-light px-4 py-2 fw-semibold" @click="showTransportModal = false">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-accent px-4 py-2 fw-bold text-dark-mountain shadow">
+              <i class="bi bi-check2-circle me-1"></i> Guardar Servicio
+            </button>
+          </div>
+
         </form>
       </div>
     </div>
@@ -2409,6 +3834,26 @@ const handleRestore = () => {
             </div>
           </div>
 
+          <!-- Imagen de Fondo de Cabecera (Banner del Tour) -->
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white mb-2 d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-aspect-ratio me-1 text-accent"></i>Imagen de Fondo de Cabecera (Banner del Título) - Opcional</span>
+              <span class="badge bg-secondary text-white" style="font-size: 0.72rem;">Panorámica HD</span>
+            </label>
+            <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
+              <div v-if="expForm.heroBannerUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0" style="width: 140px; height: 75px;">
+                <img :src="expForm.heroBannerUrl" class="w-100 h-100 object-fit-cover" alt="Vista previa Banner">
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" class="form-control mb-2 admin-input text-white" accept="image/*" @change="handleHeroBannerUpload">
+                <input v-model="expForm.heroBannerUrl" type="text" class="form-control admin-input text-white" placeholder="O pega una URL directa del banner panorámico...">
+                <span class="small text-white opacity-75 d-block mt-1" style="font-size: 0.75rem;">
+                  Esta imagen se mostrará en alta resolución detrás del título y subtítulo centrado. Si se deja vacía, se usará la imagen de portada.
+                </span>
+              </div>
+            </div>
+          </div>
+
           <!-- Galería de Fotos Adicionales -->
           <div class="col-12">
             <div class="p-3 rounded-4 admin-sub-card">
@@ -2486,6 +3931,67 @@ const handleRestore = () => {
           <div class="col-12">
             <label class="form-label small fw-bold text-white">Itinerario (`HH:MM - Título - Descripción`)</label>
             <textarea v-model="expForm.itineraryRaw" class="form-control admin-input text-white text-monospace" rows="5"></textarea>
+          </div>
+
+          <!-- Qué Incluye y Qué No Incluye -->
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-white d-flex align-items-center gap-1">
+              <i class="bi bi-check-circle-fill text-success"></i>
+              <span>Qué Incluye el Tour (un ítem por línea)</span>
+            </label>
+            <textarea 
+              v-model="expForm.includedRaw" 
+              class="form-control admin-input text-white" 
+              rows="4" 
+              placeholder="Guía certificado&#10;Seguro de accidentes&#10;Equipo técnico completo&#10;Transporte ida y vuelta"
+            ></textarea>
+            <span class="small text-white opacity-75 d-block mt-1" style="font-size: 0.75rem;">Aparecerá en la sección 'Qué incluye' con check verde.</span>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-white d-flex align-items-center gap-1">
+              <i class="bi bi-x-circle-fill text-danger"></i>
+              <span>Qué NO Incluye el Tour (un ítem por línea)</span>
+            </label>
+            <textarea 
+              v-model="expForm.notIncludedRaw" 
+              class="form-control admin-input text-white" 
+              rows="4" 
+              placeholder="Propinas voluntarias&#10;Gastos personales&#10;Alimentación no descrita"
+            ></textarea>
+            <span class="small text-white opacity-75 d-block mt-1" style="font-size: 0.75rem;">Aparecerá en la sección 'Qué no incluye' con cruz roja.</span>
+          </div>
+
+          <!-- Garantías Oficiales del Tour (Personalizables) -->
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white d-flex align-items-center justify-content-between">
+              <span class="d-flex align-items-center gap-1">
+                <i class="bi bi-shield-check text-accent"></i>
+                <span>Garantías Oficiales del Tour (un ítem por línea)</span>
+              </span>
+              <span class="badge bg-accent text-dark-mountain fw-bold" style="font-size: 0.72rem;">Sellos Oficiales</span>
+            </label>
+            <textarea 
+              v-model="expForm.guaranteesRaw" 
+              class="form-control admin-input text-white" 
+              rows="4" 
+              placeholder="Prestador SERNATUR: Registro Oficial de Turismo N° 84219&#10;Seguro Incluido: Cobertura de rescate y asistencia en montaña&#10;Garantía Climática: Reprogramación 100% garantizada por clima&#10;Pago Cifrado: Transbank Webpay Plus estándar internacional PCI-DSS"
+            ></textarea>
+            <span class="small text-white opacity-75 d-block mt-1" style="font-size: 0.75rem;">
+              Aparecerán en el bloque oficial de garantías en la página de reserva del tour. Formato recomendado: <code>Título: Detalle</code>.
+            </span>
+          </div>
+
+          <div class="col-12" v-if="modalMode === 'edit' && editingExpId">
+            <div class="p-2 px-3 rounded-3 admin-sub-card d-flex align-items-center justify-content-between">
+              <span class="small text-white opacity-85">
+                <i class="bi bi-link-45deg text-accent me-1"></i>Enlace oficial del tour:
+                <code class="text-accent ms-1">/experiencias/{{ contentStore.experiences.find(e => e.id === editingExpId)?.slug }}</code>
+              </span>
+              <a :href="'/experiencias/' + contentStore.experiences.find(e => e.id === editingExpId)?.slug" target="_blank" class="btn btn-sm btn-outline-accent py-1 px-3 fw-semibold" style="font-size: 0.75rem;">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Ver en vivo
+              </a>
+            </div>
           </div>
 
           <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3 mt-4">
@@ -3320,5 +4826,42 @@ $accent-turquoise: #E7DCC3;
 .slide-fade-leave-to {
   transform: translateY(20px);
   opacity: 0;
+}
+
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 8mm;
+  }
+  html, body {
+    background: #FFFFFF !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #quote-preview-paper,
+  #quote-preview-paper * {
+    visibility: visible !important;
+  }
+  #quote-preview-paper {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #FFFFFF !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
 </style>

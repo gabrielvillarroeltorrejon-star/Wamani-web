@@ -1,15 +1,7 @@
 ---
 name: Emil Kowalski Design Skill
 description: Motion design, animations, and micro-interactions for dynamic UIs.
-trigger:
-  - "html"
-  - "css"
-  - "js"
-  - "ts"
-  - "vue"
-  - "frontend"
-  - "ui"
-  - "design"
+trigger: always_on
 ---
 
 # Emil Kowalski Design Engineering Skill

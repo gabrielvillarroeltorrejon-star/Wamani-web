@@ -1,15 +1,7 @@
 ---
 name: Impeccable Design Skill
 description: Structural design systems, strict typography, and spatial balance rules.
-trigger:
-  - "html"
-  - "css"
-  - "js"
-  - "ts"
-  - "vue"
-  - "frontend"
-  - "ui"
-  - "design"
+trigger: always_on
 ---
 
 # Impeccable Design Skill

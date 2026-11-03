@@ -400,8 +400,9 @@ const goToWhatsApp = (expTitle: string) => {
                     </button>
                   </div>
                   <div class="col-12 col-sm-6">
-                    <button class="btn btn-cyan-gradient w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
-                      <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
+                    <button class="btn btn-cyan-gradient w-100 py-2.5 px-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow rounded-pill" @click="goToWebpay">
+                      <span class="text-white">Pagar con</span>
+                      <img src="/webpay-logo-transparent.png" alt="Webpay.cl Transbank" style="height: 28px; width: auto; object-fit: contain;" />
                     </button>
                   </div>
                 </div>
@@ -413,6 +414,13 @@ const goToWhatsApp = (expTitle: string) => {
                 <div class="d-flex align-items-center justify-content-center gap-2 text-white small mt-1 fw-medium" style="color: #FFFFFF !important;">
                   <i class="bi bi-shield-lock-fill" style="color: #E7DCC3;"></i>
                   <span>Transacción protegida por cifrado SSL 256-bit y Webpay Oficial</span>
+                </div>
+
+                <div class="text-center mt-2 pt-2 border-top border-secondary border-opacity-25">
+                  <router-link :to="'/experiencias/' + experience.slug" class="small text-accent text-decoration-none fw-bold d-inline-flex align-items-center gap-1" @click="emit('close')">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Abrir página individual completa de este tour</span>
+                  </router-link>
                 </div>
               </div>
 

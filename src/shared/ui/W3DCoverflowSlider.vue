@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import type { Experience } from '@/entities/experience/model/schemas';
+
+const router = useRouter();
 
 const props = defineProps<{
   experiences: Experience[];
@@ -44,8 +47,8 @@ const goToSlide = (index: number) => {
 
 const handleCardClick = (index: number, exp: Experience) => {
   if (currentIndex.value === index) {
-    // Si ya está activa, abrir modal de detalles
-    emit('open', exp);
+    // Si ya está activa en el centro, navegar directamente a la página del tour
+    router.push(`/experiencias/${exp.slug}`);
   } else {
     // Si es lateral, traer al centro
     goToSlide(index);
@@ -225,6 +228,16 @@ onUnmounted(() => {
         <div class="coverflow-info">
           <h3 class="coverflow-title font-brush">{{ exp.title }}</h3>
           <p class="coverflow-subtitle">{{ exp.subtitle || exp.summary }}</p>
+          <div class="coverflow-action-row mt-2" v-if="idx === currentIndex">
+            <button 
+              type="button" 
+              class="coverflow-direct-btn"
+              @click.stop="router.push(`/experiencias/${exp.slug}`)"
+            >
+              <span>Ver Tour Completo</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Borde sutil de brillo -->
@@ -424,6 +437,49 @@ onUnmounted(() => {
 
       @media (max-width: 768px) {
         font-size: 0.78rem;
+      }
+    }
+
+    .coverflow-action-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.6rem;
+    }
+
+    .coverflow-direct-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      background-color: #E7DCC3 !important;
+      color: #0D5B57 !important;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      border: 1px solid #E7DCC3;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+      span, i {
+        color: #0D5B57 !important;
+      }
+
+      &:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 6px 20px rgba(231, 220, 195, 0.6);
+        background-color: #F7F1E1 !important;
+        color: #083D39 !important;
+        border-color: #F7F1E1;
+
+        span, i {
+          color: #083D39 !important;
+        }
+      }
+
+      &:active {
+        transform: scale(0.97);
       }
     }
   }

@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import HomeHero from '@/widgets/home-hero/HomeHero.vue';
 import HomeServices from '@/widgets/home-services/HomeServices.vue';
+import HomeTransport from '@/widgets/home-transport/HomeTransport.vue';
 import HomeDestinations from '@/widgets/home-destinations/HomeDestinations.vue';
+import HomeGallery from '@/widgets/home-gallery/HomeGallery.vue';
 import HomePackages from '@/widgets/home-packages/HomePackages.vue';
 import ReviewsCarousel from '@/widgets/reviews/ReviewsCarousel.vue';
 import W3DCoverflowSlider from '@/shared/ui/W3DCoverflowSlider.vue';
@@ -168,11 +170,17 @@ onMounted(() => {
     <!-- 3. Nuestros Servicios -->
     <HomeServices />
     
+    <!-- 3.5. Transporte Exclusivo & Traslados Cordilleranos -->
+    <HomeTransport />
+    
     <!-- 4. Buscador y Destinos -->
     <HomeDestinations />
 
     <!-- 4.5. Paquetes Promocionales -->
     <HomePackages />
+
+    <!-- 4.8. Galería Visual de Expediciones -->
+    <HomeGallery />
 
     <!-- 5. Opiniones y Social Proof -->
     <section id="opiniones" class="py-5">

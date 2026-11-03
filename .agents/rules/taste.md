@@ -1,15 +1,7 @@
 ---
 name: Taste Design Skill
 description: Guidelines for high-tier aesthetic judgment and modern UI design patterns.
-trigger:
-  - "html"
-  - "css"
-  - "js"
-  - "ts"
-  - "vue"
-  - "frontend"
-  - "ui"
-  - "design"
+trigger: always_on
 ---
 
 # Taste Design Skill

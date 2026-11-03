@@ -173,6 +173,13 @@ export const mockExperiences: Experience[] = baseTemplates.map((template, index)
         : template.destinationId === 'dest-cajon-maipo'
           ? 'Metro Los Héroes / Plaza Baquedano (Santiago)'
           : 'Oficina Wamani, Centro de Pucón',
+    heroBannerUrl: template.coverImage?.url,
+    guarantees: [
+      'Prestador SERNATUR: Registro Oficial de Turismo N° 84219',
+      'Seguro Incluido: Cobertura de rescate y asistencia en montaña',
+      'Garantía Climática: Reprogramación 100% garantizada por clima',
+      'Pago Cifrado: Transbank Webpay Plus estándar PCI-DSS'
+    ],
     cancellationPolicy: 'Cancelación gratuita con 48 hrs de anticipación (Reembolso 100%).'
   } as Experience;
 });

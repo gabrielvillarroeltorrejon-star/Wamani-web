@@ -128,6 +128,16 @@ const modalities = [
   { id: 'transporte', label: 'Transporte & Transfers', icon: 'bi-car-front' }
 ];
 
+// Sub-navegación interna de la página estilo píldora macrozona
+const subnavSections = [
+  { id: 'catalogo', label: 'Ver Catálogo', icon: 'bi-grid-3x3-gap-fill' },
+  { id: 'destinos', label: 'Destinos', icon: 'bi-geo-alt-fill' },
+  { id: 'servicios', label: 'Formatos de Servicio', icon: 'bi-stars' },
+  { id: 'paquetes', label: 'Paquetes & Combos', icon: 'bi-box-seam-fill' }
+];
+
+const activeSubnav = ref('catalogo');
+
 // Modal Detalle y Reserva de Tour
 const selectedExperience = ref<Experience | null>(null);
 const modalDate = ref(defaultNextDay);
@@ -309,6 +319,29 @@ onMounted(() => {
   if (route.query.zone) selectedZone.value = route.query.zone as string;
   if (route.query.modality) selectedModality.value = route.query.modality as string;
   scrollToHash();
+
+  if (route.hash) {
+    const cleanHash = route.hash.replace('#', '');
+    if (subnavSections.some(s => s.id === cleanHash)) {
+      activeSubnav.value = cleanHash;
+    }
+  }
+
+  // Observer de secciones para sincronizar la píldora activa con el scroll
+  if (typeof IntersectionObserver !== 'undefined') {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+          activeSubnav.value = entry.target.id;
+        }
+      });
+    }, { threshold: [0.2, 0.4] });
+
+    subnavSections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+  }
 });
 
 watch(() => route.hash, () => {
@@ -340,19 +373,18 @@ watch(() => route.query, (newQ) => {
           Descubre Chile de norte a sur. Selecciona tu territorio, elige tu formato de viaje (grupal, privado o a medida) y cotiza tu aventura en vivo con guías certificados y logística integral.
         </p>
 
-        <!-- Sub-navegación rápida interna -->
-        <div class="d-flex flex-wrap justify-content-center gap-2 pt-2">
-          <a href="#catalogo" class="btn btn-sm btn-subnav rounded-pill px-3 py-2 fw-bold text-decoration-none">
-            <i class="bi bi-grid-3x3-gap-fill me-1" style="color: #E7DCC3;"></i> Ver Catálogo
-          </a>
-          <a href="#destinos" class="btn btn-sm btn-subnav rounded-pill px-3 py-2 fw-bold text-decoration-none">
-            <i class="bi bi-geo-alt-fill me-1" style="color: #E7DCC3;"></i> Destinos
-          </a>
-          <a href="#servicios" class="btn btn-sm btn-subnav rounded-pill px-3 py-2 fw-bold text-decoration-none">
-            <i class="bi bi-stars me-1" style="color: #E7DCC3;"></i> Formatos de Servicio
-          </a>
-          <a href="#paquetes" class="btn btn-sm btn-subnav rounded-pill px-3 py-2 fw-bold text-decoration-none">
-            <i class="bi bi-box-seam-fill me-1" style="color: #E7DCC3;"></i> Paquetes & Combos
+        <!-- Sub-navegación rápida interna estilo píldoras macrozona -->
+        <div class="d-flex flex-wrap justify-content-center gap-2 pt-2 subnav-pills-bar">
+          <a 
+            v-for="sec in subnavSections" 
+            :key="sec.id"
+            :href="'#' + sec.id" 
+            class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm transition-all text-decoration-none"
+            :class="activeSubnav === sec.id ? 'btn-macrozone-active' : 'btn-macrozone-inactive'"
+            @click="activeSubnav = sec.id"
+          >
+            <i :class="['bi', sec.icon]"></i>
+            <span>{{ sec.label }}</span>
           </a>
         </div>
       </div>
@@ -588,7 +620,7 @@ watch(() => route.query, (newQ) => {
       <!-- GRID DE TARJETAS DE EXPEDICIÓN -->
       <div class="row g-4 mb-5">
         <div v-for="exp in filteredExperiences" :key="exp.id" class="col-md-6 col-lg-4">
-          <WCard no-padding class="h-100 cursor-pointer catalog-card border-0" @click="openModal(exp)">
+          <WCard no-padding class="h-100 cursor-pointer catalog-card border-0" @click="router.push(`/experiencias/${exp.slug}`)">
             <div class="position-relative overflow-hidden card-img-wrapper">
               <img :src="exp.coverImage.url" :alt="exp.coverImage.alt" width="400" height="220" loading="lazy" class="w-100 object-fit-cover transition-transform" style="height: 220px;">
               <div class="card-image-overlay"></div>
@@ -621,7 +653,14 @@ watch(() => route.query, (newQ) => {
                     {{ formatCurrency((exp.pricing ? exp.pricing.basePrice : 50000) * searchPax, 'CLP') }}
                   </span>
                 </div>
-                <WButton variant="primary" size="sm" class="px-3 py-2 fw-bold">Ver y Reservar</WButton>
+                <router-link 
+                  :to="`/experiencias/${exp.slug}`" 
+                  class="btn btn-sm btn-tour-beige px-3 py-2 fw-bold rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5 transition-all"
+                  @click.stop
+                >
+                  <span>Ver Tour</span>
+                  <i class="bi bi-arrow-right"></i>
+                </router-link>
               </div>
             </div>
           </WCard>
@@ -880,18 +919,71 @@ watch(() => route.query, (newQ) => {
   }
 }
 
-.btn-subnav {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(231, 220, 195, 0.5);
-  color: #ffffff;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+// Píldoras de Navegación y Filtros (Idénticos al diseño macrozonas)
+.btn-macrozone-active,
+.btn-subnav.active,
+.btn-subnav-active {
+  background-color: #E7DCC3 !important;
+  color: #0D5B57 !important;
+  border: 1px solid #E7DCC3 !important;
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
+  box-shadow: 0 4px 14px rgba(231, 220, 195, 0.45) !important;
+  transform: translateY(-2px);
+  cursor: pointer;
+
+  i, span {
+    color: #0D5B57 !important;
+  }
 
   &:hover {
-    background: #E7DCC3;
-    color: #0D5B57;
-    border-color: #E7DCC3;
+    background-color: #F7F1E1 !important;
+    color: #083D39 !important;
+    border-color: #F7F1E1 !important;
+    box-shadow: 0 6px 18px rgba(231, 220, 195, 0.6) !important;
     transform: translateY(-2px);
+
+    i, span {
+      color: #083D39 !important;
+    }
+  }
+
+  &:active {
+    transform: scale(0.97) translateY(0);
+  }
+}
+
+.btn-macrozone-inactive,
+.btn-subnav {
+  background-color: rgba(13, 91, 87, 0.85) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(231, 220, 195, 0.35) !important;
+  backdrop-filter: blur(8px);
+  font-weight: 600;
+  font-size: 0.88rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+  
+  i, span {
+    color: #ffffff !important;
+    transition: color 0.2s ease;
+  }
+  
+  &:hover {
+    background-color: #E7DCC3 !important;
+    border-color: #E7DCC3 !important;
+    color: #0D5B57 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 220, 195, 0.45) !important;
+
+    i, span {
+      color: #0D5B57 !important;
+    }
+  }
+
+  &:active {
+    transform: scale(0.97) translateY(0);
   }
 }
 
@@ -958,28 +1050,7 @@ watch(() => route.query, (newQ) => {
 }
 
 .macrozone-filter-bar {
-  .btn-macrozone-active {
-    background-color: #E7DCC3 !important;
-    color: #0D5B57 !important;
-    border: 1px solid #E7DCC3 !important;
-    font-weight: 700 !important;
-    box-shadow: 0 4px 14px rgba(231, 220, 195, 0.4) !important;
-    transform: translateY(-2px);
-  }
-
-  .btn-macrozone-inactive {
-    background-color: rgba(13, 91, 87, 0.85) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(231, 220, 195, 0.35) !important;
-    backdrop-filter: blur(8px);
-    
-    &:hover {
-      background-color: #147E79 !important;
-      border-color: #E7DCC3 !important;
-      color: #E7DCC3 !important;
-      transform: translateY(-1px);
-    }
-  }
+  // Las reglas de .btn-macrozone-active y .btn-macrozone-inactive aplican de forma global
 }
 
 // Caja Buscador
@@ -1089,6 +1160,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   
   .border-top {
     border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+.btn-tour-beige {
+  background-color: #E7DCC3 !important;
+  color: #0D5B57 !important;
+  border: 1px solid #E7DCC3 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(231, 220, 195, 0.45) !important;
+  letter-spacing: 0.02em;
+
+  span {
+    color: #0D5B57 !important;
+  }
+
+  i {
+    color: #0D5B57 !important;
+    font-size: 1.05rem;
+    transition: transform 0.25s ease;
+  }
+
+  &:hover {
+    background-color: #F7F1E1 !important;
+    color: #083D39 !important;
+    border-color: #F7F1E1 !important;
+    box-shadow: 0 6px 18px rgba(231, 220, 195, 0.65) !important;
+    transform: translateY(-2px);
+
+    span, i {
+      color: #083D39 !important;
+    }
+
+    i {
+      transform: translateX(3px);
+    }
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 }
 

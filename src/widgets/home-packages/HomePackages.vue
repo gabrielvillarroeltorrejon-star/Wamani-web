@@ -681,8 +681,9 @@ const goToWhatsApp = () => {
                   <button class="btn btn-outline-accent w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm bg-transparent" @click="addToCartAction">
                     <i class="bi bi-cart-plus-fill fs-5"></i> Agregar Paquete al Carrito
                   </button>
-                  <button class="btn btn-primary w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow" @click="goToWebpay">
-                    <i class="bi bi-credit-card-2-front-fill fs-5"></i> Pagar con Webpay Plus
+                  <button class="btn btn-primary w-100 py-2.5 px-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow rounded-pill" @click="goToWebpay">
+                    <span class="text-white">Pagar con</span>
+                    <img src="/webpay-logo-transparent.png" alt="Webpay.cl Transbank" style="height: 28px; width: auto; object-fit: contain;" />
                   </button>
                   <button class="btn btn-whatsapp-custom w-100 py-3 fw-bold fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm" @click="goToWhatsApp">
                     <i class="bi bi-whatsapp fs-5"></i> Reservar vía Transferencia / WhatsApp

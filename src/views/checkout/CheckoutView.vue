@@ -1308,9 +1308,8 @@ const printVoucher = () => {
                           <span class="small text-white opacity-85">Tarjetas de Crédito, Débito Redcompra y Prepago. Confirmación instantánea con token bancario seguro.</span>
                         </div>
                       </div>
-                      <div class="d-none d-sm-flex align-items-center gap-2 ps-3">
-                        <span class="badge bg-dark text-white p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Redcompra</span>
-                        <span class="badge bg-dark text-accent p-2 border border-secondary border-opacity-25 fw-bold" style="font-size: 0.72rem;">Webpay</span>
+                      <div class="d-none d-sm-flex align-items-center ps-3 flex-shrink-0">
+                        <img src="/webpay-plus-transbank.png" alt="Webpay Plus Transbank" style="height: 52px; width: auto; object-fit: contain; background: #FFFFFF; padding: 2px 5px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);" />
                       </div>
                     </label>
                   </div>

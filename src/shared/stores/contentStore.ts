@@ -104,6 +104,27 @@ export interface LegalInfo {
   insurancePolicy: string;
 }
 
+export interface TransportServiceCard {
+  id: string;
+  badge: string;
+  featuredBadge?: string;
+  title: string;
+  description: string;
+  icon?: string;
+  imageUrl?: string;
+  features: string[];
+  buttonText: string;
+  buttonStyle?: 'solid' | 'outline';
+  whatsAppTag?: string;
+}
+
+export interface TransportSectionContent {
+  badge: string;
+  title: string;
+  description: string;
+  services: TransportServiceCard[];
+}
+
 export interface SectionContent {
   home: {
     hero: {
@@ -125,6 +146,7 @@ export interface SectionContent {
       description: string;
       elfsightWidgetId: string;
     };
+    transport?: TransportSectionContent;
   };
   about: {
     heroTitle: string;
@@ -166,6 +188,65 @@ export interface SectionContent {
   legal: LegalInfo;
   gateway: GatewaySettings;
 }
+
+export const DEFAULT_TRANSPORT_SERVICES: TransportServiceCard[] = [
+  {
+    id: 'trans-1',
+    badge: 'Aeropuertos ZCO / PMC',
+    title: 'Traslados Aeropuerto VIP',
+    description: 'Recogida y retorno puntual en los aeropuertos de Temuco (Freire) y Puerto Montt hacia Pucón, Villarrica y Huilo Huilo.',
+    icon: 'bi-airplane-engines',
+    imageUrl: '',
+    features: [
+      'Monitoreo de vuelo en tiempo real',
+      'Recepción personalizada con letrero',
+      'Asistencia completa con equipaje'
+    ],
+    buttonText: 'Cotizar Traslado',
+    buttonStyle: 'outline',
+    whatsAppTag: 'Traslado Aeropuerto'
+  },
+  {
+    id: 'trans-2',
+    badge: 'Jornada Completa / Media Jornada',
+    featuredBadge: 'MÁS SOLICITADO',
+    title: 'Disposición & Rutas Termales',
+    description: 'Vehículo y chofer privado a tu propio ritmo para visitar termas cordilleranas, parques nacionales, saltos de agua y gastronomía.',
+    icon: 'bi-car-front-fill',
+    imageUrl: '',
+    features: [
+      'Circuitos a Termas Geométricas y Huife',
+      'Flexibilidad total en paradas y tiempos',
+      'Chofer profesional con conocimiento local'
+    ],
+    buttonText: 'Cotizar Disposición',
+    buttonStyle: 'solid',
+    whatsAppTag: 'Disposición Termal y Parque'
+  },
+  {
+    id: 'trans-3',
+    badge: 'Empresas & Grupos Privados',
+    title: 'Corporativo & Delegaciones',
+    description: 'Logística de movilidad integral para convenciones, matrimonios de destino, productoras audiovisuales y viajes de incentivo.',
+    icon: 'bi-people-fill',
+    imageUrl: '',
+    features: [
+      'Vans ejecutivas y tracción 4x4',
+      'Facturación formal electrónica para empresas',
+      'Pólizas colectivas de asistencia'
+    ],
+    buttonText: 'Cotizar Corporativo',
+    buttonStyle: 'outline',
+    whatsAppTag: 'Transporte Corporativo'
+  }
+];
+
+export const DEFAULT_TRANSPORT_SECTION: TransportSectionContent = {
+  badge: 'MOVILIDAD PRIVADA & CONFORT',
+  title: 'Transporte Exclusivo & Traslados Cordilleranos',
+  description: 'Conectamos los principales aeropuertos y destinos del sur de Chile con conductores profesionales, puntualidad rigurosa y vehículos acondicionados para la montaña.',
+  services: DEFAULT_TRANSPORT_SERVICES
+};
 
 const DEFAULT_CONTENT: SectionContent = {
   home: {
@@ -299,7 +380,8 @@ const DEFAULT_CONTENT: SectionContent = {
       title: 'Reseñas',
       description: 'Lo que nuestros viajeros opinan sobre su aventura con Wamani Experience.',
       elfsightWidgetId: '908f9592-7ab5-4097-8a5a-1f97e9a30061'
-    }
+    },
+    transport: DEFAULT_TRANSPORT_SECTION
   },
   about: {
     heroTitle: 'Nuestra Historia',
@@ -424,6 +506,66 @@ export interface TourPackage {
   isActive: boolean;
 }
 
+export interface GalleryImage {
+  id: string;
+  url: string;
+  title: string;
+  category: string;
+  caption?: string;
+  createdAt: string;
+}
+
+const DEFAULT_GALLERY: GalleryImage[] = [
+  {
+    id: 'gal-1',
+    url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=80',
+    title: 'Volcán Villarrica al Amanecer',
+    category: 'Montaña',
+    caption: 'Ascenso guiado al cráter activo en los Andes de la Araucanía.',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'gal-2',
+    url: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80',
+    title: 'Bosques Milenarios de Araucarias',
+    category: 'Bosques',
+    caption: 'Senderismo por parques nacionales protegidos.',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'gal-3',
+    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    title: 'Aguas Termales Geotérmicas',
+    category: 'Termas',
+    caption: 'Relajo y desconexión en pozas naturales cordilleranas.',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'gal-4',
+    url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
+    title: 'Lagos y Cascadas Cristalinas',
+    category: 'Lagos',
+    caption: 'Navegación y saltos de agua en la Ruta de los Siete Lagos.',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'gal-5',
+    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    title: 'Atardecer en la Cordillera',
+    category: 'Montaña',
+    caption: 'Vistas panorámicas tras una jornada de trekking.',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'gal-6',
+    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+    title: 'Expedición en Terreno',
+    category: 'Aventura',
+    caption: 'Equipamiento técnico y acompañamiento profesional de montaña.',
+    createdAt: new Date().toISOString()
+  }
+];
+
 const DEFAULT_PACKAGES: TourPackage[] = [
   {
     id: 'pkg-1',
@@ -466,6 +608,8 @@ export const useContentStore = defineStore('content', () => {
   const bookings = ref<Booking[]>([]);
   const discountCodes = ref<DiscountCode[]>([]);
   const tourPackages = ref<TourPackage[]>([]);
+  const galleryImages = ref<GalleryImage[]>([]);
+  const isLoading = ref(false);
   const isDarkMode = ref(false);
 
   // Desactivado: forzar siempre modo claro
@@ -499,7 +643,17 @@ export const useContentStore = defineStore('content', () => {
       try {
         const parsed = JSON.parse(savedContent);
         content.value = {
-          home: { ...DEFAULT_CONTENT.home, ...parsed.home },
+          home: {
+            ...DEFAULT_CONTENT.home,
+            ...parsed.home,
+            transport: {
+              ...DEFAULT_CONTENT.home.transport,
+              ...(parsed.home?.transport || {}),
+              services: (Array.isArray(parsed.home?.transport?.services) && parsed.home.transport.services.length > 0)
+                ? parsed.home.transport.services
+                : DEFAULT_TRANSPORT_SECTION.services
+            }
+          },
           about: {
             ...DEFAULT_CONTENT.about,
             ...parsed.about,
@@ -574,17 +728,30 @@ export const useContentStore = defineStore('content', () => {
       localStorage.setItem('wamani_packages', JSON.stringify(DEFAULT_PACKAGES));
     }
 
+    const savedGallery = localStorage.getItem('wamani_gallery');
+    if (savedGallery) {
+      try {
+        galleryImages.value = JSON.parse(savedGallery);
+      } catch {
+        galleryImages.value = [...DEFAULT_GALLERY];
+      }
+    } else {
+      galleryImages.value = [...DEFAULT_GALLERY];
+      localStorage.setItem('wamani_gallery', JSON.stringify(DEFAULT_GALLERY));
+    }
+
     applyTheme();
   };
 
   // Sincronización en la Nube con Supabase
   const syncFromSupabase = async () => {
     if (!isSupabaseConfigured || !supabase) return;
+    isLoading.value = true;
     try {
       // 1. Cargar experiencias desde Supabase
       const { data: expData, error: expError } = await supabase.from('experiences').select('*');
       if (!expError && expData && expData.length > 0) {
-        experiences.value = expData.map((e: any) => ({
+        const cloudExperiences = expData.map((e: any) => ({
           id: e.id,
           slug: e.slug,
           title: e.title,
@@ -611,8 +778,34 @@ export const useContentStore = defineStore('content', () => {
           itinerary: e.itinerary || [],
           included: e.included || [],
           notIncluded: e.not_included || [],
+          heroBannerUrl: e.hero_banner_url || e.cover_image?.url || '',
+          guarantees: e.guarantees || [],
           status: (e.status as 'active' | 'draft' | 'archived') || 'active'
         }));
+
+        // Fusión inteligente: preservar tours locales que aún no se hayan subido a la nube
+        const cloudIds = new Set(cloudExperiences.map(e => e.id));
+        const localOnly = experiences.value.filter(e => !cloudIds.has(e.id));
+        experiences.value = [...localOnly, ...cloudExperiences];
+
+        try {
+          localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
+        } catch (e) {
+          console.warn('Aviso cuota storage:', e);
+        }
+      } else {
+        // Fallback a respaldo en site_content si la tabla individual no devolvió datos
+        try {
+          const { data: catData } = await supabase.from('site_content').select('data').eq('key', 'experiences_catalog').single();
+          if (catData?.data && Array.isArray(catData.data) && catData.data.length > 0) {
+            const cloudCat = catData.data as Experience[];
+            const cloudIds = new Set(cloudCat.map(e => e.id));
+            const localOnly = experiences.value.filter(e => !cloudIds.has(e.id));
+            experiences.value = [...localOnly, ...cloudCat];
+          }
+        } catch (catErr) {
+          console.warn('Aviso: no se pudo leer catálogo de respaldo:', catErr);
+        }
       }
 
       // 2. Cargar reservas desde Supabase
@@ -646,12 +839,22 @@ export const useContentStore = defineStore('content', () => {
         }));
       }
 
-      // 3. Cargar contenidos generales del sitio desde Supabase
+      // 3. Cargar contenidos generales y galería desde Supabase
       const { data: scData, error: scError } = await supabase.from('site_content').select('data').eq('key', 'main_content').single();
       if (!scError && scData?.data) {
         const cloud = scData.data;
         content.value = {
-          home: { ...DEFAULT_CONTENT.home, ...cloud.home },
+          home: {
+            ...DEFAULT_CONTENT.home,
+            ...cloud.home,
+            transport: {
+              ...DEFAULT_CONTENT.home.transport,
+              ...(cloud.home?.transport || {}),
+              services: (Array.isArray(cloud.home?.transport?.services) && cloud.home.transport.services.length > 0)
+                ? cloud.home.transport.services
+                : DEFAULT_TRANSPORT_SECTION.services
+            }
+          },
           about: {
             ...DEFAULT_CONTENT.about,
             ...cloud.about,
@@ -676,14 +879,22 @@ export const useContentStore = defineStore('content', () => {
             emailNotifications: { ...DEFAULT_CONTENT.gateway.emailNotifications, ...cloud.gateway?.emailNotifications }
           }
         };
+      }
+
+      // 4. Cargar galería fotográfica desde Supabase
+      const { data: galData } = await supabase.from('site_content').select('data').eq('key', 'gallery_images').single();
+      if (galData?.data && Array.isArray(galData.data) && galData.data.length > 0) {
+        galleryImages.value = galData.data;
         try {
-          localStorage.setItem('wamani_content', JSON.stringify(content.value));
-        } catch (storageErr) {
-          console.warn('Aviso: Capacidad de localStorage alcanzada, manteniendo estado en memoria y nube:', storageErr);
+          localStorage.setItem('wamani_gallery', JSON.stringify(galleryImages.value));
+        } catch (e) {
+          console.warn('Storage quota gallery notice:', e);
         }
       }
     } catch (e) {
       console.warn('Nota: Supabase offline o no alcanzable, usando caché local:', e);
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -698,14 +909,17 @@ export const useContentStore = defineStore('content', () => {
       localStorage.setItem('wamani_bookings', JSON.stringify(bookings.value));
       localStorage.setItem('wamani_discounts', JSON.stringify(discountCodes.value));
       localStorage.setItem('wamani_packages', JSON.stringify(tourPackages.value));
+      localStorage.setItem('wamani_gallery', JSON.stringify(galleryImages.value));
     } catch (storageErr) {
-      console.warn('Aviso: Cuota de localStorage excedida al guardar imágenes, sincronizando directamente con Supabase:', storageErr);
+      console.warn('Aviso: Cuota de localStorage alcanzada, sincronizando directamente con Supabase:', storageErr);
     }
 
     // Si Supabase está configurado, guardar también en la nube de forma asíncrona
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('site_content').upsert({ key: 'main_content', data: content.value });
+        await supabase.from('site_content').upsert({ key: 'experiences_catalog', data: experiences.value });
+        await supabase.from('site_content').upsert({ key: 'gallery_images', data: galleryImages.value });
       } catch (e) {
         console.warn('Error al sincronizar contenidos con Supabase:', e);
       }
@@ -740,7 +954,12 @@ export const useContentStore = defineStore('content', () => {
   // CRUD de Experiencias
   const addExperience = async (exp: Omit<Experience, 'id' | 'slug'>) => {
     const nextIdNum = experiences.value.length + 1;
-    const cleanTitleSlug = exp.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const cleanTitleSlug = exp.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
     const newExp: Experience = {
       ...exp,
       id: `exp-${Date.now()}`,
@@ -752,7 +971,10 @@ export const useContentStore = defineStore('content', () => {
     
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('experiences').insert(mapExpToDb(newExp));
+        const { error } = await supabase.from('experiences').upsert(mapExpToDb(newExp), { onConflict: 'id' });
+        if (error) {
+          console.warn('Supabase upsert experience warning:', error.message, error);
+        }
       } catch (e) {
         console.warn('Error saving new experience to Supabase:', e);
       }
@@ -769,7 +991,10 @@ export const useContentStore = defineStore('content', () => {
       
       if (isSupabaseConfigured && supabase) {
         try {
-          await supabase.from('experiences').update(mapExpToDb(experiences.value[index])).eq('id', id);
+          const { error } = await supabase.from('experiences').upsert(mapExpToDb(experiences.value[index]), { onConflict: 'id' });
+          if (error) {
+            console.warn('Supabase update experience warning:', error.message, error);
+          }
         } catch (e) {
           console.warn('Error updating experience in Supabase:', e);
         }
@@ -946,20 +1171,6 @@ export const useContentStore = defineStore('content', () => {
     persist();
   };
 
-  // Restaurar todo a valores por defecto
-  const restoreDefaults = () => {
-    experiences.value = [...mockExperiences];
-    content.value = JSON.parse(JSON.stringify(DEFAULT_CONTENT));
-    bookings.value = [...DEFAULT_BOOKINGS];
-    isDarkMode.value = false;
-    localStorage.removeItem('wamani_experiences');
-    localStorage.removeItem('wamani_content');
-    localStorage.removeItem('wamani_bookings');
-    localStorage.removeItem('wamani_dark_mode');
-    persist();
-    applyTheme();
-  };
-
   const addDiscountCode = (code: Omit<DiscountCode, 'id'>) => {
     const newCode: DiscountCode = {
       ...code,
@@ -1004,6 +1215,63 @@ export const useContentStore = defineStore('content', () => {
     persist();
   };
 
+  // CRUD de Galería Fotográfica
+  const addGalleryImage = (img: Omit<GalleryImage, 'id' | 'createdAt'>) => {
+    const newImg: GalleryImage = {
+      ...img,
+      id: `gal-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    galleryImages.value.unshift(newImg);
+    persist();
+    return newImg;
+  };
+
+  const updateGalleryImage = (updated: GalleryImage) => {
+    const idx = galleryImages.value.findIndex(g => g.id === updated.id);
+    if (idx !== -1) {
+      galleryImages.value[idx] = { ...galleryImages.value[idx], ...updated };
+      persist();
+    }
+  };
+
+  const deleteGalleryImage = (id: string) => {
+    galleryImages.value = galleryImages.value.filter(g => g.id !== id);
+    persist();
+  };
+
+  // CRUD de Transporte Exclusivo & Traslados
+  const updateTransportHeader = (header: { badge: string; title: string; description: string }) => {
+    if (!content.value.home.transport) {
+      content.value.home.transport = JSON.parse(JSON.stringify(DEFAULT_TRANSPORT_SECTION));
+    }
+    content.value.home.transport.badge = header.badge;
+    content.value.home.transport.title = header.title;
+    content.value.home.transport.description = header.description;
+    persist();
+  };
+
+  const saveTransportService = (service: TransportServiceCard) => {
+    if (!content.value.home.transport) {
+      content.value.home.transport = JSON.parse(JSON.stringify(DEFAULT_TRANSPORT_SECTION));
+    }
+    const list = [...(content.value.home.transport.services || [])];
+    const idx = list.findIndex(s => s.id === service.id);
+    if (idx >= 0) {
+      list[idx] = { ...service };
+    } else {
+      list.push({ ...service, id: service.id || `trans-${Date.now()}` });
+    }
+    content.value.home.transport.services = list;
+    persist();
+  };
+
+  const deleteTransportService = (id: string) => {
+    if (!content.value.home.transport) return;
+    content.value.home.transport.services = (content.value.home.transport.services || []).filter(s => s.id !== id);
+    persist();
+  };
+
   return {
     experiences,
     content,
@@ -1012,6 +1280,14 @@ export const useContentStore = defineStore('content', () => {
     addDiscountCode,
     updateDiscountCode,
     deleteDiscountCode,
+    galleryImages,
+    addGalleryImage,
+    updateGalleryImage,
+    deleteGalleryImage,
+    updateTransportHeader,
+    saveTransportService,
+    deleteTransportService,
+    isLoading,
     isDarkMode,
     toggleDarkMode,
     addExperience,
@@ -1026,7 +1302,6 @@ export const useContentStore = defineStore('content', () => {
     deleteBooking,
     updateContent,
     updateGatewaySettings,
-    restoreDefaults,
     tourPackages,
     addPackage,
     updatePackage,
