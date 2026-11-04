@@ -70,11 +70,22 @@ const formatDifficulty = (diff?: string) => {
   const map: Record<string, string> = {
     easy: 'Fácil',
     moderate: 'Moderada',
-    hard: 'Exigente (Alta)',
-    expert: 'Desafiante'
+    hard: 'Alta Exigencia'
   };
-  return map[diff.toLowerCase()] || diff;
+  return map[diff] || diff;
 };
+
+const formattedIncluded = computed(() => {
+  if (!props.experience || !props.experience.included) return [];
+  const langsStr = formatLanguages(props.experience.languages);
+  return props.experience.included.map(item => {
+    if (typeof item !== 'string') return item;
+    if (item.toLowerCase().includes('idioma a confirmar')) {
+      return item.replace(/idioma a confirmar al reservar/i, `guiado en ${langsStr}`);
+    }
+    return item;
+  });
+});
 
 const scrollToReservation = () => {
   const el = document.getElementById('modal-reservation-box');
@@ -137,10 +148,12 @@ const goToWhatsApp = (expTitle: string) => {
     passengers: []
   });
 
+  const langsStr = formatLanguages(props.experience?.languages);
   const msg = encodeURIComponent(
     `Hola Wamani Experience, deseo reservar el tour: *${expTitle}*\n` +
     `📅 Fecha de excursión: *${modalDate.value}*\n` +
     `👥 Pasajeros: *${modalPax.value} personas*\n` +
+    `🗣️ Idiomas de guiado: *${langsStr}*\n` +
     `💰 Monto Total Estimado: *${formattedTotal}*\n\n` +
     `¿Me podrían confirmar disponibilidad y los datos para transferir? Muchas gracias.`
   );
@@ -264,7 +277,7 @@ const goToWhatsApp = (expTitle: string) => {
                       <i class="bi bi-check-circle-fill"></i> Qué incluye
                     </h4>
                     <ul class="list-unstyled mb-0">
-                      <li v-for="(inc, i) in experience.included" :key="i" class="mb-2 small fw-semibold d-flex align-items-start gap-2" style="color: #147E79 !important;">
+                      <li v-for="(inc, i) in formattedIncluded" :key="i" class="mb-2 small fw-semibold d-flex align-items-start gap-2" style="color: #147E79 !important;">
                         <i class="bi bi-check2 text-success fs-6 flex-shrink-0 mt-0"></i> 
                         <span>{{ inc }}</span>
                       </li>
@@ -378,6 +391,10 @@ const goToWhatsApp = (expTitle: string) => {
                       <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-white border-opacity-15">
                         <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Cantidad de viajeros</span>
                         <span class="fw-bold" style="color: #E7DCC3;">× {{ modalPax }}</span>
+                      </div>
+                      <div v-if="experience.languages && experience.languages.length" class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-white border-opacity-15">
+                        <span class="small text-white fw-semibold" style="color: #FFFFFF !important;">Idiomas de guiado</span>
+                        <span class="fw-bold text-end" style="color: #E7DCC3; font-size: 0.88rem;"><i class="bi bi-translate me-1"></i>{{ formatLanguages(experience.languages) }}</span>
                       </div>
                     </div>
                     

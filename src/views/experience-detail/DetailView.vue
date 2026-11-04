@@ -45,6 +45,17 @@ const displayedGuarantees = computed(() => {
   ];
 });
 
+const formattedIncluded = computed(() => {
+  if (!experience.value?.included) return [];
+  const langs = formatLanguages(experience.value.languages);
+  return experience.value.included.map(item => {
+    if (item.toLowerCase().includes('idioma a confirmar')) {
+      return item.replace(/;\s*idioma a confirmar( al reservar)?/i, `; guiado en ${langs}`);
+    }
+    return item;
+  });
+});
+
 const shareTour = async () => {
   const url = window.location.href;
   if (navigator.share) {
@@ -158,6 +169,7 @@ const handleBookWhatsApp = () => {
     `Hola Wamani Experience, deseo reservar el tour: *${experience.value.title}*\n` +
     `📅 Fecha de excursión: *${selectedDate.value}*\n` +
     `👥 Pasajeros: *${paxCount.value} personas*\n` +
+    `🌐 Idiomas de guiado: *${formatLanguages(experience.value.languages)}*\n` +
     `💰 Monto Total: *${formatPrice(totalPriceCLP.value, 'CLP')}*\n\n` +
     `¿Me confirman disponibilidad y los datos para transferir? Muchas gracias.`
   );
@@ -196,6 +208,10 @@ const handleBookWhatsApp = () => {
           <span class="badge hero-pill-badge shadow-sm">
             <i class="bi bi-geo-alt-fill"></i>
             <span>{{ formatDestinationName(experience.destinationId) }}</span>
+          </span>
+          <span class="badge hero-pill-badge shadow-sm">
+            <i class="bi bi-translate text-accent me-1.5"></i>
+            <span>{{ formatLanguages(experience.languages) }}</span>
           </span>
           <button 
             type="button" 
@@ -283,7 +299,7 @@ const handleBookWhatsApp = () => {
                   <span>Qué incluye</span>
                 </h4>
                 <ul class="list-unstyled mb-0 feature-checklist">
-                  <li v-for="(inc, i) in experience.included" :key="i" class="feature-item">
+                  <li v-for="(inc, i) in formattedIncluded" :key="i" class="feature-item">
                     <span class="feature-icon-box">
                       <i class="bi bi-check-lg text-beige"></i>
                     </span>
@@ -448,6 +464,10 @@ const handleBookWhatsApp = () => {
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-light border-opacity-15 small">
                   <span class="text-beige fw-medium">Dificultad técnica:</span>
                   <span class="fw-bold text-white">{{ formatDifficulty(experience.difficulty) }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-light border-opacity-15 small">
+                  <span class="text-beige fw-medium">Idiomas de guiado:</span>
+                  <span class="fw-bold text-white text-end">{{ formatLanguages(experience.languages) }}</span>
                 </div>
                 <!-- Total Principal en CLP -->
                 <div class="mt-4 pt-3 border-top border-light border-opacity-15">

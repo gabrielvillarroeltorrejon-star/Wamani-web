@@ -794,42 +794,79 @@ export const useContentStore = defineStore('content', () => {
     if (!isSupabaseConfigured || !supabase) return;
     isLoading.value = true;
     try {
-      // 1. Cargar experiencias desde Supabase
+      // 1. Cargar catálogo completo enriquecido desde site_content (contiene languages, duration, capacity completos)
+      const catalogBackupMap = new Map<string, Experience>();
+      try {
+        const { data: catData } = await supabase.from('site_content').select('data').eq('key', 'experiences_catalog').single();
+        if (catData?.data && Array.isArray(catData.data)) {
+          catData.data.forEach((exp: Experience) => {
+            if (exp && exp.id && !isObsoleteTour(exp)) {
+              catalogBackupMap.set(exp.id, exp);
+            }
+          });
+        }
+      } catch (catErr) {
+        console.warn('Aviso: no se pudo leer catálogo enriquecido de respaldo:', catErr);
+      }
+
+      // 2. Cargar experiencias desde Supabase
       const { data: expData, error: expError } = await supabase.from('experiences').select('*');
       if (!expError && expData && expData.length > 0) {
         const cloudExperiences = expData
-          .map((e: any) => ({
-            id: e.id,
-            slug: e.slug,
-            title: e.title,
-            subtitle: e.subtitle || '',
-            summary: e.summary || '',
-            description: e.description || '',
-            destinationId: e.destination_id || 'dest-cordillera-santiago',
-            macroZone: e.macro_zone || 'centro',
-            difficulty: e.difficulty || 'moderate',
-            pricing: {
-              basePrice: Number(e.base_price),
-              currency: 'CLP'
-            },
-            duration: { value: 6, unit: 'hours' },
-            languages: e.languages || ['es', 'en'],
-            capacity: e.capacity || { min: 2, max: 12 },
-            coverImage: e.cover_image || { url: '', alt: '' },
-            gallery: e.gallery || [],
-            tags: e.tags || [],
-            categories: e.categories || [],
-            schedule: e.schedule,
-            meetingPoint: e.meeting_point,
-            cancellationPolicy: e.cancellation_policy,
-            itinerary: e.itinerary || [],
-            included: e.included || [],
-            notIncluded: e.not_included || [],
-            heroBannerUrl: e.hero_banner_url || e.cover_image?.url || '',
-            guarantees: e.guarantees || [],
-            status: (e.status as 'active' | 'draft' | 'archived') || 'active'
-          }))
+          .map((e: any) => {
+            const backupExp = catalogBackupMap.get(e.id);
+            const localExp = experiences.value.find(loc => loc.id === e.id);
+
+            // Resolver idiomas preservando la selección guardada
+            const resolvedLanguages = (backupExp?.languages && backupExp.languages.length > 0)
+              ? backupExp.languages
+              : (localExp?.languages && localExp.languages.length > 0)
+                ? localExp.languages
+                : (e.languages && e.languages.length > 0)
+                  ? e.languages
+                  : ['Español', 'Inglés'];
+
+            return {
+              id: e.id,
+              slug: e.slug,
+              title: e.title,
+              subtitle: e.subtitle || backupExp?.subtitle || '',
+              summary: e.summary || backupExp?.summary || '',
+              description: e.description || backupExp?.description || '',
+              destinationId: e.destination_id || backupExp?.destinationId || 'dest-cordillera-santiago',
+              macroZone: e.macro_zone || backupExp?.macroZone || 'centro',
+              difficulty: e.difficulty || backupExp?.difficulty || 'moderate',
+              pricing: {
+                basePrice: Number(e.base_price) || backupExp?.pricing?.basePrice || 50000,
+                currency: 'CLP'
+              },
+              duration: backupExp?.duration || localExp?.duration || { value: 6, unit: 'hours' },
+              languages: resolvedLanguages,
+              capacity: backupExp?.capacity || localExp?.capacity || { min: 2, max: 12 },
+              coverImage: e.cover_image || backupExp?.coverImage || { url: '', alt: '' },
+              gallery: e.gallery || backupExp?.gallery || [],
+              tags: e.tags || backupExp?.tags || [],
+              categories: e.categories || backupExp?.categories || [],
+              schedule: e.schedule || backupExp?.schedule,
+              meetingPoint: e.meeting_point || backupExp?.meetingPoint,
+              cancellationPolicy: e.cancellation_policy || backupExp?.cancellationPolicy,
+              itinerary: e.itinerary || backupExp?.itinerary || [],
+              included: e.included || backupExp?.included || [],
+              notIncluded: e.not_included || backupExp?.notIncluded || [],
+              heroBannerUrl: e.hero_banner_url || e.cover_image?.url || backupExp?.heroBannerUrl || '',
+              guarantees: e.guarantees || backupExp?.guarantees || [],
+              status: (e.status as 'active' | 'draft' | 'archived') || 'active'
+            };
+          })
           .filter((e: any) => !isObsoleteTour(e));
+
+        // Incorporar tours adicionales presentes en el respaldo pero ausentes en la tabla individual
+        const expDataIds = new Set(expData.map(e => e.id));
+        catalogBackupMap.forEach((exp, id) => {
+          if (!expDataIds.has(id) && !isObsoleteTour(exp)) {
+            cloudExperiences.push(exp);
+          }
+        });
 
         if (cloudExperiences.length > 0) {
           // Fusión inteligente: preservar tours locales que aún no se hayan subido a la nube (excluyendo obsoletos)

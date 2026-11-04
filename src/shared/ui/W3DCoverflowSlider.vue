@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { formatLanguages } from '@/shared/lib/formatters';
 import type { Experience } from '@/entities/experience/model/schemas';
 
 const router = useRouter();
@@ -226,6 +227,11 @@ onUnmounted(() => {
 
         <!-- Contenido y Textos Inferiores -->
         <div class="coverflow-info">
+          <div v-if="exp.languages && exp.languages.length" class="mb-1">
+            <span class="badge bg-dark bg-opacity-75 border border-secondary border-opacity-40 px-2 py-1" style="font-size: 0.72rem; color: #E7DCC3 !important;">
+              <i class="bi bi-translate me-1"></i>{{ formatLanguages(exp.languages) }}
+            </span>
+          </div>
           <h3 class="coverflow-title font-brush">{{ exp.title }}</h3>
           <p class="coverflow-subtitle">{{ exp.subtitle || exp.summary }}</p>
           <div class="coverflow-action-row mt-2" v-if="idx === currentIndex">

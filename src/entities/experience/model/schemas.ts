@@ -44,7 +44,7 @@ export const ExperienceSchema = z.object({
     unit: z.enum(['hours', 'days'])
   }),
   difficulty: z.enum(['easy', 'moderate', 'hard', 'expert']),
-  languages: z.array(z.string()),
+  languages: z.array(z.string()).default(['Español', 'Inglés']),
   pricing: z.object({
     basePrice: z.number(),
     currency: z.string().default('USD'),
