@@ -1,7 +1,7 @@
 /**
  * Compresor y optimizador de imágenes del lado del cliente.
  * Transforma imágenes de cualquier tamaño (>2MB, 5MB, 15MB) a un formato web optimizado
- * manteniendo alta fidelidad visual y reduciendo el peso en más del 85-92% (< 200KB).
+ * manteniendo alta fidelidad visual y reduciendo el peso en más del 85-92% (< 80KB).
  */
 
 export interface CompressOptions {
@@ -11,19 +11,18 @@ export interface CompressOptions {
   mimeType?: 'image/jpeg' | 'image/webp';
 }
 
-export function compressImageFile(
+export function compressImageBlob(
   file: File,
   options: CompressOptions = {}
-): Promise<string> {
+): Promise<{ blob: Blob; dataUrl: string }> {
   const {
-    maxWidth = 1400,
-    maxHeight = 1400,
-    quality = 0.82,
-    mimeType = 'image/jpeg'
+    maxWidth = 1200,
+    maxHeight = 1200,
+    quality = 0.78,
+    mimeType = 'image/webp'
   } = options;
 
   return new Promise((resolve, reject) => {
-    // Si no es imagen, rechazar amablemente
     if (!file.type.startsWith('image/')) {
       reject(new Error('El archivo seleccionado no es una imagen válida.'));
       return;
@@ -37,7 +36,6 @@ export function compressImageFile(
         let width = img.width;
         let height = img.height;
 
-        // Calcular escalado proporcional
         if (width > maxWidth || height > maxHeight) {
           if (width > height) {
             height = Math.round((height * maxWidth) / width);
@@ -54,24 +52,45 @@ export function compressImageFile(
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          // Fallback a la imagen original si el canvas falla
-          resolve(e.target?.result as string);
+          const fallbackDataUrl = e.target?.result as string;
+          fetch(fallbackDataUrl)
+            .then(res => res.blob())
+            .then(blob => resolve({ blob, dataUrl: fallbackDataUrl }))
+            .catch(() => reject(new Error('Error en procesamiento de imagen.')));
           return;
         }
 
-        // Suavizado de imagen de alta calidad
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convertir al formato y calidad solicitada
+        let chosenMime = mimeType;
+        let dataUrl = '';
         try {
-          const optimizedDataUrl = canvas.toDataURL(mimeType, quality);
-          resolve(optimizedDataUrl);
-        } catch (err) {
-          // Fallback seguro a jpeg básico
-          resolve(canvas.toDataURL('image/jpeg', 0.8));
+          dataUrl = canvas.toDataURL(chosenMime, quality);
+          if (!dataUrl.startsWith(`data:${chosenMime}`)) {
+            chosenMime = 'image/jpeg';
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+        } catch {
+          chosenMime = 'image/jpeg';
+          dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         }
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve({ blob, dataUrl });
+            } else {
+              fetch(dataUrl)
+                .then(r => r.blob())
+                .then(b => resolve({ blob: b, dataUrl }))
+                .catch(err => reject(err));
+            }
+          },
+          chosenMime,
+          quality
+        );
       };
 
       img.onerror = () => {
@@ -87,6 +106,14 @@ export function compressImageFile(
 
     reader.readAsDataURL(file);
   });
+}
+
+export async function compressImageFile(
+  file: File,
+  options: CompressOptions = {}
+): Promise<string> {
+  const { dataUrl } = await compressImageBlob(file, options);
+  return dataUrl;
 }
 
 /**

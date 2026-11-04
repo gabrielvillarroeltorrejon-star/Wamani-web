@@ -826,10 +826,32 @@ export const useContentStore = defineStore('content', () => {
                   ? e.languages
                   : ['Español', 'Inglés'];
 
+            // Resolver portada: preferir la portada personalizada del respaldo si existe
+            const resolvedCover = (backupExp?.coverImage?.url && (
+              backupExp.coverImage.url.startsWith('data:') ||
+              backupExp.coverImage.url.includes('supabase') ||
+              !e.cover_image?.url
+            )) ? backupExp.coverImage : (e.cover_image || backupExp?.coverImage || { url: '', alt: e.title });
+
+            // Resolver galería: no permitir que un array vacío de la tabla pise fotos cargadas en el catálogo
+            const resolvedGallery = (backupExp?.gallery && backupExp.gallery.length > 0)
+              ? backupExp.gallery
+              : (e.gallery && Array.isArray(e.gallery) && e.gallery.length > 0 ? e.gallery : []);
+
+            // Resolver banner panorámico
+            const resolvedHeroBanner = (backupExp?.heroBannerUrl && backupExp.heroBannerUrl !== e.cover_image?.url)
+              ? backupExp.heroBannerUrl
+              : (e.hero_banner_url || backupExp?.heroBannerUrl || resolvedCover?.url || '');
+
+            // Resolver garantías oficiales
+            const resolvedGuarantees = (backupExp?.guarantees && backupExp.guarantees.length > 0)
+              ? backupExp.guarantees
+              : (e.guarantees && Array.isArray(e.guarantees) && e.guarantees.length > 0 ? e.guarantees : []);
+
             return {
               id: e.id,
               slug: e.slug,
-              title: e.title,
+              title: e.title || backupExp?.title || '',
               subtitle: e.subtitle || backupExp?.subtitle || '',
               summary: e.summary || backupExp?.summary || '',
               description: e.description || backupExp?.description || '',
@@ -840,21 +862,21 @@ export const useContentStore = defineStore('content', () => {
                 basePrice: Number(e.base_price) || backupExp?.pricing?.basePrice || 50000,
                 currency: 'CLP'
               },
-              duration: backupExp?.duration || localExp?.duration || { value: 6, unit: 'hours' },
+              duration: backupExp?.duration || (e.duration ? e.duration : { value: 8, unit: 'hours' }),
               languages: resolvedLanguages,
-              capacity: backupExp?.capacity || localExp?.capacity || { min: 2, max: 12 },
-              coverImage: e.cover_image || backupExp?.coverImage || { url: '', alt: '' },
-              gallery: e.gallery || backupExp?.gallery || [],
-              tags: e.tags || backupExp?.tags || [],
-              categories: e.categories || backupExp?.categories || [],
-              schedule: e.schedule || backupExp?.schedule,
-              meetingPoint: e.meeting_point || backupExp?.meetingPoint,
-              cancellationPolicy: e.cancellation_policy || backupExp?.cancellationPolicy,
-              itinerary: e.itinerary || backupExp?.itinerary || [],
-              included: e.included || backupExp?.included || [],
-              notIncluded: e.not_included || backupExp?.notIncluded || [],
-              heroBannerUrl: e.hero_banner_url || e.cover_image?.url || backupExp?.heroBannerUrl || '',
-              guarantees: e.guarantees || backupExp?.guarantees || [],
+              capacity: backupExp?.capacity || (e.capacity ? e.capacity : { min: 2, max: 12 }),
+              coverImage: resolvedCover,
+              gallery: resolvedGallery,
+              tags: (e.tags && e.tags.length > 0) ? e.tags : (backupExp?.tags || []),
+              categories: (e.categories && e.categories.length > 0) ? e.categories : (backupExp?.categories || []),
+              schedule: e.schedule || backupExp?.schedule || '',
+              meetingPoint: e.meeting_point || backupExp?.meetingPoint || '',
+              cancellationPolicy: e.cancellation_policy || backupExp?.cancellationPolicy || '',
+              itinerary: (backupExp?.itinerary && backupExp.itinerary.length > 0) ? backupExp.itinerary : (e.itinerary || []),
+              included: (backupExp?.included && backupExp.included.length > 0) ? backupExp.included : (e.included || []),
+              notIncluded: (backupExp?.notIncluded && backupExp.notIncluded.length > 0) ? backupExp.notIncluded : (e.not_included || []),
+              heroBannerUrl: resolvedHeroBanner,
+              guarantees: resolvedGuarantees,
               status: (e.status as 'active' | 'draft' | 'archived') || 'active'
             };
           })
@@ -990,7 +1012,7 @@ export const useContentStore = defineStore('content', () => {
   loadFromStorage();
   syncFromSupabase();
 
-  // Guardar en Storage y Nube
+  // Guardar en Storage y Nube con persistencia garantizada
   const persist = async () => {
     try {
       localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
@@ -1003,41 +1025,46 @@ export const useContentStore = defineStore('content', () => {
       console.warn('Aviso: Cuota de localStorage alcanzada, sincronizando directamente con Supabase:', storageErr);
     }
 
-    // Si Supabase está configurado, guardar también en la nube de forma asíncrona
+    // Si Supabase está configurado, guardar también en la nube
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('site_content').upsert({ key: 'main_content', data: content.value });
-        await supabase.from('site_content').upsert({ key: 'experiences_catalog', data: experiences.value });
-        await supabase.from('site_content').upsert({ key: 'gallery_images', data: galleryImages.value });
+        const [r1, r2, r3] = await Promise.all([
+          supabase.from('site_content').upsert({ key: 'main_content', data: content.value }, { onConflict: 'key' }),
+          supabase.from('site_content').upsert({ key: 'experiences_catalog', data: experiences.value }, { onConflict: 'key' }),
+          supabase.from('site_content').upsert({ key: 'gallery_images', data: galleryImages.value }, { onConflict: 'key' })
+        ]);
+        if (r1.error) console.error('Error al guardar main_content en Supabase:', r1.error);
+        if (r2.error) console.error('Error al guardar experiences_catalog en Supabase:', r2.error);
+        if (r3.error) console.error('Error al guardar gallery_images en Supabase:', r3.error);
       } catch (e) {
         console.warn('Error al sincronizar contenidos con Supabase:', e);
       }
     }
   };
 
-  // Helpers for Supabase mapping
+  // Helpers for Supabase mapping (sólo columnas soportadas por public.experiences)
   const mapExpToDb = (e: Experience) => ({
     id: e.id,
     slug: e.slug,
     title: e.title,
-    subtitle: e.subtitle,
-    summary: e.summary,
-    description: e.description,
-    destination_id: e.destinationId,
-    macro_zone: e.macroZone || 'sur',
-    difficulty: e.difficulty,
-    base_price: e.pricing.basePrice,
-    cover_image: e.coverImage,
-    gallery: e.gallery,
-    tags: e.tags,
-    categories: e.categories,
-    schedule: e.schedule,
-    meeting_point: e.meetingPoint,
-    cancellation_policy: e.cancellationPolicy,
-    itinerary: e.itinerary,
-    included: e.included,
-    not_included: e.notIncluded,
-    status: e.status
+    subtitle: e.subtitle || '',
+    summary: e.summary || '',
+    description: e.description || '',
+    destination_id: e.destinationId || 'dest-cordillera-santiago',
+    difficulty: e.difficulty || 'moderate',
+    base_price: Number(e.pricing?.basePrice) || 50000,
+    cover_image: e.coverImage || { url: '', alt: e.title },
+    gallery: e.gallery || [],
+    tags: e.tags || [],
+    categories: e.categories || [],
+    schedule: e.schedule || '',
+    meeting_point: e.meetingPoint || '',
+    cancellation_policy: e.cancellationPolicy || '',
+    itinerary: e.itinerary || [],
+    included: e.included || [],
+    not_included: e.notIncluded || [],
+    status: e.status || 'active',
+    updated_at: new Date().toISOString()
   });
 
   // CRUD de Experiencias
@@ -1056,7 +1083,7 @@ export const useContentStore = defineStore('content', () => {
       status: 'active'
     };
     experiences.value.unshift(newExp);
-    persist();
+    await persist();
     
     if (isSupabaseConfigured && supabase) {
       try {
@@ -1076,7 +1103,7 @@ export const useContentStore = defineStore('content', () => {
     const index = experiences.value.findIndex(e => e.id === id);
     if (index !== -1) {
       experiences.value[index] = { ...experiences.value[index], ...updated } as Experience;
-      persist();
+      await persist();
       
       if (isSupabaseConfigured && supabase) {
         try {
@@ -1098,7 +1125,7 @@ export const useContentStore = defineStore('content', () => {
     const index = experiences.value.findIndex(e => e.id === id);
     if (index !== -1) {
       experiences.value.splice(index, 1);
-      persist();
+      await persist();
       
       if (isSupabaseConfigured && supabase) {
         try {
@@ -1114,7 +1141,7 @@ export const useContentStore = defineStore('content', () => {
   };
 
   // CRUD de Servicios de Inicio (Tarjetas de Inicio)
-  const saveServiceItem = (item: ServiceItem) => {
+  const saveServiceItem = async (item: ServiceItem) => {
     if (!content.value.home.services.items) {
       content.value.home.services.items = [];
     }
@@ -1124,20 +1151,20 @@ export const useContentStore = defineStore('content', () => {
     } else {
       content.value.home.services.items.push({ ...item });
     }
-    persist();
+    await persist();
   };
 
-  const deleteServiceItem = (id: string) => {
+  const deleteServiceItem = async (id: string) => {
     if (!content.value.home.services.items) return;
     const idx = content.value.home.services.items.findIndex(s => s.id === id);
     if (idx !== -1) {
       content.value.home.services.items.splice(idx, 1);
-      persist();
+      await persist();
     }
   };
 
   // CRUD de Advisors / Equipo
-  const saveAdvisor = (adv: Advisor) => {
+  const saveAdvisor = async (adv: Advisor) => {
     if (!content.value.about.advisors) {
       content.value.about.advisors = [];
     }
@@ -1147,27 +1174,27 @@ export const useContentStore = defineStore('content', () => {
     } else {
       content.value.about.advisors.push({ ...adv });
     }
-    persist();
+    await persist();
   };
 
-  const deleteAdvisor = (id: string) => {
+  const deleteAdvisor = async (id: string) => {
     if (!content.value.about.advisors) return;
     const idx = content.value.about.advisors.findIndex(a => a.id === id);
     if (idx !== -1) {
       content.value.about.advisors.splice(idx, 1);
-      persist();
+      await persist();
     }
   };
 
   // CRM Reservas / Ventas Actions
-  const addBooking = (booking: Omit<Booking, 'id' | 'createdAt'>) => {
+  const addBooking = async (booking: Omit<Booking, 'id' | 'createdAt'>) => {
     const newBooking: Booking = {
       ...booking,
       id: `b-${Date.now()}`,
       createdAt: new Date().toISOString()
     };
     bookings.value.unshift(newBooking);
-    persist();
+    await persist();
 
     // Sincronizar reserva en Supabase en tiempo real
     if (isSupabaseConfigured && supabase) {
@@ -1180,7 +1207,7 @@ export const useContentStore = defineStore('content', () => {
           newBooking.invoiceType === 'factura' ? `Comprobante: Factura (${JSON.stringify(newBooking.billingDetails)})` : ''
         ].filter(Boolean).join(' | ');
 
-        supabase.from('bookings').insert({
+        const { error } = await supabase.from('bookings').insert({
           id: newBooking.id,
           buy_order: newBooking.buyOrder || `BO-${Date.now()}`,
           customer_name: newBooking.customerName,
@@ -1198,9 +1225,8 @@ export const useContentStore = defineStore('content', () => {
           authorization_code: newBooking.authorizationCode || null,
           card_last4: newBooking.cardLast4 || null,
           notes: fullNotesCombined || null
-        }).then(({ error }) => {
-          if (error) console.warn('Supabase booking insert notice:', error);
         });
+        if (error) console.warn('Supabase booking insert notice:', error);
       } catch (e) {
         console.warn('Error saving booking to Supabase:', e);
       }
@@ -1209,11 +1235,11 @@ export const useContentStore = defineStore('content', () => {
     return newBooking;
   };
 
-  const updateBookingStatus = (id: string, status: 'pending' | 'confirmed' | 'cancelled') => {
+  const updateBookingStatus = async (id: string, status: 'pending' | 'confirmed' | 'cancelled') => {
     const booking = bookings.value.find(b => b.id === id);
     if (booking) {
       booking.status = status;
-      persist();
+      await persist();
 
       if (isSupabaseConfigured && supabase) {
         supabase.from('bookings').update({ status }).eq('id', id).then(({ error }) => {
@@ -1226,12 +1252,12 @@ export const useContentStore = defineStore('content', () => {
     return false;
   };
 
-  const deleteBooking = (id: string) => {
+  const deleteBooking = async (id: string) => {
     const index = bookings.value.findIndex(b => b.id === id);
     if (index !== -1) {
       const removedId = bookings.value[index].id;
       bookings.value.splice(index, 1);
-      persist();
+      await persist();
 
       if (isSupabaseConfigured && supabase) {
         supabase.from('bookings').delete().eq('id', removedId).then(({ error }) => {
@@ -1245,102 +1271,102 @@ export const useContentStore = defineStore('content', () => {
   };
 
   // Actualizar Secciones
-  const updateContent = (newContent: Partial<SectionContent>) => {
+  const updateContent = async (newContent: Partial<SectionContent>) => {
     content.value = { ...content.value, ...newContent } as SectionContent;
-    persist();
+    await persist();
   };
 
   // Actualizar Pasarela y Datos Bancarios
-  const updateGatewaySettings = (settings: Partial<GatewaySettings>) => {
+  const updateGatewaySettings = async (settings: Partial<GatewaySettings>) => {
     content.value.gateway = {
       transbank: { ...content.value.gateway.transbank, ...settings.transbank },
       bankTransfer: { ...content.value.gateway.bankTransfer, ...settings.bankTransfer },
       emailNotifications: { ...content.value.gateway.emailNotifications, ...settings.emailNotifications }
     };
-    persist();
+    await persist();
   };
 
-  const addDiscountCode = (code: Omit<DiscountCode, 'id'>) => {
+  const addDiscountCode = async (code: Omit<DiscountCode, 'id'>) => {
     const newCode: DiscountCode = {
       ...code,
       id: `disc-${Date.now()}`
     };
     discountCodes.value.push(newCode);
-    persist();
+    await persist();
   };
 
-  const updateDiscountCode = (id: string, code: Partial<DiscountCode>) => {
+  const updateDiscountCode = async (id: string, code: Partial<DiscountCode>) => {
     const idx = discountCodes.value.findIndex(d => d.id === id);
     if (idx !== -1) {
       discountCodes.value[idx] = { ...discountCodes.value[idx], ...code };
-      persist();
+      await persist();
     }
   };
 
-  const deleteDiscountCode = (id: string) => {
+  const deleteDiscountCode = async (id: string) => {
     discountCodes.value = discountCodes.value.filter(d => d.id !== id);
-    persist();
+    await persist();
   };
 
-  const addPackage = (pkg: Omit<TourPackage, 'id'>) => {
+  const addPackage = async (pkg: Omit<TourPackage, 'id'>) => {
     const newPkg: TourPackage = {
       ...pkg,
       id: `pkg-${Date.now()}`
     };
     tourPackages.value.push(newPkg);
-    persist();
+    await persist();
   };
 
-  const updatePackage = (id: string, pkg: Partial<TourPackage>) => {
+  const updatePackage = async (id: string, pkg: Partial<TourPackage>) => {
     const idx = tourPackages.value.findIndex(p => p.id === id);
     if (idx !== -1) {
       tourPackages.value[idx] = { ...tourPackages.value[idx], ...pkg };
-      persist();
+      await persist();
     }
   };
 
-  const deletePackage = (id: string) => {
+  const deletePackage = async (id: string) => {
     tourPackages.value = tourPackages.value.filter(p => p.id !== id);
-    persist();
+    await persist();
   };
 
   // CRUD de Galería Fotográfica
-  const addGalleryImage = (img: Omit<GalleryImage, 'id' | 'createdAt'>) => {
+  const addGalleryImage = async (img: Omit<GalleryImage, 'id' | 'createdAt'>) => {
     const newImg: GalleryImage = {
       ...img,
       id: `gal-${Date.now()}`,
       createdAt: new Date().toISOString()
     };
     galleryImages.value.unshift(newImg);
-    persist();
+    await persist();
     return newImg;
   };
 
-  const updateGalleryImage = (updated: GalleryImage) => {
+  const updateGalleryImage = async (updated: GalleryImage) => {
     const idx = galleryImages.value.findIndex(g => g.id === updated.id);
     if (idx !== -1) {
       galleryImages.value[idx] = { ...galleryImages.value[idx], ...updated };
-      persist();
+      await persist();
     }
   };
 
-  const deleteGalleryImage = (id: string) => {
+  const deleteGalleryImage = async (id: string) => {
     galleryImages.value = galleryImages.value.filter(g => g.id !== id);
-    persist();
+    await persist();
   };
 
   // CRUD de Transporte Exclusivo & Traslados
-  const updateTransportHeader = (header: { badge: string; title: string; description: string }) => {
+  const updateTransportHeader = async (header: { badge: string; title: string; description: string }) => {
     if (!content.value.home.transport) {
       content.value.home.transport = JSON.parse(JSON.stringify(DEFAULT_TRANSPORT_SECTION));
     }
     content.value.home.transport.badge = header.badge;
     content.value.home.transport.title = header.title;
     content.value.home.transport.description = header.description;
-    persist();
+    await persist();
   };
 
-  const saveTransportService = (service: TransportServiceCard) => {
+  const saveTransportService = async (service: TransportServiceCard) => {
     if (!content.value.home.transport) {
       content.value.home.transport = JSON.parse(JSON.stringify(DEFAULT_TRANSPORT_SECTION));
     }
@@ -1352,13 +1378,13 @@ export const useContentStore = defineStore('content', () => {
       list.push({ ...service, id: service.id || `trans-${Date.now()}` });
     }
     content.value.home.transport.services = list;
-    persist();
+    await persist();
   };
 
-  const deleteTransportService = (id: string) => {
+  const deleteTransportService = async (id: string) => {
     if (!content.value.home.transport) return;
     content.value.home.transport.services = (content.value.home.transport.services || []).filter(s => s.id !== id);
-    persist();
+    await persist();
   };
 
   return {
@@ -1379,6 +1405,8 @@ export const useContentStore = defineStore('content', () => {
     isLoading,
     isDarkMode,
     toggleDarkMode,
+    persist,
+    syncFromSupabase,
     addExperience,
     updateExperience,
     deleteExperience,

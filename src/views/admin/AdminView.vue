@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useContentStore, type ServiceItem, type Advisor, type GalleryImage, type TransportServiceCard } from '@/shared/stores/contentStore';
 import { compressImageFile, compressMultipleImageFiles } from '@/shared/lib/imageCompressor';
+import { uploadImageToStorageOrBase64, uploadMultipleImagesToStorage } from '@/shared/lib/supabaseStorage';
 import { formatLanguages } from '@/shared/lib/formatters';
 import type { Experience } from '@/entities/experience/model/schemas';
 
@@ -181,18 +182,29 @@ const removeGalleryImage = (index: number) => {
   expForm.value.galleryUrls.splice(index, 1);
 };
 
+// Estado reactivo de guardado y carga de imágenes en Tours
+const isSavingExp = ref(false);
+const isUploadingCover = ref(false);
+const isUploadingHero = ref(false);
+const isUploadingGallery = ref(false);
+
 const handleMultipleGalleryUpload = async (event: Event) => {
-  const files = (event.target as HTMLInputElement).files;
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
   if (files && files.length > 0) {
+    isUploadingGallery.value = true;
     triggerToast(`Optimizando e importando ${files.length} fotos...`);
     try {
-      const compressedList = await compressMultipleImageFiles(files, { maxWidth: 1400, quality: 0.82 });
-      compressedList.forEach(url => {
+      const urls = await uploadMultipleImagesToStorage(files, { maxWidth: 900, quality: 0.75, folder: 'gallery' });
+      urls.forEach(url => {
         expForm.value.galleryUrls.push(url);
       });
       triggerToast('¡Imágenes optimizadas y añadidas a la galería!');
     } catch (err: any) {
       alert('Error al procesar imágenes: ' + (err.message || ''));
+    } finally {
+      isUploadingGallery.value = false;
+      input.value = '';
     }
   }
 };
@@ -283,112 +295,132 @@ const openEditModal = (exp: Experience) => {
 };
 
 const handleHeroBannerUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
+    isUploadingHero.value = true;
     triggerToast('Optimizando fondo de cabecera panorámico...');
     try {
-      const compressed = await compressImageFile(file, { maxWidth: 1920, quality: 0.84 });
-      expForm.value.heroBannerUrl = compressed;
+      const url = await uploadImageToStorageOrBase64(file, { maxWidth: 1440, quality: 0.78, folder: 'banners' });
+      expForm.value.heroBannerUrl = url;
       triggerToast('¡Fondo de cabecera optimizado y listo!');
     } catch (err: any) {
       alert('Error al procesar la imagen: ' + (err.message || ''));
+    } finally {
+      isUploadingHero.value = false;
+      input.value = '';
     }
   }
 };
 
 const handleImageUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
+    isUploadingCover.value = true;
     triggerToast('Optimizando y procesando imagen de portada...');
     try {
-      const compressed = await compressImageFile(file, { maxWidth: 1400, quality: 0.82 });
-      expForm.value.coverImageUrl = compressed;
+      const url = await uploadImageToStorageOrBase64(file, { maxWidth: 1000, quality: 0.76, folder: 'covers' });
+      expForm.value.coverImageUrl = url;
       triggerToast('¡Imagen optimizada con éxito!');
     } catch (err: any) {
       alert('Error al procesar la imagen: ' + (err.message || ''));
+    } finally {
+      isUploadingCover.value = false;
+      input.value = '';
     }
   }
 };
 
 const saveExperience = async () => {
-  const itinerary = expForm.value.itineraryRaw
-    .split('\n')
-    .filter(line => line.trim() !== '')
-    .map(line => {
-      const parts = line.split('-').map(p => p.trim());
-      return {
-        dayOrTime: parts[0] || 'Todo el día',
-        title: parts[1] || 'Actividad',
-        description: parts[2] || parts[1] || 'Sin descripción'
-      };
-    });
+  if (isSavingExp.value) return;
+  isSavingExp.value = true;
+  triggerToast('Guardando tour en la nube...');
 
-  const gallery = expForm.value.galleryUrls.map((url, i) => ({
-    url,
-    alt: `${expForm.value.title} - Foto ${i + 1}`
-  }));
+  try {
+    const itinerary = expForm.value.itineraryRaw
+      .split('\n')
+      .filter(line => line.trim() !== '')
+      .map(line => {
+        const parts = line.split('-').map(p => p.trim());
+        return {
+          dayOrTime: parts[0] || 'Todo el día',
+          title: parts[1] || 'Actividad',
+          description: parts[2] || parts[1] || 'Sin descripción'
+        };
+      });
 
-  const included = expForm.value.includedRaw
-    .split('\n')
-    .map(s => s.trim())
-    .filter(Boolean);
+    const gallery = expForm.value.galleryUrls.map((url, i) => ({
+      url,
+      alt: `${expForm.value.title} - Foto ${i + 1}`
+    }));
 
-  const notIncluded = expForm.value.notIncludedRaw
-    .split('\n')
-    .map(s => s.trim())
-    .filter(Boolean);
+    const included = expForm.value.includedRaw
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
 
-  const guarantees = expForm.value.guaranteesRaw
-    .split('\n')
-    .map(s => s.trim())
-    .filter(Boolean);
+    const notIncluded = expForm.value.notIncludedRaw
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
 
-  const parsedExp: Omit<Experience, 'id' | 'slug'> = {
-    status: 'active',
-    title: expForm.value.title,
-    subtitle: expForm.value.subtitle,
-    summary: expForm.value.summary,
-    description: expForm.value.description,
-    destinationId: expForm.value.destinationId,
-    difficulty: expForm.value.difficulty,
-    pricing: {
-      currency: 'CLP',
-      basePrice: Number(expForm.value.basePrice)
-    },
-    coverImage: {
-      url: expForm.value.coverImageUrl || 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80',
-      alt: expForm.value.title
-    },
-    heroBannerUrl: expForm.value.heroBannerUrl || expForm.value.coverImageUrl || '',
-    guarantees: guarantees.length > 0 ? guarantees : [
-      'Prestador SERNATUR: Registro Oficial de Turismo N° 84219',
-      'Seguro Incluido: Cobertura de rescate y asistencia en montaña',
-      'Garantía Climática: Reprogramación 100% garantizada por clima',
-      'Pago Cifrado: Transbank Webpay Plus estándar PCI-DSS'
-    ],
-    gallery,
-    tags: expForm.value.tags.split(',').map(t => t.trim()).filter(Boolean),
-    categories: expForm.value.categories.split(',').map(c => c.trim()).filter(Boolean),
-    schedule: expForm.value.schedule,
-    meetingPoint: expForm.value.meetingPoint,
-    cancellationPolicy: expForm.value.cancellationPolicy,
-    itinerary,
-    duration: { value: 8, unit: 'hours' },
-    languages: expForm.value.languages && expForm.value.languages.length > 0 ? [...expForm.value.languages] : ['Español'],
-    capacity: { min: 2, max: 12 },
-    included: included.length > 0 ? included : ['Guía certificado', 'Seguro de accidentes', 'Equipo técnico'],
-    notIncluded: notIncluded.length > 0 ? notIncluded : ['Propinas', 'Gastos personales']
-  };
+    const guarantees = expForm.value.guaranteesRaw
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
 
-  if (modalMode.value === 'add') {
-    await contentStore.addExperience(parsedExp);
-    triggerToast('¡Servicio añadido al catálogo y publicado!');
-  } else if (editingExpId.value) {
-    await contentStore.updateExperience(editingExpId.value, parsedExp);
-    triggerToast('¡Servicio actualizado correctamente!');
+    const parsedExp: Omit<Experience, 'id' | 'slug'> = {
+      status: 'active',
+      title: expForm.value.title,
+      subtitle: expForm.value.subtitle,
+      summary: expForm.value.summary,
+      description: expForm.value.description,
+      destinationId: expForm.value.destinationId,
+      difficulty: expForm.value.difficulty,
+      pricing: {
+        currency: 'CLP',
+        basePrice: Number(expForm.value.basePrice)
+      },
+      coverImage: {
+        url: expForm.value.coverImageUrl || 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80',
+        alt: expForm.value.title
+      },
+      heroBannerUrl: expForm.value.heroBannerUrl || expForm.value.coverImageUrl || '',
+      guarantees: guarantees.length > 0 ? guarantees : [
+        'Prestador SERNATUR: Registro Oficial de Turismo N° 84219',
+        'Seguro Incluido: Cobertura de rescate y asistencia en montaña',
+        'Garantía Climática: Reprogramación 100% garantizada por clima',
+        'Pago Cifrado: Transbank Webpay Plus estándar PCI-DSS'
+      ],
+      gallery,
+      tags: expForm.value.tags.split(',').map(t => t.trim()).filter(Boolean),
+      categories: expForm.value.categories.split(',').map(c => c.trim()).filter(Boolean),
+      schedule: expForm.value.schedule,
+      meetingPoint: expForm.value.meetingPoint,
+      cancellationPolicy: expForm.value.cancellationPolicy,
+      itinerary,
+      duration: { value: 8, unit: 'hours' },
+      languages: expForm.value.languages && expForm.value.languages.length > 0 ? [...expForm.value.languages] : ['Español', 'Inglés'],
+      capacity: { min: 2, max: 12 },
+      included: included.length > 0 ? included : ['Guía certificado', 'Seguro de accidentes', 'Equipo técnico'],
+      notIncluded: notIncluded.length > 0 ? notIncluded : ['Propinas', 'Gastos personales']
+    };
+
+    if (modalMode.value === 'add') {
+      await contentStore.addExperience(parsedExp);
+      triggerToast('¡Servicio añadido al catálogo y publicado en la nube!');
+    } else if (editingExpId.value) {
+      await contentStore.updateExperience(editingExpId.value, parsedExp);
+      triggerToast('¡Servicio actualizado correctamente en la nube!');
+    }
+
+    showExpModal.value = false;
+  } catch (err: any) {
+    alert('Error al guardar el tour: ' + (err.message || ''));
+  } finally {
+    isSavingExp.value = false;
   }
-
-  showExpModal.value = false;
 };
 
 const copyTourLink = async (exp: Experience) => {
@@ -496,19 +528,22 @@ const openEditServiceItemModal = (item: ServiceItem) => {
 };
 
 const handleServiceCoverUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
     triggerToast('Optimizando imagen de portada...');
     try {
-      serviceItemForm.value.coverImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.82 });
+      serviceItemForm.value.coverImage = await uploadImageToStorageOrBase64(file, { maxWidth: 1000, quality: 0.76, folder: 'services' });
       triggerToast('¡Imagen optimizada y guardada!');
     } catch (err: any) {
       alert('Error al procesar imagen: ' + (err.message || ''));
+    } finally {
+      input.value = '';
     }
   }
 };
 
-const saveServiceItemForm = () => {
+const saveServiceItemForm = async () => {
   const itemData: ServiceItem = {
     id: serviceItemForm.value.id || `serv-${Date.now()}`,
     title: serviceItemForm.value.title,
@@ -520,7 +555,7 @@ const saveServiceItemForm = () => {
     gallery: serviceItemForm.value.galleryRaw.split('\n').map(g => g.trim()).filter(Boolean)
   };
 
-  contentStore.saveServiceItem(itemData);
+  await contentStore.saveServiceItem(itemData);
   triggerToast('¡Tarjeta de Inicio guardada con éxito!');
   showServiceItemModal.value = false;
 };
@@ -619,15 +654,18 @@ const openEditTransportModal = (srv: TransportServiceCard) => {
 };
 
 const handleTransportImageUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
     triggerToast('Optimizando fotografía del servicio...');
     try {
-      const compressed = await compressImageFile(file, { maxWidth: 1200, quality: 0.82 });
-      transportCardForm.value.imageUrl = compressed;
+      const url = await uploadImageToStorageOrBase64(file, { maxWidth: 1000, quality: 0.76, folder: 'transport' });
+      transportCardForm.value.imageUrl = url;
       triggerToast('¡Fotografía optimizada y cargada!');
     } catch (err: any) {
       alert('Error al procesar la imagen: ' + (err.message || ''));
+    } finally {
+      input.value = '';
     }
   }
 };
@@ -636,7 +674,7 @@ const removeTransportImage = () => {
   transportCardForm.value.imageUrl = '';
 };
 
-const saveTransportCardForm = () => {
+const saveTransportCardForm = async () => {
   const lines = transportFeaturesText.value
     .split('\n')
     .map(l => l.trim())
@@ -648,7 +686,7 @@ const saveTransportCardForm = () => {
     features: lines
   };
 
-  contentStore.saveTransportService(serviceToSave);
+  await contentStore.saveTransportService(serviceToSave);
   showTransportModal.value = false;
   triggerToast(transportModalMode.value === 'add' ? '¡Servicio de transporte añadido con éxito!' : '¡Servicio de transporte actualizado con éxito!');
 };
@@ -700,22 +738,25 @@ const openEditAdvisorModal = (adv: Advisor) => {
 };
 
 const handleAdvisorImageUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
     if (file.size > 10000000) {
       alert('La imagen supera los 10MB.');
       return;
     }
     try {
-      advisorForm.value.image = await compressImageFile(file, { maxWidth: 800, quality: 0.85 });
+      advisorForm.value.image = await uploadImageToStorageOrBase64(file, { maxWidth: 600, quality: 0.8, folder: 'advisors' });
       triggerToast('Imagen de integrante subida.');
     } catch {
       alert('No se pudo procesar la fotografía.');
+    } finally {
+      input.value = '';
     }
   }
 };
 
-const saveAdvisorForm = () => {
+const saveAdvisorForm = async () => {
   const advData: Advisor = {
     id: advisorForm.value.id || `adv-${Date.now()}`,
     name: advisorForm.value.name,
@@ -724,7 +765,7 @@ const saveAdvisorForm = () => {
     bio: advisorForm.value.bio
   };
 
-  contentStore.saveAdvisor(advData);
+  await contentStore.saveAdvisor(advData);
   triggerToast('¡Ficha de Integrante guardada!');
   showAdvisorModal.value = false;
 };
@@ -986,45 +1027,73 @@ watch(() => contentStore.content.about, (newAbout) => {
   }
 }, { deep: true });
 
+watch(() => contentStore.content.home, (newHome) => {
+  if (newHome) {
+    homeForm.value = JSON.parse(JSON.stringify(newHome));
+  }
+}, { deep: true });
+
+watch(() => contentStore.content.contact, (newContact) => {
+  if (newContact) {
+    contactForm.value = { ...newContact };
+  }
+}, { deep: true });
+
+watch(() => contentStore.content.gateway, (newGateway) => {
+  if (newGateway) {
+    gatewayForm.value = {
+      transbank: { ...newGateway.transbank },
+      bankTransfer: { ...newGateway.bankTransfer },
+      emailNotifications: { ...newGateway.emailNotifications }
+    };
+  }
+}, { deep: true });
+
 const handleAboutHeroUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
     if (file.size > 10000000) {
       alert('La imagen supera los 10MB.');
       return;
     }
     try {
-      aboutForm.value.heroImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.85 });
+      aboutForm.value.heroImage = await uploadImageToStorageOrBase64(file, { maxWidth: 1200, quality: 0.8, folder: 'about' });
       triggerToast('Imagen de cabecera de Nosotros optimizada y cargada.');
     } catch {
       alert('No se pudo procesar la imagen.');
+    } finally {
+      input.value = '';
     }
   }
 };
 
 const handleAboutHistoryUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) {
     if (file.size > 10000000) {
       alert('La imagen supera los 10MB.');
       return;
     }
     try {
-      aboutForm.value.historyImage = await compressImageFile(file, { maxWidth: 1000, quality: 0.85 });
+      aboutForm.value.historyImage = await uploadImageToStorageOrBase64(file, { maxWidth: 1000, quality: 0.8, folder: 'about' });
       triggerToast('Imagen de historia optimizada y cargada.');
     } catch {
       alert('No se pudo procesar la imagen.');
+    } finally {
+      input.value = '';
     }
   }
 };
 
-const saveHomeContent = () => {
-  contentStore.updateContent({ home: homeForm.value });
+const saveHomeContent = async () => {
+  await contentStore.updateContent({ home: homeForm.value });
   triggerToast('¡Contenidos de la Página de Inicio guardados!');
 };
 
-const saveAboutContent = () => {
-  contentStore.updateContent({
+const saveAboutContent = async () => {
+  await contentStore.updateContent({
     about: {
       ...aboutForm.value,
       advisors: contentStore.content.about.advisors
@@ -1033,13 +1102,13 @@ const saveAboutContent = () => {
   triggerToast('¡Contenidos de la Página Nosotros guardados!');
 };
 
-const saveContactContent = () => {
-  contentStore.updateContent({ contact: contactForm.value });
+const saveContactContent = async () => {
+  await contentStore.updateContent({ contact: contactForm.value });
   triggerToast('¡Información de Contacto guardada!');
 };
 
-const saveGatewayContent = () => {
-  contentStore.updateGatewaySettings(gatewayForm.value);
+const saveGatewayContent = async () => {
+  await contentStore.updateGatewaySettings(gatewayForm.value);
   triggerToast('¡Configuración de Pasarela y Transferencias guardada con éxito!');
 };
 
@@ -1556,17 +1625,20 @@ const newGalleryForm = ref({
 });
 
 const handleGalleryFilesUpload = async (event: Event) => {
-  const files = (event.target as HTMLInputElement).files;
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
   if (files && files.length > 0) {
     triggerToast(`Optimizando y procesando ${files.length} fotografías...`);
     try {
-      const compressedList = await compressMultipleImageFiles(files, { maxWidth: 1400, quality: 0.82 });
-      compressedList.forEach(url => {
+      const urls = await uploadMultipleImagesToStorage(files, { maxWidth: 1200, quality: 0.78, folder: 'gallery_main' });
+      urls.forEach(url => {
         newGalleryForm.value.images.push(url);
       });
       triggerToast('¡Fotografías optimizadas y listas para publicar!');
     } catch (err: any) {
       alert('Error al comprimir imágenes: ' + (err.message || ''));
+    } finally {
+      input.value = '';
     }
   }
 };
@@ -1575,20 +1647,21 @@ const removeNewGalleryImg = (index: number) => {
   newGalleryForm.value.images.splice(index, 1);
 };
 
-const saveGalleryImages = () => {
+const saveGalleryImages = async () => {
   if (newGalleryForm.value.images.length === 0) {
     alert('Por favor selecciona al menos una fotografía para subir.');
     return;
   }
 
-  newGalleryForm.value.images.forEach((url, i) => {
-    contentStore.addGalleryImage({
+  for (let i = 0; i < newGalleryForm.value.images.length; i++) {
+    const url = newGalleryForm.value.images[i];
+    await contentStore.addGalleryImage({
       url,
       title: newGalleryForm.value.title || `Fotografía Wamani ${contentStore.galleryImages.length + i + 1}`,
       category: newGalleryForm.value.category,
       caption: newGalleryForm.value.caption
     });
-  });
+  }
 
   newGalleryForm.value = {
     title: '',
@@ -3982,7 +4055,10 @@ const saveEditGalleryForm = () => {
           <div class="col-12">
             <label class="form-label small fw-bold text-white mb-2">Imagen de Portada (Archivo local o URL)</label>
             <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
-              <div v-if="expForm.coverImageUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0" style="width: 100px; height: 100px;">
+              <div v-if="isUploadingCover" class="rounded-3 border border-secondary border-opacity-25 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 flex-shrink-0" style="width: 100px; height: 100px;">
+                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
+              </div>
+              <div v-else-if="expForm.coverImageUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0" style="width: 100px; height: 100px;">
                 <img :src="expForm.coverImageUrl" class="w-100 h-100 object-fit-cover" alt="Vista previa">
               </div>
               <div class="flex-grow-1">
@@ -3999,7 +4075,10 @@ const saveEditGalleryForm = () => {
               <span class="badge bg-secondary text-white" style="font-size: 0.72rem;">Panorámica HD</span>
             </label>
             <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
-              <div v-if="expForm.heroBannerUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0" style="width: 140px; height: 75px;">
+              <div v-if="isUploadingHero" class="rounded-3 border border-secondary border-opacity-25 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 flex-shrink-0" style="width: 140px; height: 75px;">
+                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
+              </div>
+              <div v-else-if="expForm.heroBannerUrl" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden flex-shrink-0" style="width: 140px; height: 75px;">
                 <img :src="expForm.heroBannerUrl" class="w-100 h-100 object-fit-cover" alt="Vista previa Banner">
               </div>
               <div class="flex-grow-1">
@@ -4021,6 +4100,10 @@ const saveEditGalleryForm = () => {
               </label>
 
               <!-- Subir múltiples fotos locales o agregar URL -->
+              <div v-if="isUploadingGallery" class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-2">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span>Subiendo y optimizando fotografías para la galería...</span>
+              </div>
               <div class="row g-2 mb-3">
                 <div class="col-12 col-sm-6">
                   <input type="file" multiple class="form-control form-control-sm admin-input text-white" accept="image/*" @change="handleMultipleGalleryUpload">
@@ -4153,8 +4236,12 @@ const saveEditGalleryForm = () => {
           </div>
 
           <div class="col-12 text-end border-top border-secondary border-opacity-25 pt-3 mt-4">
-            <button type="button" class="btn btn-outline-light me-2 px-4" @click="showExpModal = false">Cancelar</button>
-            <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain">Guardar Tour</button>
+            <button type="button" class="btn btn-outline-light me-2 px-4" :disabled="isSavingExp" @click="showExpModal = false">Cancelar</button>
+            <button type="submit" class="btn btn-accent px-4 fw-bold text-dark-mountain d-inline-flex align-items-center gap-2" :disabled="isSavingExp || isUploadingCover || isUploadingHero || isUploadingGallery">
+              <span v-if="isSavingExp" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <i v-else class="bi bi-check2-circle"></i>
+              <span>{{ isSavingExp ? 'Guardando en la nube...' : 'Guardar Tour' }}</span>
+            </button>
           </div>
         </form>
       </div>
