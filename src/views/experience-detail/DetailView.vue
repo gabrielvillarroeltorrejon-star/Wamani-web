@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
-import { formatDestinationName, formatDifficulty, formatCLP } from '@/shared/lib/formatters';
+import { formatDestinationName, formatDifficulty, formatCLP, formatLanguages } from '@/shared/lib/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -244,7 +244,7 @@ const handleBookWhatsApp = () => {
               <div class="p-4 rounded-4 h-100 text-center d-flex flex-column align-items-center justify-content-center key-fact-card transition-all">
                 <i class="bi bi-translate fs-3 text-beige mb-2"></i>
                 <span class="small text-beige-muted text-uppercase fw-bold tracking-wide">IDIOMAS</span>
-                <strong class="text-white fs-6 mt-1">Español / Inglés</strong>
+                <strong class="text-white fs-6 mt-1">{{ formatLanguages(experience.languages) }}</strong>
               </div>
             </div>
           </div>

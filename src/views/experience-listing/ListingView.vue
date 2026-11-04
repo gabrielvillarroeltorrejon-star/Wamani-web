@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentStore, type ServiceItem } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
+import { DESTINATIONS_MAP, formatLanguages } from '@/shared/lib/formatters';
 import type { Experience } from '@/entities/experience/model/schemas';
 import WCard from '@/shared/ui/WCard.vue';
 import WButton from '@/shared/ui/WButton.vue';
@@ -44,78 +45,88 @@ interface DestinationMeta {
 
 const destinationsMeta: DestinationMeta[] = [
   {
-    id: 'dest-pucon',
-    name: 'Pucón & Volcán Villarrica',
-    subtitle: 'La capital del turismo aventura y volcanes activos',
-    zone: 'Lagos & Volcanes (Zona Sur)',
-    zoneId: 'sur',
-    coverImage: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=80',
-    description: 'Rodeado por el lago y el imponente volcán activo Villarrica, Pucón es el epicentro del ecoturismo andino. Bosques milenarios de araucarias, termas geológicas, ríos indómitos y ascensiones de alta montaña.',
-    highlights: ['Ascenso al Volcán Villarrica (2.847 m)', 'Termas Geométricas e Indómito', 'Rafting en Río Trancura', 'Parque Nacional Huerquehue'],
-    climate: 'Templado lluvioso con influencia de montaña',
-    bestSeason: 'Todo el año (Nieve en invierno, lagos en verano)',
-    altitude: '227 m - 2.847 m'
-  },
-  {
-    id: 'dest-panguipulli',
-    name: 'Panguipulli & Huilo Huilo',
-    subtitle: 'Tierra de siete lagos y selva valdiviana virgen',
-    zone: 'Selva Valdiviana (Zona Sur)',
-    zoneId: 'sur',
-    coverImage: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
-    description: 'Santuario de biodiversidad donde la cordillera se une con lagos cristalinos y cascadas ocultas. Un destino perfecto para desconexión, senderismo botánico y navegación panorámica.',
-    highlights: ['Reserva Biológica Huilo Huilo', 'Ruta de los 7 Lagos', 'Saltos del Huilo Huilo y La Leona', 'Miradores del Mocho-Choshuenco'],
-    climate: 'Oceánico lluvioso templado',
-    bestSeason: 'Septiembre a Mayo',
-    altitude: '130 m - 2.422 m'
-  },
-  {
-    id: 'dest-atacama',
-    name: 'San Pedro de Atacama',
-    subtitle: 'El desierto más árido del planeta y cielos infinitos',
-    zone: 'Norte Grande & Altiplano',
-    zoneId: 'norte',
-    coverImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
-    description: 'Un paisaje lunar de salares resplandecientes, géiseres geotérmicos a 4.300 m y lagunas altiplánicas habitadas por flamencos. El santuario astronómico y místico por excelencia.',
-    highlights: ['Géiseres del Tatio', 'Valle de la Luna y de la Muerte', 'Lagunas Escondidas de Baltinache', 'Astrofotografía en salares'],
-    climate: 'Desértico de altura con alta radiación solar',
-    bestSeason: 'Todo el año',
-    altitude: '2.400 m - 4.320 m'
-  },
-  {
-    id: 'dest-patagonia',
-    name: 'Torres del Paine & Patagonia',
-    subtitle: 'Los confines del continente y glaciares milenarios',
-    zone: 'Patagonia Austral',
-    zoneId: 'patagonia',
-    coverImage: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80',
-    description: 'Cumbres de granito esculpidas por el viento, témpanos de hielo turquesa y la estepa salvaje. El santuario del trekking mundial para quienes buscan la verdadera aventura.',
-    highlights: ['Base Torres del Paine', 'Glaciar Grey y Campos de Hielo Sur', 'Circuito W & O', 'Navegación por Fiordos'],
-    climate: 'Frío estepario y templado frío con vientos',
-    bestSeason: 'Octubre a Abril',
-    altitude: '0 m - 3.050 m'
-  },
-  {
-    id: 'dest-cajon-maipo',
-    name: 'Cajón del Maipo & Andes Centrales',
-    subtitle: 'La majestuosidad de la alta cordillera cerca de Santiago',
+    id: 'dest-cordillera-santiago',
+    name: 'Cordillera de Santiago & Farellones',
+    subtitle: 'Miradores panorámicos, nieve y atardeceres andinos',
     zone: 'Cordillera Central',
     zoneId: 'centro',
     coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
-    description: 'El cañón cordillerano del Maipo ofrece glaciares colgantes, aguas termales medicinales y el imponente Embalse El Yeso, perfecto para escapadas de montaña desde la capital.',
-    highlights: ['Embalse El Yeso y Cordillera', 'Termas de Colina y del Plomo', 'Glaciar El Morado', 'Trekking en Valle de las Arenas'],
-    climate: 'Mediterráneo de montaña',
-    bestSeason: 'Todo el año (Raquetas de nieve en invierno)',
-    altitude: '900 m - 3.200 m'
+    description: 'El macizo cordillerano que corona la capital. Pueblos de montaña como Farellones y centros invernales como El Colorado ofrecen desde excursiones panorámicas y atardeceres mágicos hasta esquí, snowboard y diversión en la nieve.',
+    highlights: ['Andes Panorámico y Miradores', 'Atardeceres Sunset con Picnic', 'Centros de Esquí & Snowboard', 'Parque Farellones'],
+    climate: 'Mediterráneo de altura y clima alpino',
+    bestSeason: 'Todo el año (Nieve en invierno, trekking y sunsets en verano)',
+    altitude: '2.300 m - 3.200 m'
+  },
+  {
+    id: 'dest-portillo',
+    name: 'Portillo & Alta Montaña',
+    subtitle: 'El mítico centro de esquí y la laguna color esmeralda',
+    zone: 'Alta Cordillera',
+    zoneId: 'centro',
+    coverImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    description: 'En plena frontera con Argentina, la Cuesta Caracoles conduce a la legendaria Laguna del Inca y al histórico Hotel Portillo, cuna de los deportes de invierno en Sudamérica y rodeado de picos de más de 4.000 metros.',
+    highlights: ['Laguna del Inca y leyenda incaica', 'Hotel Portillo histórico', 'Cuesta de los Caracoles', 'Picnic andino gourmet'],
+    climate: 'Alpino de alta montaña',
+    bestSeason: 'Todo el año',
+    altitude: '2.800 m'
+  },
+  {
+    id: 'dest-cajon-maipo',
+    name: 'Cajón del Maipo',
+    subtitle: 'Aventura, aguas termales volcánicas y cielos limpios',
+    zone: 'Cordillera Central',
+    zoneId: 'centro',
+    coverImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    description: 'El gran cañón cordillerano esculpido por el río Maipo. Un oasis de aventura con pozas termales minerales en Valle de Colina, adrenalina en rápidos clase IV, rutas en motos de nieve y cielos prístinos para la astronomía.',
+    highlights: ['Termas Valle de Colina', 'Rafting en Río Maipo', 'Tour Astronómico', 'Motos de Nieve y Cuatrimotos'],
+    climate: 'Mediterráneo cordillerano',
+    bestSeason: 'Todo el año',
+    altitude: '900 m - 2.500 m'
+  },
+  {
+    id: 'dest-valparaiso-vina',
+    name: 'Valparaíso & Viña del Mar',
+    subtitle: 'Patrimonio de la Humanidad, arte costero y poesía',
+    zone: 'Costa Central',
+    zoneId: 'centro',
+    coverImage: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?auto=format&fit=crop&w=1200&q=80',
+    description: 'El Océano Pacífico en su máxima expresión cultural. Cerros pintorescos con funiculares centenarios y murales en Valparaíso, playas y elegancia en Viña del Mar, y el rincón poético de Isla Negra frente al oleaje.',
+    highlights: ['Cerros Alegre y Concepción', 'Reloj de Flores de Viña del Mar', 'Casa Museo Neruda en Isla Negra', 'Bahía de Algarrobo'],
+    climate: 'Mediterráneo costero templado',
+    bestSeason: 'Todo el año',
+    altitude: '0 m - 120 m'
+  },
+  {
+    id: 'dest-vinas',
+    name: 'Valles Vitivinícolas (Maipo & Casablanca)',
+    subtitle: 'Cuna de grandes reservas, cavas históricas y espumantes',
+    zone: 'Valles Centrales',
+    zoneId: 'centro',
+    coverImage: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80',
+    description: 'Las denominaciones de origen más prestigiosas de Chile a minutos de la capital. Desde las legendarias cavas subterráneas de Concha y Toro y Santa Rita en el Valle del Maipo, hasta los blancos y espumantes de clima frío del Valle de Casablanca y fincas familiares boutique como Alyan.',
+    highlights: ['Viña Concha y Toro & Casillero del Diablo', 'Viña Santa Rita y Museo Andino', 'Ruta de tres viñas en Casablanca', 'Atardeceres en Viña Alyan'],
+    climate: 'Mediterráneo con brisas marinas y suelos aluviales',
+    bestSeason: 'Todo el año (Vendimia en marzo y abril)',
+    altitude: '200 m - 600 m'
+  },
+  {
+    id: 'dest-santiago',
+    name: 'Santiago Histórico & Moderno',
+    subtitle: 'Patrimonio colonial, arquitectura contemporánea y miradores',
+    zone: 'Valle Central',
+    zoneId: 'centro',
+    coverImage: 'https://images.unsplash.com/photo-1578852612716-854e527abf50?auto=format&fit=crop&w=1200&q=80',
+    description: 'La vibrante capital chilena en toda su dimensión. Recorridos a pie por su casco fundacional, el Palacio de La Moneda, paseos en bus de dos pisos Hop-on Hop-off, vuelos en helicóptero y el icónico Templo Bahá’í con vista panorámica a la cordillera.',
+    highlights: ['Palacio de La Moneda y Cerro Santa Lucía', 'Bus Hop-On Hop-Off', 'Sobrevuelo en Helicóptero', 'Templo Bahá’í & Cousiño Macul'],
+    climate: 'Mediterráneo templado cálido',
+    bestSeason: 'Todo el año',
+    altitude: '570 m'
   }
 ];
 
 // Macrozonas de Chile
 const macrozones = [
-  { id: 'all', label: 'Todo Chile', icon: 'bi-globe-americas' },
-  { id: 'sur', label: 'Lagos & Volcanes (Sur)', icon: 'bi-tree-fill' },
-  { id: 'norte', label: 'Norte & Atacama', icon: 'bi-sun-fill' },
-  { id: 'patagonia', label: 'Patagonia & Glaciares', icon: 'bi-snow2' },
+  { id: 'all', label: 'Todo el Catálogo', icon: 'bi-globe-americas' },
   { id: 'centro', label: 'Zona Central & Cordillera', icon: 'bi-compass-fill' }
 ];
 
@@ -165,12 +176,8 @@ const cities = computed(() => {
 const getCityName = (id: string) => {
   const found = destinationsMeta.find(d => d.id === id);
   if (found) return found.name.split('&')[0].trim();
-  if (id === 'dest-pucon') return 'Pucón';
-  if (id === 'dest-panguipulli') return 'Panguipulli';
-  if (id === 'dest-atacama') return 'San Pedro de Atacama';
-  if (id === 'dest-patagonia') return 'Torres del Paine';
-  if (id === 'dest-cajon-maipo') return 'Cajón del Maipo';
-  return id.replace('dest-', '').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  if (DESTINATIONS_MAP[id]) return DESTINATIONS_MAP[id];
+  return id.replace('dest-', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
 // Destino seleccionado actualmente (metadata)
@@ -179,9 +186,24 @@ const currentDestinationMeta = computed(() => {
   return destinationsMeta.find(d => d.id === selectedCity.value) || null;
 });
 
+// Helper de correspondencia de destino para soportar clústeres
+const isExperienceInDestination = (expDestinationId: string, targetDestId: string): boolean => {
+  if (expDestinationId === targetDestId) return true;
+  if (targetDestId === 'dest-vinas') {
+    return ['dest-concha-y-toro', 'dest-casablanca', 'dest-santa-rita', 'dest-undurraga', 'dest-alyan'].includes(expDestinationId);
+  }
+  if (targetDestId === 'dest-cordillera-santiago') {
+    return ['dest-cordillera-santiago'].includes(expDestinationId);
+  }
+  if (targetDestId === 'dest-valparaiso-vina') {
+    return ['dest-valparaiso-vina', 'dest-isla-negra'].includes(expDestinationId);
+  }
+  return false;
+};
+
 // Contador de experiencias por destino
 const getExperienceCountByCity = (cityId: string) => {
-  return contentStore.experiences.filter(e => e.destinationId === cityId).length;
+  return contentStore.experiences.filter(e => isExperienceInDestination(e.destinationId, cityId)).length;
 };
 
 // Filtrado reactivo completo
@@ -199,16 +221,11 @@ const filteredExperiences = computed(() => {
     // 2. Filtro por dificultad
     const matchesDiff = selectedDifficulty.value ? exp.difficulty === selectedDifficulty.value : true;
 
-    // 3. Filtro por destino puntual (ciudad)
-    const matchesCity = selectedCity.value ? exp.destinationId === selectedCity.value : true;
+    // 3. Filtro por destino puntual (ciudad o clúster)
+    const matchesCity = selectedCity.value ? isExperienceInDestination(exp.destinationId, selectedCity.value) : true;
 
     // 4. Filtro por macrozona de Chile
-    const matchesZone = selectedZone.value === 'all' || exp.macroZone === selectedZone.value || (
-      selectedZone.value === 'sur' && ['dest-pucon', 'dest-panguipulli'].includes(exp.destinationId) ||
-      selectedZone.value === 'norte' && exp.destinationId === 'dest-atacama' ||
-      selectedZone.value === 'patagonia' && exp.destinationId === 'dest-patagonia' ||
-      selectedZone.value === 'centro' && exp.destinationId === 'dest-cajon-maipo'
-    );
+    const matchesZone = selectedZone.value === 'all' || exp.macroZone === selectedZone.value;
 
     // 5. Filtro por modalidad de servicio
     let matchesModality = true;
@@ -633,9 +650,14 @@ watch(() => route.query, (newQ) => {
             </div>
             <div class="p-4 d-flex flex-column flex-grow-1 justify-content-between">
               <div>
-                <p class="small text-accent mb-1 text-uppercase fw-bold" style="color: #147E79 !important; font-size: 0.78rem; letter-spacing: 0.08em;">
-                  {{ exp.tags && exp.tags.length ? exp.tags[0] : 'EXPERIENCIA' }}
-                </p>
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <p class="small text-accent mb-0 text-uppercase fw-bold" style="color: #147E79 !important; font-size: 0.78rem; letter-spacing: 0.08em;">
+                    {{ exp.tags && exp.tags.length ? exp.tags[0] : 'EXPERIENCIA' }}
+                  </p>
+                  <span v-if="exp.languages && exp.languages.length" class="small fw-semibold opacity-85 d-inline-flex align-items-center" style="color: #147E79 !important; font-size: 0.74rem;">
+                    <i class="bi bi-translate me-1"></i>{{ formatLanguages(exp.languages) }}
+                  </span>
+                </div>
                 <h3 class="h5 fw-bold mb-2" style="font-size: 1.25rem; color: #1C1C1E !important; font-family: 'Montserrat', sans-serif !important;">
                   {{ exp.title }}
                 </h3>

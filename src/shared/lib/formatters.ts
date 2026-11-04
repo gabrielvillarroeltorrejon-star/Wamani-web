@@ -1,9 +1,29 @@
 export const DESTINATIONS_MAP: Record<string, string> = {
-  'dest-pucon': 'Pucón',
-  'dest-panguipulli': 'Huilo Huilo / Panguipulli',
-  'dest-atacama': 'San Pedro de Atacama',
-  'dest-patagonia': 'Torres del Paine',
-  'dest-cajon-maipo': 'Cajón del Maipo'
+  'dest-cordillera-santiago': 'Cordillera de Santiago',
+  'dest-portillo': 'Portillo y Laguna del Inca',
+  'dest-valparaiso-vina': 'Valparaíso y Viña del Mar',
+  'dest-concha-y-toro': 'Viña Concha y Toro',
+  'dest-santiago': 'Santiago',
+  'dest-cajon-maipo': 'Cajón del Maipo',
+  'dest-casablanca': 'Valle de Casablanca',
+  'dest-undurraga': 'Viña Undurraga',
+  'dest-santa-rita': 'Viña Santa Rita',
+  'dest-parque-safari': 'Parque Safari',
+  'dest-isla-negra': 'Undurraga, Algarrobo e Isla Negra',
+  'dest-alyan': 'Viña Alyan',
+  // Nombres directos
+  'Cordillera de Santiago': 'Cordillera de Santiago',
+  'Portillo y Laguna del Inca': 'Portillo y Laguna del Inca',
+  'Valparaíso y Viña del Mar': 'Valparaíso y Viña del Mar',
+  'Viña Concha y Toro': 'Viña Concha y Toro',
+  'Santiago': 'Santiago',
+  'Cajón del Maipo': 'Cajón del Maipo',
+  'Valle de Casablanca': 'Valle de Casablanca',
+  'Viña Undurraga': 'Viña Undurraga',
+  'Viña Santa Rita': 'Viña Santa Rita',
+  'Parque Safari': 'Parque Safari',
+  'Undurraga, Algarrobo e Isla Negra': 'Undurraga, Algarrobo e Isla Negra',
+  'Viña Alyan': 'Viña Alyan'
 };
 
 export const formatDestinationName = (destIdOrName?: string): string => {
@@ -35,3 +55,23 @@ export const formatDifficulty = (diff?: string): string => {
   };
   return map[diff.toLowerCase()] || diff;
 };
+
+export const formatLanguages = (langs?: string[] | string): string => {
+  if (!langs) return 'Español';
+  const list = Array.isArray(langs) ? langs : [langs];
+  if (list.length === 0) return 'Español';
+
+  const map: Record<string, string> = {
+    es: 'Español',
+    en: 'Inglés',
+    pt: 'Portugués',
+    fr: 'Francés',
+    de: 'Alemán',
+    it: 'Italiano'
+  };
+
+  return list
+    .map(l => (typeof l === 'string' && map[l.toLowerCase()] ? map[l.toLowerCase()] : l))
+    .join(' / ');
+};
+

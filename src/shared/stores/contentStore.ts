@@ -566,36 +566,55 @@ const DEFAULT_GALLERY: GalleryImage[] = [
   }
 ];
 
+const CATALOG_VERSION = 'v2_2026_11_29tours';
+
+const OBSOLETE_TOUR_NAMES = [
+  'villarrica',
+  'pucón',
+  'pucon',
+  'geysers del tatio',
+  'siete lagos',
+  'ruta de los lagos',
+  'torres del paine',
+  'glaciar el morado'
+];
+
+const isObsoleteTour = (tour: any): boolean => {
+  if (!tour || !tour.title) return false;
+  const title = String(tour.title).toLowerCase();
+  return OBSOLETE_TOUR_NAMES.some(obs => title.includes(obs));
+};
+
 const DEFAULT_PACKAGES: TourPackage[] = [
   {
     id: 'pkg-1',
-    title: 'Pack Volcanes & Aguas Termales',
-    description: 'La combinación definitiva de adrenalina y relajo: Ascenso al Volcán Villarrica y desconexión en Termas Pucón Indómito con atardecer en lancha.',
-    bundlePrice: 175000,
-    originalPrice: 203000,
-    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    title: 'Pack Andes Total: Panorámico & Laguna del Inca',
+    description: 'La combinación definitiva de montaña: Recorre Farellones y los miradores de la cordillera, junto a la mítica Laguna del Inca en Portillo con picnic gourmet.',
+    bundlePrice: 70000,
+    originalPrice: 83000,
+    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
     includedTourIds: ['exp-001', 'exp-002'],
     badgeText: 'Ahorra 15%',
     isActive: true
   },
   {
     id: 'pkg-2',
-    title: 'Pack Aventura Lacustre & Trekking',
-    description: 'Disfruta de senderos milenarios, bosques de araucarias y vistas panorámicas del lago con guías certificados y equipamiento completo.',
-    bundlePrice: 155000,
-    originalPrice: 185000,
-    imageUrl: 'https://images.unsplash.com/photo-1518182170546-076616fd4aa8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80',
-    includedTourIds: ['exp-002', 'exp-003'],
+    title: 'Pack Santiago Cultural: Viña Concha y Toro & Andes Sunset',
+    description: 'Sumérgete en la tradición vitivinícola con Casillero del Diablo y finaliza con un atardecer mágico y picnic en las alturas de la cordillera.',
+    bundlePrice: 89000,
+    originalPrice: 105000,
+    imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80',
+    includedTourIds: ['exp-004', 'exp-005'],
     badgeText: 'Más Popular',
     isActive: true
   },
   {
     id: 'pkg-3',
-    title: 'Pack Desconexión Total en la Araucanía',
-    description: 'Circuito de aguas termales cordilleranas, navegación al atardecer y gastronomía local en una experiencia relajante para parejas y grupos.',
-    bundlePrice: 125000,
-    originalPrice: 150000,
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    title: 'Pack Alta Montaña & Valles del Vino',
+    description: 'Experiencia completa en la zona central: Andes Panorámico y la prestigiosa Viña Concha y Toro con degustación guiada.',
+    bundlePrice: 85000,
+    originalPrice: 100000,
+    imageUrl: 'https://images.unsplash.com/photo-1518182170546-076616fd4aa8?auto=format&fit=crop&w=1200&q=80',
     includedTourIds: ['exp-001', 'exp-004'],
     badgeText: 'Imperdible',
     isActive: true
@@ -626,17 +645,38 @@ export const useContentStore = defineStore('content', () => {
 
   // Cargar datos al inicializar
   const loadFromStorage = () => {
+    const savedCatalogVersion = localStorage.getItem('wamani_catalog_version');
     const savedExperiences = localStorage.getItem('wamani_experiences');
     const savedContent = localStorage.getItem('wamani_content');
     const savedBookings = localStorage.getItem('wamani_bookings');
     const savedDiscounts = localStorage.getItem('wamani_discounts');
     localStorage.removeItem('wamani_dark_mode');
 
+    let shouldRefreshCatalog = savedCatalogVersion !== CATALOG_VERSION;
+
     if (savedExperiences) {
-      experiences.value = JSON.parse(savedExperiences);
+      try {
+        const parsed: Experience[] = JSON.parse(savedExperiences);
+        if (!Array.isArray(parsed) || parsed.length !== 29 || parsed.some(isObsoleteTour)) {
+          shouldRefreshCatalog = true;
+        } else if (!shouldRefreshCatalog) {
+          experiences.value = parsed;
+        }
+      } catch {
+        shouldRefreshCatalog = true;
+      }
     } else {
+      shouldRefreshCatalog = true;
+    }
+
+    if (shouldRefreshCatalog) {
       experiences.value = [...mockExperiences];
-      localStorage.setItem('wamani_experiences', JSON.stringify(mockExperiences));
+      try {
+        localStorage.setItem('wamani_experiences', JSON.stringify(mockExperiences));
+        localStorage.setItem('wamani_catalog_version', CATALOG_VERSION);
+      } catch (e) {
+        console.warn('Aviso storage:', e);
+      }
     }
 
     if (savedContent) {
@@ -714,7 +754,13 @@ export const useContentStore = defineStore('content', () => {
     if (savedPackages) {
       try {
         const parsed = JSON.parse(savedPackages);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].includedTourIds?.includes('1')) {
+        const hasObsolete = Array.isArray(parsed) && parsed.some(p => 
+          p.title?.toLowerCase().includes('volc') || 
+          p.title?.toLowerCase().includes('araucan') || 
+          p.title?.toLowerCase().includes('lacustre') ||
+          p.includedTourIds?.includes('1')
+        );
+        if (hasObsolete || savedCatalogVersion !== CATALOG_VERSION) {
           tourPackages.value = [...DEFAULT_PACKAGES];
           localStorage.setItem('wamani_packages', JSON.stringify(DEFAULT_PACKAGES));
         } else {
@@ -751,57 +797,63 @@ export const useContentStore = defineStore('content', () => {
       // 1. Cargar experiencias desde Supabase
       const { data: expData, error: expError } = await supabase.from('experiences').select('*');
       if (!expError && expData && expData.length > 0) {
-        const cloudExperiences = expData.map((e: any) => ({
-          id: e.id,
-          slug: e.slug,
-          title: e.title,
-          subtitle: e.subtitle || '',
-          summary: e.summary || '',
-          description: e.description || '',
-          destinationId: e.destination_id || 'Pucón',
-          macroZone: e.macro_zone || 'sur',
-          difficulty: e.difficulty || 'easy',
-          pricing: {
-            basePrice: Number(e.base_price),
-            currency: 'CLP'
-          },
-          duration: { value: 6, unit: 'hours' },
-          languages: e.languages || ['es', 'en'],
-          capacity: e.capacity || { min: 1, max: 12 },
-          coverImage: e.cover_image || { url: '', alt: '' },
-          gallery: e.gallery || [],
-          tags: e.tags || [],
-          categories: e.categories || [],
-          schedule: e.schedule,
-          meetingPoint: e.meeting_point,
-          cancellationPolicy: e.cancellation_policy,
-          itinerary: e.itinerary || [],
-          included: e.included || [],
-          notIncluded: e.not_included || [],
-          heroBannerUrl: e.hero_banner_url || e.cover_image?.url || '',
-          guarantees: e.guarantees || [],
-          status: (e.status as 'active' | 'draft' | 'archived') || 'active'
-        }));
+        const cloudExperiences = expData
+          .map((e: any) => ({
+            id: e.id,
+            slug: e.slug,
+            title: e.title,
+            subtitle: e.subtitle || '',
+            summary: e.summary || '',
+            description: e.description || '',
+            destinationId: e.destination_id || 'dest-cordillera-santiago',
+            macroZone: e.macro_zone || 'centro',
+            difficulty: e.difficulty || 'moderate',
+            pricing: {
+              basePrice: Number(e.base_price),
+              currency: 'CLP'
+            },
+            duration: { value: 6, unit: 'hours' },
+            languages: e.languages || ['es', 'en'],
+            capacity: e.capacity || { min: 2, max: 12 },
+            coverImage: e.cover_image || { url: '', alt: '' },
+            gallery: e.gallery || [],
+            tags: e.tags || [],
+            categories: e.categories || [],
+            schedule: e.schedule,
+            meetingPoint: e.meeting_point,
+            cancellationPolicy: e.cancellation_policy,
+            itinerary: e.itinerary || [],
+            included: e.included || [],
+            notIncluded: e.not_included || [],
+            heroBannerUrl: e.hero_banner_url || e.cover_image?.url || '',
+            guarantees: e.guarantees || [],
+            status: (e.status as 'active' | 'draft' | 'archived') || 'active'
+          }))
+          .filter((e: any) => !isObsoleteTour(e));
 
-        // Fusión inteligente: preservar tours locales que aún no se hayan subido a la nube
-        const cloudIds = new Set(cloudExperiences.map(e => e.id));
-        const localOnly = experiences.value.filter(e => !cloudIds.has(e.id));
-        experiences.value = [...localOnly, ...cloudExperiences];
+        if (cloudExperiences.length > 0) {
+          // Fusión inteligente: preservar tours locales que aún no se hayan subido a la nube (excluyendo obsoletos)
+          const cloudIds = new Set(cloudExperiences.map(e => e.id));
+          const localOnly = experiences.value.filter(e => !cloudIds.has(e.id) && !isObsoleteTour(e));
+          experiences.value = [...cloudExperiences, ...localOnly];
 
-        try {
-          localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
-        } catch (e) {
-          console.warn('Aviso cuota storage:', e);
+          try {
+            localStorage.setItem('wamani_experiences', JSON.stringify(experiences.value));
+          } catch (e) {
+            console.warn('Aviso cuota storage:', e);
+          }
         }
       } else {
         // Fallback a respaldo en site_content si la tabla individual no devolvió datos
         try {
           const { data: catData } = await supabase.from('site_content').select('data').eq('key', 'experiences_catalog').single();
           if (catData?.data && Array.isArray(catData.data) && catData.data.length > 0) {
-            const cloudCat = catData.data as Experience[];
-            const cloudIds = new Set(cloudCat.map(e => e.id));
-            const localOnly = experiences.value.filter(e => !cloudIds.has(e.id));
-            experiences.value = [...localOnly, ...cloudCat];
+            const cloudCat = (catData.data as Experience[]).filter(e => !isObsoleteTour(e));
+            if (cloudCat.length > 0) {
+              const cloudIds = new Set(cloudCat.map(e => e.id));
+              const localOnly = experiences.value.filter(e => !cloudIds.has(e.id) && !isObsoleteTour(e));
+              experiences.value = [...cloudCat, ...localOnly];
+            }
           }
         } catch (catErr) {
           console.warn('Aviso: no se pudo leer catálogo de respaldo:', catErr);

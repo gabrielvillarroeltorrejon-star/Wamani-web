@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useContentStore } from '@/shared/stores/contentStore';
 import { useCartStore } from '@/shared/stores/cartStore';
+import { formatLanguages } from '@/shared/lib/formatters';
 import type { Experience } from '@/entities/experience/model/schemas';
 
 const props = defineProps<{
@@ -209,6 +210,9 @@ const goToWhatsApp = (expTitle: string) => {
                   </span>
                   <span class="small fw-semibold" style="color: #147E79 !important;">
                     <i class="bi bi-bar-chart-fill me-1 text-accent"></i> {{ formatDifficulty(experience.difficulty) }}
+                  </span>
+                  <span v-if="experience.languages && experience.languages.length" class="small fw-semibold d-inline-flex align-items-center" style="color: #147E79 !important;">
+                    <i class="bi bi-translate me-1 text-accent"></i> {{ formatLanguages(experience.languages) }}
                   </span>
                 </div>
 

@@ -18,54 +18,66 @@ interface DestinationSpot {
 
 const destinations: DestinationSpot[] = [
   {
-    id: 'dest-pucon',
-    name: 'Pucón & Volcán Villarrica',
-    subtitle: 'La Capital del Turismo Aventura',
-    tag: 'Lagos & Volcanes (Sur)',
-    image: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=80',
-    description: 'Ascensiones al cráter activo, termas geotérmicas naturales y bosques milenarios de araucarias.',
-    featured: true
-  },
-  {
-    id: 'dest-panguipulli',
-    name: 'Panguipulli & Huilo Huilo',
-    subtitle: 'Ruta de los Siete Lagos',
-    tag: 'Selva Valdiviana (Sur)',
-    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
-    description: 'Santuarios de biodiversidad virgen, saltos de agua cristalina y reservas biológicas protegidas.',
-    featured: false
-  },
-  {
-    id: 'dest-atacama',
-    name: 'San Pedro de Atacama',
-    subtitle: 'El Desierto Más Árido del Mundo',
-    tag: 'Norte Grande & Altiplano',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
-    description: 'Geotermia viva en los Géiseres del Tatio, valles lunares y salares infinitos bajo cielos prístinos.',
-    featured: false
-  },
-  {
-    id: 'dest-patagonia',
-    name: 'Torres del Paine & Patagonia',
-    subtitle: 'Los Confines del Continente',
-    tag: 'Patagonia Austral',
-    image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80',
-    description: 'Trekking épico entre cuernos de granito, glaciares milenarios y estepa salvaje indómita.',
+    id: 'dest-cordillera-santiago',
+    name: 'Cordillera de Santiago & Farellones',
+    subtitle: 'Miradores, Nieve y Atardeceres Andinos',
+    tag: 'Cordillera Central',
+    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+    description: 'Excursiones panorámicas por Farellones, atardeceres mágicos, centros de esquí y diversión en la nieve.',
     featured: true
   },
   {
     id: 'dest-cajon-maipo',
-    name: 'Cajón del Maipo & Andes',
-    subtitle: 'Cordillera Central y Glaciares',
-    tag: 'Cordillera de Santiago',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
-    description: 'Embalse El Yeso, senderos de alta montaña y termas cordilleranas a pocas horas de la capital.',
+    name: 'Cajón del Maipo',
+    subtitle: 'Termas, Rafting y Aventura Andina',
+    tag: 'Aventura & Bienestar',
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+    description: 'Pozas termales minerales de Colina, rápidos en el río Maipo, motos de nieve y astroturismo bajo cielos limpios.',
+    featured: false
+  },
+  {
+    id: 'dest-valparaiso-vina',
+    name: 'Valparaíso & Costa',
+    subtitle: 'Patrimonio de la Humanidad y Brisa Marina',
+    tag: 'Costa Central',
+    image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?auto=format&fit=crop&w=1200&q=80',
+    description: 'Cerros pintorescos, funiculares patrimoniales, el Reloj de Flores y la magia poética de Isla Negra.',
+    featured: false
+  },
+  {
+    id: 'dest-vinas',
+    name: 'Valles Vitivinícolas',
+    subtitle: 'Maipo, Casablanca y Cavas Centenarias',
+    tag: 'Vino & Gastronomía',
+    image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80',
+    description: 'Grandes bodegas como Concha y Toro y Santa Rita, cata de espumantes en Casablanca y atardeceres en viñas boutique.',
+    featured: true
+  },
+  {
+    id: 'dest-santiago',
+    name: 'Santiago Capital',
+    subtitle: 'Historia Colonial y Vanguardia Moderna',
+    tag: 'Cultura Urbana',
+    image: 'https://images.unsplash.com/photo-1578852612716-854e527abf50?auto=format&fit=crop&w=1200&q=80',
+    description: 'Palacio de La Moneda, recorridos peatonales históricos, buses panorámicos, sobrevuelos en helicóptero y el Templo Bahá’í.',
     featured: false
   }
 ];
 
 const getExperienceCount = (destId: string) => {
-  return contentStore.experiences.filter(e => e.destinationId === destId).length;
+  return contentStore.experiences.filter(e => {
+    if (e.destinationId === destId) return true;
+    if (destId === 'dest-vinas') {
+      return ['dest-concha-y-toro', 'dest-casablanca', 'dest-santa-rita', 'dest-undurraga', 'dest-alyan'].includes(e.destinationId);
+    }
+    if (destId === 'dest-cordillera-santiago') {
+      return ['dest-cordillera-santiago'].includes(e.destinationId);
+    }
+    if (destId === 'dest-valparaiso-vina') {
+      return ['dest-valparaiso-vina', 'dest-isla-negra'].includes(e.destinationId);
+    }
+    return false;
+  }).length;
 };
 
 const totalExperiences = computed(() => contentStore.experiences.length);
@@ -129,7 +141,7 @@ const goToAllExperiences = () => {
                 <h3 class="display-6 fw-bold font-serif mb-2 text-white">{{ destinations[0].name }}</h3>
                 <p class="mb-3 text-white opacity-90 max-w-500 d-none d-sm-block small">{{ destinations[0].description }}</p>
                 <div class="d-inline-flex align-items-center gap-2 text-uppercase tracking-wide fw-bold border-bottom border-accent pb-1" style="font-size: 0.8rem; color: #E7DCC3;">
-                  <span>Explorar Expediciones en Pucón</span>
+                  <span>Explorar {{ destinations[0].name }}</span>
                   <i class="bi bi-arrow-right"></i>
                 </div>
               </div>
@@ -137,7 +149,7 @@ const goToAllExperiences = () => {
           </div>
         </div>
 
-        <!-- Tarjeta Grande 2: Torres del Paine (Destacado) -->
+        <!-- Tarjeta Grande 2: Valles Vitivinícolas (Destacado) -->
         <div class="col-12 col-lg-5">
           <div 
             class="destination-showcase-card rounded-4 position-relative overflow-hidden cursor-pointer shadow-lg h-100" 
@@ -164,7 +176,7 @@ const goToAllExperiences = () => {
                 <h3 class="h2 fw-bold font-serif mb-2 text-white">{{ destinations[3].name }}</h3>
                 <p class="mb-3 text-white opacity-90 d-none d-sm-block small">{{ destinations[3].description }}</p>
                 <div class="d-inline-flex align-items-center gap-2 text-uppercase tracking-wide fw-bold border-bottom border-accent pb-1" style="font-size: 0.8rem; color: #E7DCC3;">
-                  <span>Explorar Patagonia</span>
+                  <span>Explorar {{ destinations[3].name }}</span>
                   <i class="bi bi-arrow-right"></i>
                 </div>
               </div>

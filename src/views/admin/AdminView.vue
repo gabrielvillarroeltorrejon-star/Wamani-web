@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useContentStore, type ServiceItem, type Advisor, type GalleryImage, type TransportServiceCard } from '@/shared/stores/contentStore';
 import { compressImageFile, compressMultipleImageFiles } from '@/shared/lib/imageCompressor';
+import { formatLanguages } from '@/shared/lib/formatters';
 import type { Experience } from '@/entities/experience/model/schemas';
 
 const contentStore = useContentStore();
@@ -85,23 +86,88 @@ const expForm = ref({
   subtitle: '',
   summary: '',
   description: '',
-  destinationId: 'Pucón',
-  difficulty: 'easy' as 'easy' | 'moderate' | 'hard' | 'expert',
+  destinationId: 'Cordillera de Santiago',
+  difficulty: 'moderate' as 'easy' | 'moderate' | 'hard' | 'expert',
   basePrice: 50000,
   coverImageUrl: '',
   heroBannerUrl: '',
   galleryUrls: [] as string[],
   galleryUrlInput: '',
+  languages: ['Español', 'Inglés'] as string[],
+  customLanguageInput: '',
   tags: '',
   categories: '',
   schedule: '',
-  meetingPoint: 'Oficina Wamani, Centro de Pucón',
-  cancellationPolicy: 'Cancelación gratuita con 48 hrs de anticipación.',
+  meetingPoint: 'Recogida directamente en tu hotel dentro del perímetro o puntos fijos Metro Baquedano y Metro Tobalaba.',
+  cancellationPolicy: 'Cancelación gratuita con al menos 48 horas de anticipación.',
   itineraryRaw: '',
   includedRaw: '',
   notIncludedRaw: '',
   guaranteesRaw: ''
 });
+
+// Opciones de Idiomas para Guiado de Tours
+const availableLanguageOptions = [
+  { id: 'Español', label: 'Español', flag: '🇪🇸' },
+  { id: 'Inglés', label: 'Inglés', flag: '🇬🇧' },
+  { id: 'Portugués', label: 'Portugués', flag: '🇧🇷' },
+  { id: 'Francés', label: 'Francés', flag: '🇫🇷' },
+  { id: 'Alemán', label: 'Alemán', flag: '🇩🇪' },
+  { id: 'Italiano', label: 'Italiano', flag: '🇮🇹' }
+];
+
+const isLanguageSelected = (langName: string): boolean => {
+  return expForm.value.languages.some(l => {
+    const lLower = l.toLowerCase();
+    const nameLower = langName.toLowerCase();
+    return (
+      lLower === nameLower ||
+      (nameLower === 'español' && lLower === 'es') ||
+      (nameLower === 'inglés' && lLower === 'en') ||
+      (nameLower === 'portugués' && lLower === 'pt') ||
+      (nameLower === 'francés' && lLower === 'fr') ||
+      (nameLower === 'alemán' && lLower === 'de') ||
+      (nameLower === 'italiano' && lLower === 'it')
+    );
+  });
+};
+
+const toggleLanguage = (langName: string) => {
+  const idx = expForm.value.languages.findIndex(l => {
+    const lLower = l.toLowerCase();
+    const nameLower = langName.toLowerCase();
+    return (
+      lLower === nameLower ||
+      (nameLower === 'español' && lLower === 'es') ||
+      (nameLower === 'inglés' && lLower === 'en') ||
+      (nameLower === 'portugués' && lLower === 'pt') ||
+      (nameLower === 'francés' && lLower === 'fr') ||
+      (nameLower === 'alemán' && lLower === 'de') ||
+      (nameLower === 'italiano' && lLower === 'it')
+    );
+  });
+
+  if (idx !== -1) {
+    expForm.value.languages.splice(idx, 1);
+  } else {
+    expForm.value.languages.push(langName);
+  }
+};
+
+const addCustomLanguage = () => {
+  const val = expForm.value.customLanguageInput?.trim();
+  if (!val) return;
+  const exists = expForm.value.languages.some(l => l.toLowerCase() === val.toLowerCase());
+  if (!exists) {
+    expForm.value.languages.push(val);
+    triggerToast(`Idioma "${val}" añadido.`);
+  }
+  expForm.value.customLanguageInput = '';
+};
+
+const removeLanguage = (index: number) => {
+  expForm.value.languages.splice(index, 1);
+};
 
 const addGalleryUrl = () => {
   if (expForm.value.galleryUrlInput.trim()) {
@@ -150,8 +216,8 @@ const openAddModal = () => {
     subtitle: '',
     summary: '',
     description: '',
-    destinationId: 'Pucón',
-    difficulty: 'easy',
+    destinationId: 'Cordillera de Santiago',
+    difficulty: 'moderate',
     basePrice: 50000,
     coverImageUrl: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=600&q=80',
     heroBannerUrl: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1920&q=85',
@@ -160,14 +226,16 @@ const openAddModal = () => {
       'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80'
     ],
     galleryUrlInput: '',
-    tags: 'Montaña, Trekking',
-    categories: 'Aventura',
-    schedule: '08:00 - 16:00',
-    meetingPoint: 'Oficina Wamani, Centro de Pucón',
-    cancellationPolicy: 'Cancelación gratuita con 48 hrs de anticipación.',
-    itineraryRaw: '08:00 - Salida - Inicio del traslado hacia el parque nacional.\n10:00 - Trekking - Inicio del sendero guiado.\n14:00 - Cumbre - Descanso y almuerzo en la cumbre.\n16:00 - Retorno - Regreso al centro de la ciudad.',
-    includedRaw: 'Guía profesional certificado (UIAGM / Sernatur)\nSeguro de accidentes personales\nEquipo técnico completo de montaña\nTransporte ida y vuelta desde punto de encuentro',
-    notIncludedRaw: 'Propinas voluntarias para guías y chofer\nAlimentación o snacks de marcha no especificados\nEntrada a Parques Nacionales (salvo indicación)\nGastos personales',
+    languages: ['Español', 'Inglés'],
+    customLanguageInput: '',
+    tags: 'Cordillera, Naturaleza',
+    categories: 'Naturaleza, Cordillera',
+    schedule: '08:00 - 18:00',
+    meetingPoint: 'Recogida directamente en tu hotel dentro del perímetro o puntos fijos Metro Baquedano y Metro Tobalaba.',
+    cancellationPolicy: 'Cancelación gratuita con al menos 48 horas de anticipación.',
+    itineraryRaw: '08:00 - Salida desde Santiago - Inicio del traslado según la recogida coordinada.\n10:30 - Miradores cordilleranos - Parada fotográfica y paisajes de alta montaña.\n13:00 - Almuerzo / Picnic - Tiempo libre para fotografías y descanso.\n17:30 - Regreso a Santiago - Retorno al punto de inicio.',
+    includedRaw: 'Transporte ida y vuelta desde Santiago\nGuía turístico profesional en idiomas seleccionados\nSeguro de accidentes personales y asistencia\nParada en rental / actividades descritas',
+    notIncludedRaw: 'Alimentación adicional o bebidas no descritas\nGastos personales y compras\nPropinas voluntarias',
     guaranteesRaw: 'Prestador SERNATUR: Registro Oficial de Turismo N° 84219\nSeguro Incluido: Cobertura de rescate y asistencia en montaña\nGarantía Climática: Reprogramación 100% garantizada por condiciones de clima\nPago Cifrado: Transbank Webpay Plus estándar internacional PCI-DSS'
   };
   showExpModal.value = true;
@@ -193,11 +261,13 @@ const openEditModal = (exp: Experience) => {
     heroBannerUrl: exp.heroBannerUrl || exp.coverImage.url,
     galleryUrls: exp.gallery ? exp.gallery.map(g => g.url) : [],
     galleryUrlInput: '',
+    languages: exp.languages && exp.languages.length > 0 ? [...exp.languages] : ['Español', 'Inglés'],
+    customLanguageInput: '',
     tags: exp.tags.join(', '),
     categories: exp.categories.join(', '),
     schedule: exp.schedule || '',
-    meetingPoint: exp.meetingPoint || 'Oficina Wamani, Centro de Pucón',
-    cancellationPolicy: exp.cancellationPolicy || 'Cancelación gratuita con 48 hrs de anticipación.',
+    meetingPoint: exp.meetingPoint || 'Recogida directamente en tu hotel dentro del perímetro.',
+    cancellationPolicy: exp.cancellationPolicy || 'Cancelación gratuita con al menos 48 horas de anticipación.',
     itineraryRaw: itineraryText,
     includedRaw: (exp.included && exp.included.length > 0)
       ? exp.included.join('\n')
@@ -304,7 +374,7 @@ const saveExperience = async () => {
     cancellationPolicy: expForm.value.cancellationPolicy,
     itinerary,
     duration: { value: 8, unit: 'hours' },
-    languages: ['Español', 'Inglés'],
+    languages: expForm.value.languages && expForm.value.languages.length > 0 ? [...expForm.value.languages] : ['Español'],
     capacity: { min: 2, max: 12 },
     included: included.length > 0 ? included : ['Guía certificado', 'Seguro de accidentes', 'Equipo técnico'],
     notIncluded: notIncluded.length > 0 ? notIncluded : ['Propinas', 'Gastos personales']
@@ -1801,6 +1871,11 @@ const saveEditGalleryForm = () => {
                   <td>
                     <div class="fw-bold text-white fs-6">{{ exp.title }}</div>
                     <div class="small text-white opacity-75 text-truncate" style="max-width: 320px;">{{ exp.summary }}</div>
+                    <div class="mt-1 d-flex align-items-center gap-1">
+                      <span class="badge bg-dark bg-opacity-75 border border-secondary border-opacity-40 text-accent font-monospace" style="font-size: 0.7rem;">
+                        <i class="bi bi-translate me-1"></i>{{ formatLanguages(exp.languages) }}
+                      </span>
+                    </div>
                   </td>
                   <td>
                     <span class="badge admin-pill-badge px-2 py-1">
@@ -3819,6 +3894,89 @@ const saveEditGalleryForm = () => {
           <div class="col-md-6">
             <label class="form-label small fw-bold text-white">Horario</label>
             <input v-model="expForm.schedule" type="text" class="form-control admin-input text-white" placeholder="08:00 - 15:00">
+          </div>
+
+          <!-- Idiomas en que se realiza el Tour -->
+          <div class="col-12">
+            <label class="form-label small fw-bold text-white d-flex align-items-center justify-content-between mb-2">
+              <span class="d-flex align-items-center gap-1.5">
+                <i class="bi bi-translate text-accent"></i>
+                <span>Idiomas del Tour (en qué idioma se realiza el guiado)</span>
+              </span>
+              <span class="badge bg-dark border border-secondary border-opacity-50 text-accent font-monospace" style="font-size: 0.75rem;">
+                {{ formatLanguages(expForm.languages) }}
+              </span>
+            </label>
+            
+            <div class="p-3 rounded-4 admin-sub-card">
+              <span class="small text-white opacity-85 d-block mb-2 fw-semibold" style="font-size: 0.78rem;">
+                Selecciona uno o más idiomas disponibles para este guiado:
+              </span>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button 
+                  v-for="lang in availableLanguageOptions" 
+                  :key="lang.id"
+                  type="button" 
+                  class="btn btn-sm d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5 transition-all"
+                  :class="isLanguageSelected(lang.id) ? 'btn-accent text-dark-mountain fw-bold shadow-sm' : 'btn-outline-secondary text-white'"
+                  @click="toggleLanguage(lang.id)"
+                >
+                  <span>{{ lang.flag }}</span>
+                  <span>{{ lang.label }}</span>
+                  <i v-if="isLanguageSelected(lang.id)" class="bi bi-check2 ms-1"></i>
+                </button>
+              </div>
+
+              <!-- Agregar otro idioma personalizado -->
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-sm-8">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary border-opacity-25 text-white">
+                      <i class="bi bi-globe"></i>
+                    </span>
+                    <input 
+                      v-model="expForm.customLanguageInput" 
+                      type="text" 
+                      class="form-control admin-input text-white" 
+                      placeholder="Escribe otro idioma (ej: Italiano, Chino) y pulsa Añadir..."
+                      @keyup.enter.prevent="addCustomLanguage"
+                    >
+                    <button 
+                      type="button" 
+                      class="btn btn-sm btn-accent fw-bold text-dark-mountain px-3"
+                      @click="addCustomLanguage"
+                    >
+                      <i class="bi bi-plus-lg me-1"></i>Añadir Idioma
+                    </button>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <span class="small text-white opacity-75" style="font-size: 0.75rem;">
+                    Se reflejará en la ficha del tour y reserva.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Idiomas seleccionados actualmente -->
+              <div v-if="expForm.languages && expForm.languages.length > 0" class="d-flex flex-wrap gap-1.5 mt-2 pt-2 border-top border-secondary border-opacity-25 align-items-center">
+                <span class="small text-white opacity-75 me-2" style="font-size: 0.75rem;">Idiomas activos:</span>
+                <span 
+                  v-for="(l, idx) in expForm.languages" 
+                  :key="idx"
+                  class="badge bg-secondary bg-opacity-50 text-white border border-secondary border-opacity-50 d-inline-flex align-items-center gap-1.5 px-2.5 py-1"
+                  style="font-size: 0.75rem;"
+                >
+                  {{ l }}
+                  <button 
+                    type="button" 
+                    class="btn-close btn-close-white p-0" 
+                    style="width: 10px; height: 10px; font-size: 0.55rem;"
+                    @click="removeLanguage(idx)"
+                    title="Quitar idioma"
+                  ></button>
+                </span>
+              </div>
+            </div>
           </div>
 
           <div class="col-12">
